@@ -4,16 +4,17 @@ project(WebCFD)
 set(CMAKE_CXX_STANDARD 23)
 
 set(DAWN_FETCH_DEPENDENCIES ON)
-add_subdirectory(dawn)
-add_subdirectory(imgui)
+add_subdirectory(dawn EXCLUDE_FROM_ALL)
+include(cmake/ImGui.cmake)
 if(EMSCRIPTEN AND TARGET dawn_glfw)
     target_compile_definitions(dawn_glfw PRIVATE EMSCRIPTEN=1)
 endif()
 
 add_executable(WebCFD
-        Source/WebCFD.cpp
-        Source/WebCFD.hpp
-        Source/App.cpp)
+        src/WebCFD.cpp
+        src/WebCFD.hpp
+        src/App.cpp
+)
 
 target_link_libraries(WebCFD PRIVATE webgpu_glfw imgui)
 

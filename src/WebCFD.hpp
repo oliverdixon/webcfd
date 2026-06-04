@@ -31,13 +31,15 @@ private:
     void configure_surface();
     void configure_sample_shader();
 
-    void render() const;
+    void render();
+    void setup_gui();
+    void update_gui(const wgpu::RenderPassEncoder &render_pass);
 
 #ifdef __EMSCRIPTEN__
     // ReSharper disable once CppParameterMayBeConstPtrOrRef - Function signature enforced by Emscripten API.
     static void render_shim(void * const user_data)
     {
-        const auto* instance = static_cast<const WebCFD*>(user_data);
+        auto* instance = static_cast<WebCFD*>(user_data);
         instance->render();
     }
 #endif

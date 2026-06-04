@@ -6,11 +6,15 @@
 
 #include <dawn/webgpu_cpp_print.h>
 #include <webgpu/webgpu_glfw.h>
+#include <imgui.h>
 #if defined(__EMSCRIPTEN__)
 #include <emscripten/emscripten.h>
 #endif
 
 #include "WebCFD.hpp"
+
+#include "backends/imgui_impl_glfw.h"
+#include "backends/imgui_impl_wgpu.h"
 
 namespace WebCFD
 {
@@ -31,10 +35,17 @@ WebCFD::WebCFD()
 
     configure_surface();
     configure_sample_shader();
+    setup_gui();
 }
 
 WebCFD::~WebCFD()
 {
+    if (ImGui::GetCurrentContext()) {
+        ImGui_ImplWGPU_Shutdown();
+        ImGui_ImplGlfw_Shutdown();
+        ImGui::DestroyContext();
+    }
+
     pipeline = nullptr;
 
     if (surface) {
@@ -197,7 +208,8 @@ void WebCFD::configure_sample_shader()
     pipeline = device.CreateRenderPipeline(&pipeline_descriptor);
 }
 
-void WebCFD::render() const
+// ReSharper disable once CppMemberFunctionMayBeConst - Not semantically constant
+void WebCFD::render()
 {
     wgpu::SurfaceTexture surfaceTexture;
     surface.GetCurrentTexture(&surfaceTexture);
@@ -208,18 +220,73 @@ void WebCFD::render() const
         .storeOp = wgpu::StoreOp::Store
     };
 
-    const wgpu::RenderPassDescriptor renderpass{
+    const wgpu::RenderPassDescriptor pass_descriptor{
         .colorAttachmentCount = 1,
         .colorAttachments = &attachment
     };
 
     const wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-    const wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderpass);
+    const wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&pass_descriptor);
     pass.SetPipeline(pipeline);
     pass.Draw(3);
+    update_gui(pass);
     pass.End();
 
     const wgpu::CommandBuffer commands = encoder.Finish();
     device.GetQueue().Submit(1, &commands);
 }
+
+// ReSharper disable once CppMemberFunctionMayBeConst - Not semantically constant
+void WebCFD::setup_gui()
+{
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+
+    if (!ImGui_ImplGlfw_InitForOther(window, true))
+        throw std::runtime_error("ImGui_ImplGlfw_InitForOther failed");
+
+    ImGui_ImplWGPU_InitInfo init_info{};
+    init_info.Device = device.Get();
+    init_info.RenderTargetFormat = static_cast<WGPUTextureFormat>(std::to_underlying(format));
+
+    if (!ImGui_ImplWGPU_Init(&init_info))
+        throw std::runtime_error("ImGui_ImplWGPU_Init failed");
+}
+
+// ReSharper disable once CppMemberFunctionMayBeStatic
+// ReSharper disable once CppDFAUnreachableFunctionCall
+void WebCFD::update_gui(const wgpu::RenderPassEncoder &render_pass)
+{
+    ImGui_ImplWGPU_NewFrame();
+    ImGui_ImplGlfw_NewFrame();
+    ImGui::NewFrame();
+
+    static float f = 0.0f;
+    static int counter = 0;
+    static bool show_demo_window = true;
+    static bool show_another_window = false;
+    static auto clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+
+    ImGui::Begin("Hello, world!");
+    ImGui::Text("This is some useful text.");
+    ImGui::Checkbox("Demo Window", &show_demo_window);
+    ImGui::Checkbox("Another Window", &show_another_window);
+
+    ImGui::SliderFloat("float", &f, 0.0f, 1.0f);
+    ImGui::ColorEdit3("clear color", reinterpret_cast<float *>(&clear_color));
+
+    if (ImGui::Button("Button"))
+        counter++;
+    ImGui::SameLine();
+    ImGui::Text("counter = %d", counter);
+
+    ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate,
+        ImGui::GetIO().Framerate);
+
+    ImGui::End();
+
+    ImGui::Render();
+    ImGui_ImplWGPU_RenderDrawData(ImGui::GetDrawData(), render_pass.Get());
+}
+
 } // WebCFD
