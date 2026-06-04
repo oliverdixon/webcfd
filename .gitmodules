@@ -1,0 +1,7 @@
+[submodule "imgui"]
+	path = imgui
+	url = git@github.com:ocornut/imgui
+	branch = docking
+[submodule "dawn"]
+	path = dawn
+	url = git@github.com:google/dawn
