@@ -28,21 +28,15 @@ target_include_directories(imgui PUBLIC
 )
 
 if (EMSCRIPTEN)
-    target_link_libraries(imgui PUBLIC
-            emdawnwebgpu_cpp
-    )
-
+    target_link_libraries(imgui PUBLIC emdawnwebgpu_cpp)
     target_link_options(imgui PUBLIC
             "-sASYNCIFY=1"
             "-sUSE_GLFW=3"
     )
 else()
+    target_compile_definitions(imgui PUBLIC IMGUI_IMPL_WEBGPU_BACKEND_DAWN)
     target_link_libraries(imgui PUBLIC
             dawn::webgpu_dawn
             glfw
-    )
-
-    target_compile_definitions(imgui PUBLIC
-            IMGUI_IMPL_WEBGPU_BACKEND_DAWN
     )
 endif()

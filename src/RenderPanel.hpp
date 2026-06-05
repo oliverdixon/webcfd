@@ -22,7 +22,7 @@ public:
     void update_gpu(const wgpu::CommandEncoder &command_encoder) override;
 
 private:
-    std::unique_ptr<ViewportRenderer> renderer;
+    ViewportRenderer renderer;
 };
 
 } // WebCFD

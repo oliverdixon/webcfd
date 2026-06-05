@@ -20,7 +20,7 @@ public:
 
     void resize(std::uint32_t new_width, std::uint32_t new_height);
 
-    wgpu::TextureView get_texture_view() const noexcept;
+    [[nodiscard]] wgpu::TextureView get_texture_view() const noexcept;
 
 private:
     void install_shader();
