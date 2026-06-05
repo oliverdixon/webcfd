@@ -3,7 +3,7 @@
   <component name="CMakeSharedSettings">
     <configurations>
       <configuration PROFILE_NAME="Debug Native" ENABLED="true" CONFIG_NAME="Debug" GENERATION_OPTIONS="--preset native-debug" NO_GENERATOR="true" />
-      <configuration PROFILE_NAME="Debug Emscripten" ENABLED="true" CONFIG_NAME="Debug" GENERATION_OPTIONS="--preset wasm-debug-local" NO_GENERATOR="true" />
+      <configuration PROFILE_NAME="Debug Emscripten" ENABLED="true" CONFIG_NAME="Debug" GENERATION_OPTIONS="--preset wasm-debug-local --no-warn-unused-cli" NO_GENERATOR="true" />
     </configurations>
   </component>
 </project>

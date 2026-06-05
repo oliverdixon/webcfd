@@ -1,6 +1,9 @@
-//
-// Created by owd on 04/06/2026.
-//
+/**
+ * @file
+ * @brief WebCFD class specification
+ * @author Oliver Dixon
+ * @date 2026-05-05
+ */
 
 #ifndef WEBCFD_WEBCFD_HPP
 #define WEBCFD_WEBCFD_HPP
@@ -13,12 +16,38 @@
 namespace WebCFD
 {
 
+/**
+ * @class WebCFD
+ *
+ * The WebCFD maintains state for the application including WebGPU and Dear ImGui context, encapsulating initialisation,
+ * game loop, interaction, and clean-up.
+ */
 class WebCFD
 {
 public:
+    /**
+     * Initialise a WebCFD application instance.
+     *
+     * Initialisation is a computationally substantial task. Context from all managed frameworks must be initialised
+     * (GLFW, WebGPU/Dawn, and Dear ImGui) and their components registered. Once the constructor has completed, the game
+     * loop can begin with @ref run_event_loop.
+     *
+     * @throws ConfigurationError Some part of initialisation, described in the exception message, did not succeed.
+     */
     WebCFD();
 
-    ~WebCFD();
+    /**
+     * Runs the event loop to manage and propagate interaction with the WebCFD application.
+     *
+     * This function returns only once GLFW indicates that the window should close. Following closure, the event loop
+     * could be re-run, or the application could clean up by calling the destructor.
+     */
+    void run_event_loop();
+
+    /**
+     * Clean up all persistent state registered by the application instance.
+     */
+    ~WebCFD() noexcept;
 
 private:
     static constexpr auto operation_timeout = std::numeric_limits<std::uint64_t>::max();
@@ -26,26 +55,77 @@ private:
     std::uint32_t viewport_width = 512;
     std::uint32_t viewport_height = 512;
 
+    /**
+     * Create a new GLFW window of the specified dimensions from a static context.
+     *
+     * @param width Initial width of the window, in pixels.
+     * @param height Initial height of the window, in pixels.
+     * @return A mutable pointer to the created window, which must be explicitly deleted following use.
+     * @throws ConfigurationError A GLFW initialisation step failed.
+     */
     static GLFWwindow* create_window(
             int width,
             int height
     );
 
+    /**
+     * Configure a WebGPU Surface from a static context given metadata and Adapter capabilities.
+     *
+     * @note There is no way to check if the given Surface is already configured from the public WebGPU.h API. Moreover,
+     *  attempting to Unconfigure an unconfigured Surface will assert. Therefore, callers must ensure that the given
+     *  Surface is in an unconfigured state prior to invoking this function, as it cannot sanity-check the state of the
+     *  Surface.
+     *
+     * @param surface The Surface to configure.
+     * @param device The WebGPU Device on which the Surface will be displayed.
+     * @param capabilities Capabilities of the WebGPU Adapter and Instance.
+     * @param viewport_width Initial width of the Surface viewport, in pixels.
+     * @param viewport_height Initial height of the Surface viewport, in pixels.
+     */
     static void configure_surface(
             const wgpu::Surface& surface,
             const wgpu::Device& device,
             const wgpu::SurfaceCapabilities& capabilities,
             std::uint32_t viewport_width,
             std::uint32_t viewport_height
-    );
+    ) noexcept;
 
-    wgpu::Future request_adapter();
-    wgpu::Future request_device();
+    /**
+     * Produce a WebGPU Future for requesting an Adapter.
+     *
+     * @return A Future to request an Adapter that is suitable for the Surface member from the WebGPU driver.
+     */
+    wgpu::Future request_adapter() noexcept;
 
-    void run_event_loop();
-    void render();
-    void setup_gui();
-    bool handle_window_resize();
+    /**
+     * Produce a WebGPU Future for requesting an accelerator device.
+     *
+     * @return A Future to request a Device from the WebGPU driver.
+     */
+    wgpu::Future request_device() noexcept;
+
+    /**
+     * Perform a render cycle on the configured Surface and Device.
+     *
+     * A single render cycle requests all panels to render their state to the Surface, and provides an opportunity to
+     * submit any work to the GPU. Events are also received from GLFW and processed as required.
+     */
+    void render() noexcept;
+
+    /**
+     * Create a context for Dear ImGui and configure the plain GLFW and WebGPU backends.
+     *
+     * @throws ConfigurationError A Dear ImGui backend could not be initialised.
+     */
+    void setup_imgui();
+
+    /**
+     * Check if the window has been resized compared with the stored dimensions, updating member variables and
+     * reconfiguring the WebGPU surface if necessary.
+     *
+     * @return Is the window visible?
+     */
+    bool handle_window_resize() noexcept;
 
 #ifdef __EMSCRIPTEN__
 

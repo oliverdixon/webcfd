@@ -38,7 +38,8 @@ target_compile_definitions(imgui PUBLIC IMGUI_USER_CONFIG="${CMAKE_CURRENT_SOURC
 if (EMSCRIPTEN)
     target_link_libraries(imgui PUBLIC emdawnwebgpu_cpp)
     target_link_options(imgui PUBLIC
-            "-sASYNCIFY=1"
+            "-fwasm-exceptions"
+            "-sJSPI"
             "-sUSE_GLFW=3"
     )
 else()

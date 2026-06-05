@@ -30,6 +30,10 @@ add_executable(WebCFD
         src/ViewportRenderer.hpp
         src/RobotoMedium.hpp
         src/ImGuiConfig.h
+        src/Logger.cpp
+        src/Logger.hpp
+        src/ConfigurationError.cpp
+        src/ConfigurationError.hpp
 )
 
 target_link_libraries(WebCFD PRIVATE webgpu_glfw imgui)
@@ -62,8 +66,10 @@ if (EMSCRIPTEN)
 
     set_target_properties(WebCFD PROPERTIES SUFFIX ".html")
     target_link_libraries(WebCFD PRIVATE emdawnwebgpu_cpp)
+    target_compile_options(WebCFD PRIVATE "-fwasm-exceptions")
     target_link_options(WebCFD PRIVATE
-            "-sASYNCIFY=1"
+            "-fwasm-exceptions"
+            "-sJSPI"
             "-sUSE_GLFW=3"
             "--shell-file=${web_shell}"
     )
@@ -89,5 +95,6 @@ if (EMSCRIPTEN)
     add_custom_target(WebCFDShellExtra DEPENDS ${web_extra_outputs})
     add_dependencies(WebCFD WebCFDShellExtra)
 else()
+    set(CMAKE_LINKER_TYPE "native_ld")
     target_link_libraries(WebCFD PRIVATE dawn::webgpu_dawn glfw)
 endif()
