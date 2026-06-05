@@ -26,9 +26,7 @@ void RenderPanel::draw()
 {
     ImGui::Begin("Simulation Visualisation");
 
-    const ImVec2 available_space = ImGui::GetContentRegionAvail();
-
-    // TODO height blows up when hiding the window?  Produces error on console...
+    const auto available_space = ImGui::GetContentRegionAvail();
     renderer.resize(
             std::max(1u, static_cast<std::uint32_t>(available_space.x)),
             std::max(1u, static_cast<std::uint32_t>(available_space.y))

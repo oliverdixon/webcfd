@@ -21,28 +21,31 @@ public:
     ~WebCFD();
 
 private:
-    static constexpr std::uint32_t default_width = 512;
-    static constexpr std::uint32_t default_height = 512;
-    static constexpr auto default_timeout = std::numeric_limits<std::uint64_t>::max();
+    static constexpr auto operation_timeout = std::numeric_limits<std::uint64_t>::max();
 
-    static GLFWwindow* create_window();
+    std::uint32_t viewport_width = 512;
+    std::uint32_t viewport_height = 512;
 
-    static std::pair<
-            wgpu::Surface,
-            wgpu::TextureFormat>
-    create_surface(
-            const wgpu::Adapter& adapter,
-            GLFWwindow* window,
-            const wgpu::Instance& instance,
-            const wgpu::Device& device
+    static GLFWwindow* create_window(
+            int width,
+            int height
+    );
+
+    static void configure_surface(
+            const wgpu::Surface& surface,
+            const wgpu::Device& device,
+            const wgpu::SurfaceCapabilities& capabilities,
+            std::uint32_t viewport_width,
+            std::uint32_t viewport_height
     );
 
     wgpu::Future request_adapter();
     wgpu::Future request_device();
 
     void run_event_loop();
-    void render() const;
+    void render();
     void setup_gui();
+    bool handle_window_resize();
 
 #ifdef __EMSCRIPTEN__
 
@@ -59,7 +62,7 @@ private:
             void* const webcfd_instance
     )
     {
-        const auto* instance = static_cast<WebCFD*>(webcfd_instance);
+        auto* instance = static_cast<WebCFD*>(webcfd_instance);
         instance->render();
     }
 #endif
@@ -68,10 +71,9 @@ private:
     wgpu::Adapter adapter;
     wgpu::Device device;
     wgpu::Surface surface;
-    wgpu::TextureFormat default_format = wgpu::TextureFormat::Undefined;
+    wgpu::SurfaceCapabilities surface_capabilities;
     GLFWwindow* window = nullptr;
 
-    bool swapchain_rebuild = false;
     std::vector<std::unique_ptr<IPanel>> panels;
 };
 
