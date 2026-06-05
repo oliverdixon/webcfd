@@ -12,6 +12,7 @@
 #include <webgpu/webgpu_cpp.h>
 
 #include "IPanel.hpp"
+#include "SimulationParameters.hpp"
 
 namespace WebCFD
 {
@@ -155,6 +156,7 @@ private:
     GLFWwindow* window = nullptr;
 
     std::vector<std::unique_ptr<IPanel>> panels;
+    std::unique_ptr<SimulationParameters> parameters = std::make_unique<SimulationParameters>();
 };
 
 } // namespace WebCFD

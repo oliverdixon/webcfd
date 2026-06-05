@@ -6,6 +6,7 @@
 #define WEBCFD_PARAMETERSPANEL_HPP
 
 #include "IPanel.hpp"
+#include "SimulationParameters.hpp"
 
 namespace WebCFD
 {
@@ -13,7 +14,12 @@ namespace WebCFD
 class ParametersPanel final : public IPanel
 {
 public:
+    explicit ParametersPanel(SimulationParameters& parameters);
+
     void draw() override;
+
+private:
+    SimulationParameters& parameters;
 };
 
 } // namespace WebCFD

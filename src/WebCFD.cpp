@@ -307,8 +307,8 @@ void WebCFD::setup_imgui()
 #endif
 
     // Step 3.  Construct and register panels to appear on the WebCFD application UI.
-    panels.emplace_back(std::make_unique<ParametersPanel>());
-    panels.emplace_back(std::make_unique<RenderPanel>(device, viewport_width, viewport_height));
+    panels.emplace_back(std::make_unique<ParametersPanel>(*parameters));
+    panels.emplace_back(std::make_unique<RenderPanel>(device, viewport_width, viewport_height, *parameters));
 }
 
 // ReSharper disable once CppDFAUnreachableFunctionCall

@@ -12,12 +12,14 @@ namespace WebCFD
 RenderPanel::RenderPanel(
         const wgpu::Device& device,
         const std::uint32_t width,
-        const std::uint32_t height
+        const std::uint32_t height,
+        const SimulationParameters& parameters
 ) :
     renderer(
             device,
             width,
-            height
+            height,
+            parameters
     )
 {
 }

@@ -17,7 +17,8 @@ public:
     RenderPanel(
             const wgpu::Device& device,
             std::uint32_t width,
-            std::uint32_t height
+            std::uint32_t height,
+            const SimulationParameters& parameters
     );
 
     void draw() override;

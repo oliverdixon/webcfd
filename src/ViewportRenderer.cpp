@@ -9,16 +9,49 @@
 namespace WebCFD
 {
 
+namespace
+{
+
+constexpr char shader_code[] = R"(
+    struct FragmentUniforms {
+        colour : vec4f,
+    };
+
+    @group(0) @binding(0)
+    var<uniform> uniforms : FragmentUniforms;
+
+    @vertex fn vertexMain(
+        @builtin(vertex_index) i : u32
+    ) -> @builtin(position) vec4f {
+        const pos = array(
+            vec2f( 0,  1),
+            vec2f(-1, -1),
+            vec2f( 1, -1)
+        );
+
+        return vec4f(pos[i], 0, 1);
+    }
+
+    @fragment fn fragmentMain() -> @location(0) vec4f {
+        return uniforms.colour;
+    }
+)";
+
+}
+
 ViewportRenderer::ViewportRenderer(
         const wgpu::Device& device,
         const std::uint32_t width,
-        const std::uint32_t height
+        const std::uint32_t height,
+        const SimulationParameters& parameters
 ) :
     width(width),
     height(height),
+    parameters(parameters),
     device(device)
 {
-    install_shader();
+    create_parameter_buffer();
+    create_pipeline();
     recreate_texture();
 }
 
@@ -29,6 +62,8 @@ void ViewportRenderer::render(
     if (!texture_view)
         return;
 
+    device.GetQueue().WriteBuffer(uniform_buffer, 0, &parameters, sizeof(SimulationParameters));
+
     wgpu::RenderPassColorAttachment attachment{
             .view = texture_view,
             .loadOp = wgpu::LoadOp::Clear,
@@ -37,10 +72,10 @@ void ViewportRenderer::render(
     };
 
     const wgpu::RenderPassDescriptor pass_descriptor{.colorAttachmentCount = 1, .colorAttachments = &attachment};
-
     const wgpu::RenderPassEncoder pass = command_encoder.BeginRenderPass(&pass_descriptor);
 
     pass.SetPipeline(pipeline);
+    pass.SetBindGroup(0, bind_group);
     pass.Draw(3);
     pass.End();
 }
@@ -67,18 +102,57 @@ wgpu::TextureView ViewportRenderer::get_texture_view() const noexcept
     return texture_view;
 }
 
-void ViewportRenderer::install_shader()
+void ViewportRenderer::recreate_texture()
 {
-    static constexpr char shader_code[] = R"(
-        @vertex fn vertexMain(@builtin(vertex_index) i : u32) ->
-          @builtin(position) vec4f {
-            const pos = array(vec2f(0, 1), vec2f(-1, -1), vec2f(1, -1));
-            return vec4f(pos[i], 0, 1);
-        }
-        @fragment fn fragmentMain() -> @location(0) vec4f {
-            return vec4f(1, 0, 0, 1);
-        }
-    )";
+    const wgpu::TextureDescriptor texture_descriptor{
+            .usage = wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::TextureBinding,
+            .dimension = wgpu::TextureDimension::e2D,
+            .size = {width, height, 1},
+            .format = texture_format
+    };
+
+    texture = device.CreateTexture(&texture_descriptor);
+    texture_view = texture.CreateView();
+}
+
+void ViewportRenderer::create_parameter_buffer()
+{
+    constexpr wgpu::BufferDescriptor uniform_buffer_descriptor{
+            .label = "Simulation parameters buffer",
+            .usage = wgpu::BufferUsage::Uniform | wgpu::BufferUsage::CopyDst,
+            .size = sizeof(SimulationParameters)
+    };
+
+    uniform_buffer = device.CreateBuffer(&uniform_buffer_descriptor);
+}
+
+void ViewportRenderer::create_pipeline()
+{
+    // TODO monster function needs refactoring.
+
+    // Step 1.  Create the bind group layout for the uniform buffer.
+
+    constexpr wgpu::BindGroupLayoutEntry uniform_layout_entry{
+            .binding = 0,
+            .visibility = wgpu::ShaderStage::Fragment,
+            .buffer = {.type = wgpu::BufferBindingType::Uniform, .minBindingSize = sizeof(SimulationParameters)}
+    };
+
+    const wgpu::BindGroupLayoutDescriptor bind_group_layout_descriptor{
+            .entryCount = 1,
+            .entries = &uniform_layout_entry
+    };
+
+    wgpu::BindGroupLayout bind_group_layout = device.CreateBindGroupLayout(&bind_group_layout_descriptor);
+
+    // Step 2.  Use the bind group layout to describe the render pipeline, and create the pipeline.
+
+    const wgpu::PipelineLayoutDescriptor pipeline_layout_descriptor{
+            .bindGroupLayoutCount = 1,
+            .bindGroupLayouts = &bind_group_layout
+    };
+
+    wgpu::PipelineLayout pipeline_layout = device.CreatePipelineLayout(&pipeline_layout_descriptor);
 
     wgpu::ShaderSourceWGSL wgsl{{.code = shader_code}};
     const wgpu::ShaderModuleDescriptor module_descriptor{.nextInChain = &wgsl};
@@ -87,21 +161,26 @@ void ViewportRenderer::install_shader()
     wgpu::ColorTargetState colour_target{.format = texture_format};
     wgpu::FragmentState fragment{.module = module, .targetCount = 1, .targets = &colour_target};
 
-    const wgpu::RenderPipelineDescriptor pipeline_descriptor{.vertex = {.module = module}, .fragment = &fragment};
+    const wgpu::RenderPipelineDescriptor pipeline_descriptor{
+            .layout = pipeline_layout,
+            .vertex = {.module = module},
+            .fragment = &fragment
+    };
 
     pipeline = device.CreateRenderPipeline(&pipeline_descriptor);
-}
 
-void ViewportRenderer::recreate_texture()
-{
-    wgpu::TextureDescriptor texture_descriptor{};
-    texture_descriptor.dimension = wgpu::TextureDimension::e2D;
-    texture_descriptor.size = {width, height, 1};
-    texture_descriptor.format = texture_format;
-    texture_descriptor.usage = wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::TextureBinding;
+    // Step 3.  Create the bind group.
 
-    texture = device.CreateTexture(&texture_descriptor);
-    texture_view = texture.CreateView();
+    wgpu::BindGroupEntry
+            bind_group_entry{.binding = 0, .buffer = uniform_buffer, .offset = 0, .size = sizeof(SimulationParameters)};
+
+    wgpu::BindGroupDescriptor bind_group_descriptor{
+            .layout = bind_group_layout,
+            .entryCount = 1,
+            .entries = &bind_group_entry
+    };
+
+    bind_group = device.CreateBindGroup(&bind_group_descriptor);
 }
 
 } // namespace WebCFD

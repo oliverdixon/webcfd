@@ -34,6 +34,7 @@ add_executable(WebCFD
         src/Logger.hpp
         src/ConfigurationError.cpp
         src/ConfigurationError.hpp
+        src/SimulationParameters.hpp
 )
 
 target_link_libraries(WebCFD PRIVATE webgpu_glfw imgui)
