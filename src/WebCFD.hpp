@@ -18,8 +18,6 @@ namespace WebCFD
 {
 
 /**
- * @class WebCFD
- *
  * The WebCFD maintains state for the application including WebGPU and Dear ImGui context, encapsulating initialisation,
  * game loop, interaction, and clean-up.
  */

@@ -14,8 +14,6 @@ namespace WebCFD
 {
 
 /**
- * @class IPanel
- *
  * Represents a panel or window on the GUI.
  *
  * Panels may render from a static context, typically through a configured ImGui context, or despatch work to the GPU

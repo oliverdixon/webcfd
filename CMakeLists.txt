@@ -73,6 +73,7 @@ if (EMSCRIPTEN)
             "-sJSPI"
             "-sUSE_GLFW=3"
             "--shell-file=${web_shell}"
+            $<$<CONFIG:Debug,RelWithDebInfo>:--profiling-funcs>
     )
 
     # Define a target for each additional auxiliary file specified by web_extra to be replicated in the WebCFD target
