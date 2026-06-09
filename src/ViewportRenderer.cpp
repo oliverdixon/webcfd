@@ -3,41 +3,12 @@
 //
 
 #include "ViewportRenderer.hpp"
+#include "shaders/vortex.hpp"
 
-#include "webgpu/webgpu_glfw.h"
+#include <chrono>
 
 namespace WebCFD
 {
-
-namespace
-{
-
-constexpr char shader_code[] = R"(
-    struct FragmentUniforms {
-        colour : vec4f,
-    };
-
-    @group(0) @binding(0)
-    var<uniform> uniforms : FragmentUniforms;
-
-    @vertex fn vertexMain(
-        @builtin(vertex_index) i : u32
-    ) -> @builtin(position) vec4f {
-        const pos = array(
-            vec2f( 0,  1),
-            vec2f(-1, -1),
-            vec2f( 1, -1)
-        );
-
-        return vec4f(pos[i], 0, 1);
-    }
-
-    @fragment fn fragmentMain() -> @location(0) vec4f {
-        return uniforms.colour;
-    }
-)";
-
-}
 
 ViewportRenderer::ViewportRenderer(
         const wgpu::Device& device,
@@ -62,16 +33,37 @@ void ViewportRenderer::render(
     if (!texture_view)
         return;
 
-    device.GetQueue().WriteBuffer(uniform_buffer, 0, &parameters, sizeof(SimulationParameters));
+    static const auto start_time = std::chrono::steady_clock::now();
+
+    const auto now = std::chrono::steady_clock::now();
+    const float time = std::chrono::duration<float>(now - start_time).count();
+
+    SimulationParameters frame_parameters = parameters;
+
+    frame_parameters.viewport[0] = time;
+    frame_parameters.viewport[1] = static_cast<float>(width) / static_cast<float>(height);
+    frame_parameters.viewport[2] = static_cast<float>(width);
+    frame_parameters.viewport[3] = static_cast<float>(height);
+
+    device.GetQueue().WriteBuffer(
+            uniform_buffer,
+            0,
+            &frame_parameters,
+            sizeof(SimulationParameters)
+    );
 
     wgpu::RenderPassColorAttachment attachment{
             .view = texture_view,
             .loadOp = wgpu::LoadOp::Clear,
             .storeOp = wgpu::StoreOp::Store,
-            .clearValue = {0.02, 0.02, 0.04, 1.0}
+            .clearValue = {0.0, 0.0, 0.0, 1.0}
     };
 
-    const wgpu::RenderPassDescriptor pass_descriptor{.colorAttachmentCount = 1, .colorAttachments = &attachment};
+    const wgpu::RenderPassDescriptor pass_descriptor{
+            .colorAttachmentCount = 1,
+            .colorAttachments = &attachment
+    };
+
     const wgpu::RenderPassEncoder pass = command_encoder.BeginRenderPass(&pass_descriptor);
 
     pass.SetPipeline(pipeline);
@@ -128,57 +120,65 @@ void ViewportRenderer::create_parameter_buffer()
 
 void ViewportRenderer::create_pipeline()
 {
-    // TODO monster function needs refactoring.
+    wgpu::BindGroupLayoutEntry uniform_layout_entry{};
+    uniform_layout_entry.binding = 0;
+    uniform_layout_entry.visibility = wgpu::ShaderStage::Fragment;
+    uniform_layout_entry.buffer.type = wgpu::BufferBindingType::Uniform;
+    uniform_layout_entry.buffer.minBindingSize = sizeof(SimulationParameters);
 
-    // Step 1.  Create the bind group layout for the uniform buffer.
+    wgpu::BindGroupLayoutDescriptor bind_group_layout_descriptor{};
+    bind_group_layout_descriptor.entryCount = 1;
+    bind_group_layout_descriptor.entries = &uniform_layout_entry;
 
-    constexpr wgpu::BindGroupLayoutEntry uniform_layout_entry{
-            .binding = 0,
-            .visibility = wgpu::ShaderStage::Fragment,
-            .buffer = {.type = wgpu::BufferBindingType::Uniform, .minBindingSize = sizeof(SimulationParameters)}
-    };
+    const wgpu::BindGroupLayout bind_group_layout =
+            device.CreateBindGroupLayout(&bind_group_layout_descriptor);
 
-    const wgpu::BindGroupLayoutDescriptor bind_group_layout_descriptor{
-            .entryCount = 1,
-            .entries = &uniform_layout_entry
-    };
+    wgpu::PipelineLayoutDescriptor pipeline_layout_descriptor{};
+    pipeline_layout_descriptor.bindGroupLayoutCount = 1;
+    pipeline_layout_descriptor.bindGroupLayouts = &bind_group_layout;
 
-    wgpu::BindGroupLayout bind_group_layout = device.CreateBindGroupLayout(&bind_group_layout_descriptor);
+    const wgpu::PipelineLayout pipeline_layout =
+            device.CreatePipelineLayout(&pipeline_layout_descriptor);
 
-    // Step 2.  Use the bind group layout to describe the render pipeline, and create the pipeline.
+    wgpu::ShaderSourceWGSL wgsl{};
+    wgsl.code = Shaders::vortex_wgsl;
 
-    const wgpu::PipelineLayoutDescriptor pipeline_layout_descriptor{
-            .bindGroupLayoutCount = 1,
-            .bindGroupLayouts = &bind_group_layout
-    };
+    wgpu::ShaderModuleDescriptor module_descriptor{};
+    module_descriptor.nextInChain = &wgsl;
 
-    wgpu::PipelineLayout pipeline_layout = device.CreatePipelineLayout(&pipeline_layout_descriptor);
-
-    wgpu::ShaderSourceWGSL wgsl{{.code = shader_code}};
-    const wgpu::ShaderModuleDescriptor module_descriptor{.nextInChain = &wgsl};
     const wgpu::ShaderModule module = device.CreateShaderModule(&module_descriptor);
 
-    wgpu::ColorTargetState colour_target{.format = texture_format};
-    wgpu::FragmentState fragment{.module = module, .targetCount = 1, .targets = &colour_target};
+    wgpu::ColorTargetState colour_target{};
+    colour_target.format = texture_format;
 
-    const wgpu::RenderPipelineDescriptor pipeline_descriptor{
-            .layout = pipeline_layout,
-            .vertex = {.module = module},
-            .fragment = &fragment
-    };
+    wgpu::FragmentState fragment{};
+    fragment.module = module;
+    fragment.entryPoint = "fs_main";
+    fragment.targetCount = 1;
+    fragment.targets = &colour_target;
+
+    wgpu::RenderPipelineDescriptor pipeline_descriptor{};
+    pipeline_descriptor.layout = pipeline_layout;
+
+    pipeline_descriptor.vertex.module = module;
+    pipeline_descriptor.vertex.entryPoint = "vs_main";
+
+    pipeline_descriptor.primitive.topology = wgpu::PrimitiveTopology::TriangleList;
+
+    pipeline_descriptor.fragment = &fragment;
 
     pipeline = device.CreateRenderPipeline(&pipeline_descriptor);
 
-    // Step 3.  Create the bind group.
+    wgpu::BindGroupEntry bind_group_entry{};
+    bind_group_entry.binding = 0;
+    bind_group_entry.buffer = uniform_buffer;
+    bind_group_entry.offset = 0;
+    bind_group_entry.size = sizeof(SimulationParameters);
 
-    wgpu::BindGroupEntry
-            bind_group_entry{.binding = 0, .buffer = uniform_buffer, .offset = 0, .size = sizeof(SimulationParameters)};
-
-    wgpu::BindGroupDescriptor bind_group_descriptor{
-            .layout = bind_group_layout,
-            .entryCount = 1,
-            .entries = &bind_group_entry
-    };
+    wgpu::BindGroupDescriptor bind_group_descriptor{};
+    bind_group_descriptor.layout = bind_group_layout;
+    bind_group_descriptor.entryCount = 1;
+    bind_group_descriptor.entries = &bind_group_entry;
 
     bind_group = device.CreateBindGroup(&bind_group_descriptor);
 }
