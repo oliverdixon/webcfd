@@ -7,6 +7,8 @@ Web**CFD** (CS Demo Day Version) is a specialised version of Web**CFD** for the 
 The eagle-eyed reader will note that the shaders contained herein have little relation to Computational Fluid Dynamics
 (CFD) or acoustic signal beamforming.
 
+Live application: https://www-users.york.ac.uk/~od641/web-extra/demo.html
+
 ## Screenshots
 
 ![Vortex](screenshots/vortex.jpg)
