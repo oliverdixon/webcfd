@@ -16,6 +16,7 @@ ParametersPanel::ParametersPanel(
     parameters(parameters),
     invalidate_layout_callback(std::move(invalidate_layout_callback))
 {
+    parameters = default_parameters;
 }
 
 const char* ParametersPanel::get_imgui_name() const noexcept

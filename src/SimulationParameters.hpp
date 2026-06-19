@@ -24,17 +24,7 @@ struct alignas(
         16
 ) ShaderVec3
 {
-    ShaderVec3(
-            const float x,
-            const float y,
-            const float z
-    ) noexcept :
-        x(x),
-        y(y),
-        z(z)
-    {
-    }
- float x = 0.0f;
+    float x = 0.0f;
     float y = 0.0f;
     float z = 0.0f;
 
@@ -46,28 +36,25 @@ struct alignas(
         16
 ) SimulationParameters
 {
-    SimulationParameters() noexcept :
-        colour_a(
-                distribution(generator),
-                distribution(generator),
-                distribution(generator)
-        ),
-        colour_b(
-                distribution(generator),
-                distribution(generator),
-                distribution(generator)
-        ),
-        colour_c(
-                distribution(generator),
-                distribution(generator),
-                distribution(generator)
-        ),
-        colour_d(
-                distribution(generator),
-                distribution(generator),
-                distribution(generator)
-        )
+    explicit SimulationParameters(const bool randomise = false) noexcept
     {
+        if (randomise) {
+            colour_a.x = distribution(generator);
+            colour_a.y = distribution(generator);
+            colour_a.z = distribution(generator);
+
+            colour_b.x = distribution(generator);
+            colour_b.y = distribution(generator);
+            colour_b.z = distribution(generator);
+
+            colour_c.x = distribution(generator);
+            colour_c.y = distribution(generator);
+            colour_c.z = distribution(generator);
+
+            colour_d.x = distribution(generator);
+            colour_d.y = distribution(generator);
+            colour_d.z = distribution(generator);
+        }
     }
 
     ShaderVec4 controls = {

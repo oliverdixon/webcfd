@@ -26,7 +26,7 @@ private:
     bool requires_repositioning = true;
     bool force_repositioning = false;
 
-    const SimulationParameters default_parameters{};
+    const SimulationParameters default_parameters = SimulationParameters(true);
     SimulationParameters& parameters;
     std::function<void()> invalidate_layout_callback;
 };
