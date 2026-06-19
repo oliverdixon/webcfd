@@ -23,7 +23,6 @@ struct alignas(16) ShaderVec3 {
 };
 
 struct alignas(16) SimulationParameters {
-    ShaderVec4 viewport;   // time, aspect, width, height
     ShaderVec4 controls;   // speed, intensity, warp, scale
 
     ShaderVec3 colour_a;

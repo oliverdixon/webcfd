@@ -14,7 +14,7 @@ ConfigurationError::ConfigurationError(
         std::source_location location
 ) :
     std::runtime_error(std::string(message)),
-    location(std::move(location))
+    location(location)
 {
 }
 

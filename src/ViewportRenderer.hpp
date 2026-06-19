@@ -24,14 +24,14 @@ public:
     };
 
     ViewportRenderer(
-            const wgpu::Device& device,
+            wgpu::Device  device,
             std::uint32_t width,
             std::uint32_t height,
             Shader shader,
             const SimulationParameters& parameters
     );
 
-    void render(const wgpu::CommandEncoder& command_encoder) const;
+    void render(const wgpu::CommandEncoder& command_encoder) ;
 
     void resize(
             std::uint32_t new_width,
@@ -49,7 +49,10 @@ private:
 
     std::uint32_t width;
     std::uint32_t height;
+
+    ShaderVec4 viewport;
     const SimulationParameters& parameters;
+
     wgpu::Buffer uniform_buffer;
     wgpu::BindGroup bind_group;
     wgpu::StringView shader_code;
