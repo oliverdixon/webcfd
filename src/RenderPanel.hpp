@@ -27,6 +27,8 @@ public:
 
     void draw() override;
 
+    const char* get_imgui_name() const noexcept override;
+
     void update_gpu(const wgpu::CommandEncoder& command_encoder) override;
 
 private:

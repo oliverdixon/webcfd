@@ -51,6 +51,11 @@ void RenderPanel::draw()
     ImGui::End();
 }
 
+const char* RenderPanel::get_imgui_name() const noexcept
+{
+    return panel_name.c_str();
+}
+
 void RenderPanel::update_gpu(
         const wgpu::CommandEncoder& command_encoder
 )

@@ -9,6 +9,7 @@
 #define WEBCFD_WEBCFD_HPP
 
 #include <GLFW/glfw3.h>
+#include <imgui.h>
 #include <webgpu/webgpu_cpp.h>
 
 #include "IPanel.hpp"
@@ -51,8 +52,8 @@ public:
 private:
     static constexpr auto operation_timeout = std::numeric_limits<std::uint64_t>::max();
 
-    std::uint32_t viewport_width = 512;
-    std::uint32_t viewport_height = 512;
+    std::uint32_t viewport_width = 1024;
+    std::uint32_t viewport_height = 1024;
 
     /**
      * Create a new GLFW window of the specified dimensions from a static context.
@@ -126,6 +127,8 @@ private:
      */
     bool handle_window_resize() noexcept;
 
+    void fix_initial_dockspace();
+
 #ifdef __EMSCRIPTEN__
 
     // ReSharper disable once CppParameterMayBeConstPtrOrRef - Function signature enforced by Emscripten API.
@@ -155,6 +158,8 @@ private:
 
     std::vector<std::unique_ptr<IPanel>> panels;
     std::unique_ptr<SimulationParameters> parameters = std::make_unique<SimulationParameters>();
+    ImGuiID dockspace_id;
+    bool dockspace_configured = false;
 };
 
 } // namespace WebCFD
