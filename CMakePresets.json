@@ -10,11 +10,28 @@
       }
     },
     {
+      "name": "native-release",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/cmake-build-native-release",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release"
+      }
+    },
+    {
       "name": "wasm-debug",
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/cmake-build-wasm-debug",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_TOOLCHAIN_FILE": "$env{EMSDK}/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake"
+      }
+    },
+    {
+      "name": "wasm-release",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/cmake-build-wasm-release",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
         "CMAKE_TOOLCHAIN_FILE": "$env{EMSDK}/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake"
       }
     }

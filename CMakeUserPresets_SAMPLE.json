@@ -1,0 +1,30 @@
+{
+  "version": 6,
+  "configurePresets": [
+    {
+      "name": "wasm-local",
+      "environment": {
+        "EMSDK": "/home/owd/Documents/emsdk",
+        "EMSCRIPTEN_ROOT": "/home/owd/Documents/emsdk/upstream/emscripten",
+        "PATH": "/home/owd/Documents/emsdk:/home/owd/Documents/emsdk/upstream/emscripten:$penv{PATH}"
+      },
+      "cacheVariables": {
+        "CMAKE_CXX_USING_LINKER_native_ld": "-fuse-ld=/home/owd/Documents/llvm-project/build/bin/ld.lld"
+      }
+    },
+    {
+      "name": "wasm-debug-local",
+      "inherits": [
+        "wasm-local",
+        "wasm-debug"
+      ]
+    },
+    {
+      "name": "wasm-release-local",
+      "inherits": [
+        "wasm-local",
+        "wasm-release"
+      ]
+    }
+  ]
+}
