@@ -8,9 +8,10 @@
 #include <backends/imgui_impl_glfw.h>
 #include <backends/imgui_impl_wgpu.h>
 #include <dawn/webgpu_cpp_print.h>
-#include <imgui.h>
-#include <implot.h>
+#include <imgui_internal.h>
 #include <webgpu/webgpu_glfw.h>
+
+#include <ranges>
 
 #include "ParametersPanel.hpp"
 #include "RenderPanel.hpp"
@@ -26,7 +27,8 @@
 namespace WebCFD
 {
 
-WebCFD::WebCFD()
+WebCFD::WebCFD() :
+    dockspace_id(ImHashStr("MainDockSpace"))
 {
     static constexpr auto timed_wait_any = wgpu::InstanceFeatureName::TimedWaitAny;
     constexpr wgpu::InstanceDescriptor instance_desc{.requiredFeatureCount = 1, .requiredFeatures = &timed_wait_any};
@@ -156,8 +158,7 @@ wgpu::Future WebCFD::request_adapter() noexcept
     return instance.RequestAdapter(
             &options,
             wgpu::CallbackMode::WaitAnyOnly,
-            [this](const wgpu::RequestAdapterStatus status, wgpu::Adapter new_adapter, const wgpu::StringView message)
-            {
+            [this](const wgpu::RequestAdapterStatus status, wgpu::Adapter new_adapter, const wgpu::StringView message) {
                 if (status != wgpu::RequestAdapterStatus::Success)
                     Logger::log_f(
                             Logger::Level::Error,
@@ -228,12 +229,20 @@ void WebCFD::render() noexcept
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 
-    // Step 1.  Allow Dear ImGui panels to render their state to the frame, updating window size if necessary.
     if (!handle_window_resize())
         return;
-    ImGui::DockSpaceOverViewport();
+
+    const ImGuiViewport* viewport = ImGui::GetMainViewport();
+    if (!dockspace_configured) {
+        fix_initial_dockspace();
+        dockspace_configured = true;
+    }
+
+    ImGui::DockSpaceOverViewport(dockspace_id, viewport, ImGuiDockNodeFlags_None);
+
     for (const auto& panel : panels)
         panel->draw();
+
     ImGui::Render();
 
     // Step 2.  Set up a command encoder for the render and allow Dear ImGui panels to provide work.
@@ -275,9 +284,11 @@ void WebCFD::setup_imgui()
     // Step 1.  Bring up the Dear ImGui context and initialise the GLFW backend.
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
-    ImPlot::CreateContext();
 
     auto& io = ImGui::GetIO();
+#ifdef WEBCFD_DISABLE_IMGUI_PERSISTENCE
+    io.IniFilename = nullptr;
+#endif
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
     io.Fonts->AddFontFromMemoryCompressedTTF(
             data::RobotoMedium_compressed_data,
@@ -310,8 +321,53 @@ void WebCFD::setup_imgui()
 #endif
 
     // Step 3.  Construct and register panels to appear on the WebCFD application UI.
-    panels.emplace_back(std::make_unique<ParametersPanel>());
-    panels.emplace_back(std::make_unique<RenderPanel>(device, viewport_width, viewport_height));
+    panels.emplace_back(
+            std::make_unique<RenderPanel>(
+                    "Aurora",
+                    ViewportRenderer::Shader::Aurora,
+                    device,
+                    viewport_width,
+                    viewport_height,
+                    *parameters
+            )
+    );
+
+    panels.emplace_back(
+            std::make_unique<RenderPanel>(
+                    "Julia Bloom",
+                    ViewportRenderer::Shader::JuliaBloom,
+                    device,
+                    viewport_width,
+                    viewport_height,
+                    *parameters
+            )
+    );
+
+    panels.emplace_back(
+            std::make_unique<RenderPanel>(
+                    "Neon Voronoi",
+                    ViewportRenderer::Shader::NeonVoronoi,
+                    device,
+                    viewport_width,
+                    viewport_height,
+                    *parameters
+            )
+    );
+
+    panels.emplace_back(
+            std::make_unique<RenderPanel>(
+                    "Vortex",
+                    ViewportRenderer::Shader::Vortex,
+                    device,
+                    viewport_width,
+                    viewport_height,
+                    *parameters
+            )
+    );
+
+    panels.emplace_back(std::make_unique<ParametersPanel>(*parameters, [this] {
+        dockspace_configured = false;
+    }));
 }
 
 // ReSharper disable once CppDFAUnreachableFunctionCall
@@ -344,6 +400,39 @@ bool WebCFD::handle_window_resize() noexcept
 
     // The window size is unchanged.
     return true;
+}
+
+void WebCFD::fix_initial_dockspace()
+{
+    if (panels.empty())
+        return;
+
+    const ImGuiViewport* const docking_viewport = ImGui::GetMainViewport();
+
+    ImGui::DockBuilderRemoveNode(dockspace_id);
+    ImGui::DockBuilderAddNode(dockspace_id, ImGuiDockNodeFlags_DockSpace);
+    ImGui::DockBuilderSetNodePos(dockspace_id, docking_viewport->WorkPos);
+    ImGui::DockBuilderSetNodeSize(dockspace_id, docking_viewport->WorkSize);
+
+    ImGuiID dock_left;
+    ImGuiID dock_right;
+
+    /*
+     * 1. Left top
+     * 2. Right top
+     * 3. Left bottom
+     * 4. Right bottom
+     */
+    ImGuiID docking_stations[4];
+
+    ImGui::DockBuilderSplitNode(dockspace_id, ImGuiDir_Left, .5f, &dock_left, &dock_right);
+    ImGui::DockBuilderSplitNode(dock_left, ImGuiDir_Up, .5f, &docking_stations[0], &docking_stations[2]);
+    ImGui::DockBuilderSplitNode(dock_right, ImGuiDir_Up, .5f, &docking_stations[1], &docking_stations[3]);
+
+    for (const auto& [station, panel] : std::views::zip(docking_stations, panels))
+        ImGui::DockBuilderDockWindow(panel->get_imgui_name(), station);
+
+    ImGui::DockBuilderFinish(dockspace_id);
 }
 
 } // namespace WebCFD

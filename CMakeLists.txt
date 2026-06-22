@@ -42,6 +42,8 @@ add_executable(WebCFD
         src/Logger.hpp
         src/ConfigurationError.cpp
         src/ConfigurationError.hpp
+        src/SimulationParameters.hpp
+        src/SimulationParameters.cpp
 )
 
 target_link_libraries(WebCFD PRIVATE webgpu_glfw imgui implot)
@@ -49,7 +51,14 @@ target_include_directories(WebCFD PRIVATE dr_libs)
 
 # Broadcast the Dear ImGui configuration file path across all WebCFD compilation units, i.a.w. imgui/imconfig.h advice.
 # An equivalent definition is made for the 'imgui' target in cmake/ImGui.cmake.
-target_compile_definitions(WebCFD PUBLIC IMGUI_USER_CONFIG="${CMAKE_CURRENT_SOURCE_DIR}/src/ImGuiConfig.h")
+target_compile_definitions(WebCFD PUBLIC
+        IMGUI_USER_CONFIG="${CMAKE_CURRENT_SOURCE_DIR}/src/ImGuiConfig.h"
+        $<$<CONFIG:Debug>:WEBCFD_DISABLE_IMGUI_PERSISTENCE>
+)
+
+# Update generated C++ to embed WGSL sources.
+include(cmake/EmbedWGSL.cmake)
+embed_wgsl_directory(WebCFD "${CMAKE_CURRENT_SOURCE_DIR}/src/shaders")
 
 if (EMSCRIPTEN)
     # If configuring for an Emscripten/WebAssembly target, we need targets for the HTML shell and any extra web-side

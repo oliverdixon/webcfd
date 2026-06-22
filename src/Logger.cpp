@@ -1,6 +1,9 @@
-//
-// Created by owd on 05/06/2026.
-//
+/**
+ * @file
+ * @brief WebCFD portable logger implementation
+ * @author Oliver Dixon
+ * @date 2026-06-20
+ */
 
 #include "Logger.hpp"
 

@@ -30,6 +30,13 @@ public:
     virtual void draw() = 0;
 
     /**
+     * Retrieves the name of the IPanel for Dear ImGui API functions.
+     *
+     * @return The human-readable name of the window as a NULL-terminated C string.
+     */
+    [[nodiscard]] virtual const char* get_imgui_name() const noexcept = 0;
+
+    /**
      * Delegate work to the GPU via the WebGPU platform.
      *
      * @param command_encoder The configured CommandEncoder for the target accelerator.

@@ -9,6 +9,11 @@
 #include "Logger.hpp"
 #include "WebCFD.hpp"
 
+/**
+ * WebCFD common entry point.
+ *
+ * @return OS status exit code. 0 for success, 1 for failure.
+ */
 int main()
 {
     try {

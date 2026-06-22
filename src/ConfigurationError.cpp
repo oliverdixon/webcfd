@@ -1,6 +1,9 @@
-//
-// Created by owd on 05/06/2026.
-//
+/**
+ * @file
+ * @brief WebCFD ConfigurationError exception implementation
+ * @author Oliver Dixon
+ * @date 2026-06-19
+ */
 
 #include "ConfigurationError.hpp"
 
@@ -11,10 +14,10 @@ namespace WebCFD
 
 ConfigurationError::ConfigurationError(
         const std::string_view message,
-        std::source_location location
+        const std::source_location location
 ) :
     std::runtime_error(std::string(message)),
-    location(std::move(location))
+    location(location)
 {
 }
 

@@ -1,65 +1,87 @@
-//
-// Created by owd on 04/06/2026.
-//
+/**
+ * @file
+ * @brief WebCFD viewport renderer implementation
+ * @author Oliver Dixon
+ * @date 2026-06-20
+ */
 
 #include "ViewportRenderer.hpp"
 
+#include <chrono>
 #include <utility>
 
-#include "webgpu/webgpu_glfw.h"
+#include "shaders/aurora.hpp"
+#include "shaders/julia_bloom.hpp"
+#include "shaders/neon_voronoi.hpp"
+#include "shaders/vortex.hpp"
 
 namespace WebCFD
 {
 
-namespace
-{
-
-constexpr char shader_code[] = R"(
-    @vertex fn vertexMain(@builtin(vertex_index) i : u32) -> @builtin(position) vec4f
-    {
-        const pos = array(vec2f(0, 1), vec2f(-1, -1), vec2f(1, -1));
-        return vec4f(pos[i], 0, 1);
-    }
-
-    @fragment fn fragmentMain() -> @location(0) vec4f
-    {
-        return vec4f(1, 0, 0, 1);
-    }
-)";
-
-}
-
 ViewportRenderer::ViewportRenderer(
         wgpu::Device device,
         const std::uint32_t width,
-        const std::uint32_t height
+        const std::uint32_t height,
+        const Shader shader,
+        const SimulationParameters& parameters
 ) :
     width(width),
     height(height),
+    parameters(parameters),
     device(std::move(device))
 {
+    switch (shader) {
+    case Shader::Aurora:
+        shader_code = Shaders::aurora_wgsl;
+        break;
+    case Shader::JuliaBloom:
+        shader_code = Shaders::julia_bloom_wgsl;
+        break;
+    case Shader::NeonVoronoi:
+        shader_code = Shaders::neon_voronoi_wgsl;
+        break;
+    case Shader::Vortex:
+        shader_code = Shaders::vortex_wgsl;
+        break;
+    }
+
+    create_parameter_buffer();
     create_pipeline();
     recreate_texture();
 }
 
 void ViewportRenderer::render(
         const wgpu::CommandEncoder& command_encoder
-) const
+)
 {
     if (!texture_view)
         return;
+
+    static const auto start_time = std::chrono::steady_clock::now();
+
+    const auto now = std::chrono::steady_clock::now();
+    const float time = std::chrono::duration<float>(now - start_time).count();
+
+    viewport.x = time;
+    viewport.y = static_cast<float>(width) / static_cast<float>(height);
+    viewport.z = static_cast<float>(width);
+    viewport.w = static_cast<float>(height);
+
+    device.GetQueue().WriteBuffer(uniform_buffer, 0, &viewport, sizeof(ShaderVec4));
+    device.GetQueue().WriteBuffer(uniform_buffer, sizeof(ShaderVec4), &parameters, sizeof(SimulationParameters));
 
     wgpu::RenderPassColorAttachment attachment{
             .view = texture_view,
             .loadOp = wgpu::LoadOp::Clear,
             .storeOp = wgpu::StoreOp::Store,
-            .clearValue = {0.02, 0.02, 0.04, 1.0}
+            .clearValue = {0.0, 0.0, 0.0, 1.0}
     };
 
     const wgpu::RenderPassDescriptor pass_descriptor{.colorAttachmentCount = 1, .colorAttachments = &attachment};
     const wgpu::RenderPassEncoder pass = command_encoder.BeginRenderPass(&pass_descriptor);
 
     pass.SetPipeline(pipeline);
+    pass.SetBindGroup(0, bind_group);
     pass.Draw(3);
     pass.End();
 }
@@ -99,21 +121,78 @@ void ViewportRenderer::recreate_texture()
     texture_view = texture.CreateView();
 }
 
-void ViewportRenderer::create_pipeline()
+void ViewportRenderer::create_parameter_buffer()
 {
-    wgpu::ShaderSourceWGSL wgsl{{.code = shader_code}};
-    const wgpu::ShaderModuleDescriptor module_descriptor{.nextInChain = &wgsl};
-    const wgpu::ShaderModule module = device.CreateShaderModule(&module_descriptor);
-
-    wgpu::ColorTargetState colour_target{.format = texture_format};
-    wgpu::FragmentState fragment{.module = module, .targetCount = 1, .targets = &colour_target};
-
-    const wgpu::RenderPipelineDescriptor pipeline_descriptor{
-            .vertex = {.module = module},
-            .fragment = &fragment
+    constexpr wgpu::BufferDescriptor uniform_buffer_descriptor{
+            .label = "Simulation parameters buffer",
+            .usage = wgpu::BufferUsage::Uniform | wgpu::BufferUsage::CopyDst,
+            .size = sizeof(SimulationParameters) + sizeof(ShaderVec4)
     };
 
+    uniform_buffer = device.CreateBuffer(&uniform_buffer_descriptor);
+}
+
+void ViewportRenderer::create_pipeline()
+{
+    wgpu::BindGroupLayoutEntry uniform_layout_entry{};
+    uniform_layout_entry.binding = 0;
+    uniform_layout_entry.visibility = wgpu::ShaderStage::Fragment;
+    uniform_layout_entry.buffer.type = wgpu::BufferBindingType::Uniform;
+    uniform_layout_entry.buffer.minBindingSize = uniform_buffer.GetSize();
+
+    wgpu::BindGroupLayoutDescriptor bind_group_layout_descriptor{};
+    bind_group_layout_descriptor.entryCount = 1;
+    bind_group_layout_descriptor.entries = &uniform_layout_entry;
+
+    const wgpu::BindGroupLayout bind_group_layout = device.CreateBindGroupLayout(&bind_group_layout_descriptor);
+
+    wgpu::PipelineLayoutDescriptor pipeline_layout_descriptor{};
+    pipeline_layout_descriptor.bindGroupLayoutCount = 1;
+    pipeline_layout_descriptor.bindGroupLayouts = &bind_group_layout;
+
+    const wgpu::PipelineLayout pipeline_layout = device.CreatePipelineLayout(&pipeline_layout_descriptor);
+
+    wgpu::ShaderSourceWGSL wgsl{};
+    wgsl.code = shader_code;
+
+    wgpu::ShaderModuleDescriptor module_descriptor{};
+    module_descriptor.nextInChain = &wgsl;
+
+    const wgpu::ShaderModule module = device.CreateShaderModule(&module_descriptor);
+
+    wgpu::ColorTargetState colour_target{};
+    colour_target.format = texture_format;
+
+    wgpu::FragmentState fragment{};
+    fragment.module = module;
+    fragment.entryPoint = "fs_main";
+    fragment.targetCount = 1;
+    fragment.targets = &colour_target;
+
+    wgpu::RenderPipelineDescriptor pipeline_descriptor{};
+    pipeline_descriptor.layout = pipeline_layout;
+
+    pipeline_descriptor.vertex.module = module;
+    pipeline_descriptor.vertex.entryPoint = "vs_main";
+
+    pipeline_descriptor.primitive.topology = wgpu::PrimitiveTopology::TriangleList;
+
+    pipeline_descriptor.fragment = &fragment;
+
     pipeline = device.CreateRenderPipeline(&pipeline_descriptor);
+
+    wgpu::BindGroupEntry bind_group_entry{};
+    bind_group_entry.binding = 0;
+    bind_group_entry.buffer = uniform_buffer;
+    bind_group_entry.offset = 0;
+    bind_group_entry.size = uniform_buffer.GetSize();
+
+    wgpu::BindGroupDescriptor bind_group_descriptor{};
+    bind_group_descriptor.layout = bind_group_layout;
+    bind_group_descriptor.entryCount = 1;
+    bind_group_descriptor.entries = &bind_group_entry;
+
+    bind_group = device.CreateBindGroup(&bind_group_descriptor);
 }
 
 } // namespace WebCFD
