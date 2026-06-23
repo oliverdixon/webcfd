@@ -69,11 +69,13 @@ void WebCFD::run_event_loop()
 #else
     render();
     instance.ProcessEvents();
+    surface.Present();
 
     while (!glfwWindowShouldClose(window)) {
         glfwWaitEvents();
         render();
         instance.ProcessEvents();
+        surface.Present();
     }
 #endif
 }
@@ -227,7 +229,7 @@ wgpu::Future WebCFD::request_device() noexcept
 
 void WebCFD::render() noexcept
 {
-    glfwPollEvents();
+    glfwWaitEvents();
 
     if (!handle_window_resize())
         return;
@@ -293,10 +295,6 @@ void WebCFD::render() noexcept
 
     // Step 4. Submit batched work to the GPU.
     device.GetQueue().Submit(1, &commands);
-
-    // Step 5. Present the frame that was successfully acquired and submitted.
-    // ReSharper disable once CppExpressionWithoutSideEffects
-    surface.Present();
 }
 
 // ReSharper disable once CppMemberFunctionMayBeConst - Not semantically constant
@@ -346,9 +344,11 @@ void WebCFD::setup_imgui()
 #endif
 
     // Step 3. Construct and register panels to appear on the WebCFD application UI.
+#if 0
     panels.emplace_back(std::make_unique<ParametersPanel>([this] {
         dockspace_configured = false;
     }));
+#endif
 }
 
 // ReSharper disable once CppDFAUnreachableFunctionCall

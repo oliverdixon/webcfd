@@ -45,14 +45,18 @@ WAVData::WAVData(
             throw ConfigurationError("Cannot read WAV file at " + std::string(file_path) + ". Is it corrupted?");
         }
 
-        for (drwav_uint64 frame_idx = 0; frame_idx < frame_count; ++frame_idx)
-            for (auto [channel_idx, channel] : std::ranges::views::enumerate(data))
+        for (drwav_uint64 frame_idx = 0; frame_idx < frame_count; ++frame_idx) {
+            std::size_t channel_idx = 0;
+            for (auto& channel : data) {
                 /*
                  * The audio data is uniformly spaced, so we can infer the time values by taking the current frame
                  * offset for the chunk (total frames - remaining frames) and adding the current frame index.
                  */
                 channel.emplace_back(drwav_info.totalPCMFrameCount - remaining_frames + frame_idx,
                     interleaved[frame_idx * drwav_info.channels + channel_idx]);
+                ++channel_idx;
+            }
+        }
 
         remaining_frames -= frame_count;
     }
@@ -76,7 +80,7 @@ WAVData::WAVData(
         const WAVData& other,
         const float downsampling_factor
 ) :
-    WAVData(other, static_cast<std::size_t>(static_cast<float>(other.get_sample_rate()) / downsampling_factor))
+    WAVData(other, static_cast<std::uint64_t>(static_cast<float>(other.get_sample_rate()) / downsampling_factor))
 {
 }
 

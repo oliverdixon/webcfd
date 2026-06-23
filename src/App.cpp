@@ -6,6 +6,7 @@
  */
 
 #include "ConfigurationError.hpp"
+#include "JSBridge.hpp"
 #include "Logger.hpp"
 #include "WebCFD.hpp"
 
@@ -30,15 +31,22 @@ int main()
          */
 #ifdef __EMSCRIPTEN__
         auto* const application = new WebCFD::WebCFD();
+        WebCFD::JSBridge::bind(application);
         application->run_event_loop();
 #else
         WebCFD::WebCFD application;
         application.run_event_loop();
 #endif
     } catch (const WebCFD::ConfigurationError& error) {
+#ifdef __EMSCRIPTEN__
+        WebCFD::JSBridge::unbind();
+#endif
         WebCFD::Logger::log(WebCFD::Logger::Level::Error, error.what(), error.where());
         return 1;
     }
 
+#ifdef __EMSCRIPTEN__
+    WebCFD::JSBridge::unbind();
+#endif
     return 0;
 }

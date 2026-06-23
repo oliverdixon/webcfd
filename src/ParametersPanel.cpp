@@ -70,9 +70,12 @@ void ParametersPanel::draw()
     if (ImPlot::BeginPlot("Waveform")) {
         ImPlot::SetupAxes("Amplitude", "Time");
 
-        for (const auto [channel_idx, channel] : std::ranges::views::enumerate(downsampled))
+        std::size_t channel_idx = 0;
+        for (const auto& channel : downsampled) {
             ImPlot::PlotLine(std::string("Channel " + std::to_string(channel_idx)).c_str(), &channel.front().time,
                 &channel.front().amplitude, static_cast<int>(channel.size()), plotting_spec);
+            ++channel_idx;
+        }
 
         ImPlot::EndPlot();
     }

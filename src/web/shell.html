@@ -14,6 +14,9 @@
     <title>WebCFD</title>
 </head>
 <body>
+<header>
+    Input WAV file: <input id="wav-picker" type="file" accept=".wav,audio/wav">
+</header>
 <canvas id="canvas" oncontextmenu="event.preventDefault()" tabindex="-1"></canvas>
 <script type='text/javascript'>
     const canvas = document.getElementById("canvas");
@@ -27,6 +30,46 @@
             if (text)
                 console.log(text);
         }
+    };
+
+    Module.onRuntimeInitialized = () => {
+        document.getElementById("wav-picker").addEventListener("change",
+            async event => {
+                const file = event.target.files[0];
+
+                if (!file) {
+                    console.log("No file selected");
+                    return;
+                }
+
+                try {
+                    const bytes = new Uint8Array(await file.arrayBuffer());
+
+                    try {
+                        Module.FS.mkdir("/uploads");
+                    } catch (_) {
+                        // Directory already exists
+                    }
+
+                    const path = "/uploads/" + file.name;
+                    Module.FS.writeFile(path, bytes);
+
+                    const result = Module.ccall(
+                        "webcfd_on_wav_file_picked",
+                        "number",
+                        ["string"],
+                        [path]
+                    );
+
+                    if (result !== 0)
+                        console.error("C++ failed to load file:", path, "error code:", result);
+                    else
+                        console.log("Loaded file:", path);
+                } catch (error) {
+                    console.error("Failed to load selected file:", error);
+                }
+            }
+        );
     };
 </script>
 {{{ SCRIPT }}}

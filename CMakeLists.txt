@@ -46,6 +46,8 @@ add_executable(WebCFD
         src/SimulationParameters.cpp
         src/WAVData.cpp
         src/WAVData.hpp
+        src/JSBridge.cpp
+        src/JSBridge.hpp
 )
 
 target_link_libraries(WebCFD PRIVATE webgpu_glfw imgui implot dr_libs_interface)
@@ -91,6 +93,9 @@ if (EMSCRIPTEN)
             "-fwasm-exceptions"
             "-sJSPI"
             "-sUSE_GLFW=3"
+            "-sFORCE_FILESYSTEM=1"
+            "-sEXPORTED_FUNCTIONS=['_main','_webcfd_on_wav_file_picked']"
+            "-sEXPORTED_RUNTIME_METHODS=['FS','ccall']"
             "--shell-file=${web_shell}"
             $<$<CONFIG:Debug,RelWithDebInfo>:--profiling-funcs>
     )
