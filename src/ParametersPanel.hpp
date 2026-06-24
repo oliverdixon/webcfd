@@ -10,7 +10,6 @@
 
 #include <implot.h>
 
-#include <functional>
 #include <string>
 
 #include "IPanel.hpp"
@@ -20,6 +19,8 @@ namespace WebCFD
 {
 
 /**
+ * @todo outdated documentation
+ *
  * Defines a Dear ImGui panel to dynamically control simulation parameters.
  *
  * This class contains weak references to callbacks and the mutable SimulationParameters structure persisted by a WebCFD
@@ -28,30 +29,49 @@ namespace WebCFD
 class ParametersPanel final : public IPanel
 {
 public:
-    /**
-     * Create a new ParametersPanel to control the given SimulationParameters.
-     *
-     * @param invalidate_layout_callback The callback to invalidate the layout of the parent window.
-     */
-    explicit ParametersPanel(
-            std::function<void()> invalidate_layout_callback
-    );
+    ParametersPanel();
+
+    explicit ParametersPanel(const char * path);
+
+    void update_wav_file(const char * path);
 
     [[nodiscard]] const char* get_imgui_name() const noexcept override;
 
     void draw() override;
 
 private:
+    /**
+     * A wave file with a downsampled copy for visual rendering.
+     */
+    struct WAV
+    {
+        /**
+         * Create a new wave audio instance and produce its downsampled variant.
+         *
+         * @param path The path of the wave file on the file system.
+         */
+        explicit WAV(const char * path);
+
+        /**
+         * Create a new wave audio instance and produce its downsampled variant.
+         *
+         * @param path The path of the wave file on the file system.
+         * @param downsample_factor The factor by which to reduce the sample rate in the downsampled copy.
+         */
+        explicit WAV(const char * path, float downsample_factor);
+
+        WAVData original;
+        WAVData downsampled;
+
+    private:
+        static constexpr float default_downsample_factor = 50.0f;
+    };
+
     const std::string panel_name = "Simulation Parameters";
 
-    bool requires_repositioning = true;
-    bool force_repositioning = false;
-
-    WAVData wav_data{"../audio/stereo.wav"};
-    WAVData downsampled{wav_data, 50.0f};
+    std::optional<WAV> wav_data;
 
     ImPlotSpec plotting_spec;
-    std::function<void()> invalidate_layout_callback;
 };
 
 } // namespace WebCFD

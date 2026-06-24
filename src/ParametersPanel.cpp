@@ -17,15 +17,28 @@
 namespace WebCFD
 {
 
-ParametersPanel::ParametersPanel(
-        std::function<void()> invalidate_layout_callback
-) :
-    invalidate_layout_callback(std::move(invalidate_layout_callback))
+ParametersPanel::ParametersPanel()
 {
     plotting_spec.Stride = sizeof(WAVData::AudioPoint);
+}
 
-    LOG_F_INFO("Original data: {} samples", wav_data.get_sample_rate());
-    LOG_F_INFO("Downsampled data: {} samples", downsampled.get_sample_rate());
+ParametersPanel::ParametersPanel(
+        const char* const path
+)
+{
+    plotting_spec.Stride = sizeof(WAVData::AudioPoint);
+    update_wav_file(path);
+}
+
+void ParametersPanel::update_wav_file(
+        const char* const path
+)
+{
+    wav_data.reset();
+    wav_data.emplace(path);
+
+    LOG_F_INFO("Original data: {} samples", wav_data->original.get_sample_rate());
+    LOG_F_INFO("Downsampled data: {} samples", wav_data->downsampled.get_sample_rate());
 }
 
 const char* ParametersPanel::get_imgui_name() const noexcept
@@ -35,42 +48,21 @@ const char* ParametersPanel::get_imgui_name() const noexcept
 
 void ParametersPanel::draw()
 {
-    ImGuiWindowFlags flags = ImGuiWindowFlags_HorizontalScrollbar;
-
-    if (requires_repositioning || force_repositioning) {
-        /*
-         * If the reposition has been requested (or forced by the user), reset the ParametersPanel position to the
-         * center of the overall viewport. Note that in the presence of Dear ImGui persistence (typically an 'imgui.ini'
-         * file in the CWD, the position will not change unless the repositioning request was forced).
-         */
-
-        const ImGuiViewport* const viewport = ImGui::GetMainViewport();
-        const ImVec2 center{
-                viewport->WorkPos.x + viewport->WorkSize.x / 2.0f,
-                viewport->WorkPos.y + viewport->WorkSize.y / 2.0f,
-        };
-
-        ImGui::SetNextWindowPos(
-                center,
-                force_repositioning ? ImGuiCond_Always : ImGuiCond_FirstUseEver,
-                ImVec2{.5f, .5f}
-        );
-
-        flags |= ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_AlwaysAutoResize;
-
-        requires_repositioning = false;
-        force_repositioning = false;
-    }
-
+    const ImGuiWindowFlags flags = ImGuiWindowFlags_HorizontalScrollbar;
     ImGui::Begin(panel_name.c_str(), nullptr, flags);
 
-    if (ImPlot::BeginPlot("Waveform")) {
+    if (wav_data.has_value() && ImPlot::BeginPlot("Waveform")) {
         ImPlot::SetupAxes("Amplitude", "Time");
 
         std::size_t channel_idx = 0;
-        for (const auto& channel : downsampled) {
-            ImPlot::PlotLine(std::string("Channel " + std::to_string(channel_idx)).c_str(), &channel.front().time,
-                &channel.front().amplitude, static_cast<int>(channel.size()), plotting_spec);
+        for (const auto& channel : wav_data->downsampled) {
+            ImPlot::PlotLine(
+                    std::string("Channel " + std::to_string(channel_idx)).c_str(),
+                    &channel.front().time,
+                    &channel.front().amplitude,
+                    static_cast<int>(channel.size()),
+                    plotting_spec
+            );
             ++channel_idx;
         }
 
@@ -78,6 +70,29 @@ void ParametersPanel::draw()
     }
 
     ImGui::End();
+}
+
+ParametersPanel::WAV::WAV(
+        const char* const path
+) :
+    original(path),
+    downsampled(
+            original,
+            default_downsample_factor
+    )
+{
+}
+
+ParametersPanel::WAV::WAV(
+        const char* const path,
+        const float downsample_factor
+) :
+    original(path),
+    downsampled(
+            original,
+            downsample_factor
+    )
+{
 }
 
 } // namespace WebCFD

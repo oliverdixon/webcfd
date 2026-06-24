@@ -1,26 +1,38 @@
-//
-// Created by owd on 22/06/2026.
-//
+/**
+ * @file
+ * @brief Wave file specification
+ * @author Oliver Dixon
+ * @date 2026-06-24
+ */
 
 #ifndef WEBCFD_WAVDATA_H
 #define WEBCFD_WAVDATA_H
 
+// ReSharper disable once CppUnusedIncludeDirective - Emscripten false +ve.
 #include <cstdint>
-#include <span>
 #include <vector>
 
 namespace WebCFD
 {
 
+/**
+ * A container for wave audio file data composed of one or many channels at a common sample rate.
+ */
 class WAVData
 {
 public:
+    /**
+     * A PCM float-32 sampled audio point at an explicit time offset.
+     */
     struct AudioPoint
     {
-        float time;
-        float amplitude;
+        float time; /**< Time, in ms. */
+        float amplitude; /**< Amplitude at the time, normalised in the range [-1, 1]. */
     };
 
+    /**
+     * A single audio channel.
+     */
     using AudioChannel = std::vector<AudioPoint>;
 
     /**
@@ -47,6 +59,11 @@ public:
      */
     explicit WAVData(const WAVData& other, float downsampling_factor);
 
+    /**
+     * Retrieves the common sample rate of the WAV file.
+     *
+     * @return The sample rate, in Hz, of the wave data.
+     */
     [[nodiscard]] std::uint64_t get_sample_rate() const;
 
     [[nodiscard]] std::vector<AudioChannel>::iterator begin();

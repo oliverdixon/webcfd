@@ -36,6 +36,9 @@ void Logger::log(
     case Level::Warning:
         emscripten_console_warn(line.c_str());
         break;
+    case Level::Debug:
+        emscripten_console_trace(line.c_str());
+        break;
     }
 #else
     auto& stream = level == Level::Error ? std::cerr : std::cout;

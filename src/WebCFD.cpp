@@ -21,7 +21,6 @@
 #include "ConfigurationError.hpp"
 #include "Logger.hpp"
 #include "ParametersPanel.hpp"
-#include "RenderPanel.hpp"
 #include "RobotoMedium.hpp"
 #include "WebCFD.hpp"
 
@@ -59,6 +58,12 @@ WebCFD::WebCFD() :
     configure_surface(surface, device, surface_capabilities, viewport_width, viewport_height);
 
     setup_imgui();
+
+#ifdef __EMSCRIPTEN__
+    parameters_panel = std::make_unique<ParametersPanel>();
+#else
+    parameters_panel = std::make_unique<ParametersPanel>("../audio/stereo.wav");
+#endif
 }
 
 void WebCFD::run_event_loop()
@@ -79,9 +84,6 @@ void WebCFD::run_event_loop()
 
 WebCFD::~WebCFD() noexcept
 {
-    for (auto& panel : panels)
-        panel.reset();
-
     if (ImGui::GetCurrentContext()) {
         ImGui_ImplWGPU_Shutdown();
         ImGui_ImplGlfw_Shutdown();
@@ -104,6 +106,14 @@ WebCFD::~WebCFD() noexcept
     }
 
     glfwTerminate();
+}
+
+void WebCFD::update_wav_file(
+        const char* const path
+) const
+{
+    if (parameters_panel != nullptr)
+        parameters_panel->update_wav_file(path);
 }
 
 GLFWwindow* WebCFD::create_window(
@@ -260,22 +270,19 @@ void WebCFD::render() noexcept
 
     const ImGuiViewport* viewport = ImGui::GetMainViewport();
     if (!dockspace_configured) {
-        fix_initial_dockspace();
         dockspace_configured = true;
     }
 
     ImGui::DockSpaceOverViewport(dockspace_id, viewport, ImGuiDockNodeFlags_None);
 
-    for (const auto& panel : panels)
-        panel->draw();
+    parameters_panel->draw();
 
     ImGui::Render();
 
     // Step 2. Set up a command encoder for the render and allow Dear ImGui panels to provide work.
     const wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
 
-    for (const auto& panel : panels)
-        panel->update_gpu(encoder);
+    // TODO no panels use GPU yet.
 
     // Step 3. Provide the framebuffer to the WebGPU driver.
     wgpu::RenderPassColorAttachment attachment{
@@ -347,11 +354,6 @@ void WebCFD::setup_imgui()
      */
     ImGui_ImplGlfw_InstallEmscriptenCallbacks(window, "#canvas");
 #endif
-
-    // Step 3. Construct and register panels to appear on the WebCFD application UI.
-    panels.emplace_back(std::make_unique<ParametersPanel>([this] {
-        dockspace_configured = false;
-    }));
 }
 
 // ReSharper disable once CppDFAUnreachableFunctionCall
@@ -384,39 +386,6 @@ bool WebCFD::handle_window_resize() noexcept
 
     // The window size is unchanged.
     return true;
-}
-
-void WebCFD::fix_initial_dockspace()
-{
-    if (panels.empty())
-        return;
-
-    const ImGuiViewport* const docking_viewport = ImGui::GetMainViewport();
-
-    ImGui::DockBuilderRemoveNode(dockspace_id);
-    ImGui::DockBuilderAddNode(dockspace_id, ImGuiDockNodeFlags_DockSpace);
-    ImGui::DockBuilderSetNodePos(dockspace_id, docking_viewport->WorkPos);
-    ImGui::DockBuilderSetNodeSize(dockspace_id, docking_viewport->WorkSize);
-
-    ImGuiID dock_left;
-    ImGuiID dock_right;
-
-    /*
-     * 1. Left top
-     * 2. Right top
-     * 3. Left bottom
-     * 4. Right bottom
-     */
-    ImGuiID docking_stations[4];
-
-    ImGui::DockBuilderSplitNode(dockspace_id, ImGuiDir_Left, .5f, &dock_left, &dock_right);
-    ImGui::DockBuilderSplitNode(dock_left, ImGuiDir_Up, .5f, &docking_stations[0], &docking_stations[2]);
-    ImGui::DockBuilderSplitNode(dock_right, ImGuiDir_Up, .5f, &docking_stations[1], &docking_stations[3]);
-
-    for (const auto& [station, panel] : std::views::zip(docking_stations, panels))
-        ImGui::DockBuilderDockWindow(panel->get_imgui_name(), station);
-
-    ImGui::DockBuilderFinish(dockspace_id);
 }
 
 } // namespace WebCFD

@@ -1,6 +1,9 @@
-//
-// Created by owd on 22/06/2026.
-//
+/**
+ * @file
+ * @brief Wave file implementation
+ * @author Oliver Dixon
+ * @date 2026-06-24
+ */
 
 #include "WAVData.hpp"
 

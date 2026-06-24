@@ -12,7 +12,7 @@
 #include <imgui.h>
 #include <webgpu/webgpu_cpp.h>
 
-#include "IPanel.hpp"
+#include "ParametersPanel.hpp"
 
 namespace WebCFD
 {
@@ -47,6 +47,13 @@ public:
      * Clean up all persistent state registered by the application instance.
      */
     ~WebCFD() noexcept;
+
+    /**
+     * Indicate to the wave form controllers that a new file has been selected.
+     *
+     * @param path Path of the new wave file on the file system.
+     */
+    void update_wav_file(const char* path) const;
 
 private:
     static constexpr auto operation_timeout = std::numeric_limits<std::uint64_t>::max();
@@ -126,8 +133,6 @@ private:
      */
     bool handle_window_resize() noexcept;
 
-    void fix_initial_dockspace();
-
 #ifdef __EMSCRIPTEN__
 
     // ReSharper disable once CppParameterMayBeConstPtrOrRef - Function signature enforced by Emscripten API.
@@ -155,7 +160,8 @@ private:
     wgpu::SurfaceCapabilities surface_capabilities;
     GLFWwindow* window = nullptr;
 
-    std::vector<std::unique_ptr<IPanel>> panels;
+    std::unique_ptr<ParametersPanel> parameters_panel;
+
     ImGuiID dockspace_id;
     bool dockspace_configured = false;
 };

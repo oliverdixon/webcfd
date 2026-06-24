@@ -1,6 +1,9 @@
-//
-// Created by owd on 6/23/26.
-//
+/**
+ * @file
+ * @brief JavaScript-C++ bridge implementation
+ * @author Oliver Dixon
+ * @date 2026-06-24
+ */
 
 #ifdef __EMSCRIPTEN__
 
@@ -8,6 +11,7 @@
 
 #include <emscripten/em_macros.h>
 
+#include "ConfigurationError.hpp"
 #include "Logger.hpp"
 
 namespace WebCFD
@@ -31,24 +35,43 @@ int JSBridge::notify_wav_file_picked(
         const char * const path
 ) noexcept
 {
-    if (instance == nullptr) {
-        LOG_ERROR("No WebCFD app instance is registered");
+    if (!preamble())
         return 1;
-    }
 
     if (path == nullptr) {
         LOG_ERROR("File picker callback received no path.");
         return 2;
     }
 
-    LOG_F_INFO("Received new file {}", path);
-    // TODO process
+    try {
+        instance->update_wav_file(path);
+        return 0;
+    } catch (const ConfigurationError& error) {
+        Logger::log_f(Logger::Level::Error, error.where(), "Could not load path {} due to error: {}.", path,
+            error.what());
+        return 3;
+    }
+}
 
-    return 0;
+bool JSBridge::preamble() noexcept
+{
+    if (instance == nullptr) {
+        LOG_ERROR("No WebCFD app instance is registered");
+        return false;
+    }
+
+    return true;
 }
 
 } // namespace WebCFD
 
+/**
+ * Action to handle a new wave file being selected on the DOM. This is exported and called from the JS.
+ *
+ * @param path Path of the selected file in the Wasm file system.
+ * @return Numerical status code; non-zero on failure.
+ * @see JSBridge::notify_wav_file_picked
+ */
 extern "C" EMSCRIPTEN_KEEPALIVE int webcfd_on_wav_file_picked(const char * const path)
 {
     return WebCFD::JSBridge::notify_wav_file_picked(path);
