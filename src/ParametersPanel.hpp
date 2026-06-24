@@ -8,9 +8,10 @@
 #ifndef WEBCFD_PARAMETERSPANEL_HPP
 #define WEBCFD_PARAMETERSPANEL_HPP
 
-#include <string>
-
 #include <implot.h>
+
+#include <functional>
+#include <string>
 
 #include "IPanel.hpp"
 #include "WAVData.hpp"

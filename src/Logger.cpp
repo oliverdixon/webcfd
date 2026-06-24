@@ -48,6 +48,8 @@ std::string_view Logger::level_to_string(
 )
 {
     switch (level) {
+    case Level::Debug:
+        return "Debug";
     case Level::Error:
         return "Error";
     case Level::Info:

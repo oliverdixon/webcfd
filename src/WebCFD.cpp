@@ -18,12 +18,11 @@
 
 #include <ranges>
 
+#include "ConfigurationError.hpp"
+#include "Logger.hpp"
 #include "ParametersPanel.hpp"
 #include "RenderPanel.hpp"
 #include "RobotoMedium.hpp"
-
-#include "ConfigurationError.hpp"
-#include "Logger.hpp"
 #include "WebCFD.hpp"
 
 namespace WebCFD
@@ -49,11 +48,11 @@ WebCFD::WebCFD() :
     surface = wgpu::glfw::CreateSurfaceForWindow(instance, window);
 
     if (const auto adapter_wait = instance.WaitAny(request_adapter(), operation_timeout);
-            adapter_wait != wgpu::WaitStatus::Success || !adapter)
+        adapter_wait != wgpu::WaitStatus::Success || !adapter)
         throw ConfigurationError("WebGPU adapter request did not complete");
 
     if (const auto device_wait = instance.WaitAny(request_device(), operation_timeout);
-            device_wait != wgpu::WaitStatus::Success || !device)
+        device_wait != wgpu::WaitStatus::Success || !device)
         throw ConfigurationError("WebGPU device request did not complete");
 
     surface.GetCapabilities(adapter, &surface_capabilities);
@@ -69,13 +68,11 @@ void WebCFD::run_event_loop()
 #else
     render();
     instance.ProcessEvents();
-    surface.Present();
 
     while (!glfwWindowShouldClose(window)) {
         glfwWaitEvents();
         render();
         instance.ProcessEvents();
-        surface.Present();
     }
 #endif
 }
@@ -229,27 +226,30 @@ wgpu::Future WebCFD::request_device() noexcept
 
 void WebCFD::render() noexcept
 {
-    glfwWaitEvents();
-
     if (!handle_window_resize())
         return;
 
     wgpu::SurfaceTexture surface_texture{};
     surface.GetCurrentTexture(&surface_texture);
 
-    if (surface_texture.status != wgpu::SurfaceGetCurrentTextureStatus::SuccessOptimal) {
-        switch (surface_texture.status) {
-        case wgpu::SurfaceGetCurrentTextureStatus::Outdated:
-        case wgpu::SurfaceGetCurrentTextureStatus::Lost:
-            surface.Unconfigure();
-            configure_surface(surface, device, surface_capabilities, viewport_width, viewport_height);
-            break;
-
-        default:
-            break;
-        }
-
+    switch (surface_texture.status) {
+    case wgpu::SurfaceGetCurrentTextureStatus::Error:
+    case wgpu::SurfaceGetCurrentTextureStatus::Lost:
+        surface.Unconfigure();
+        configure_surface(surface, device, surface_capabilities, viewport_width, viewport_height);
         return;
+
+    case wgpu::SurfaceGetCurrentTextureStatus::Outdated:
+        surface.Unconfigure();
+        configure_surface(surface, device, surface_capabilities, viewport_width, viewport_height);
+        return;
+
+    case wgpu::SurfaceGetCurrentTextureStatus::Timeout:
+        return;
+
+    case wgpu::SurfaceGetCurrentTextureStatus::SuccessOptimal:
+    case wgpu::SurfaceGetCurrentTextureStatus::SuccessSuboptimal:
+        break;
     }
 
     const wgpu::TextureView surface_view = surface_texture.texture.CreateView();
@@ -295,6 +295,10 @@ void WebCFD::render() noexcept
 
     // Step 4. Submit batched work to the GPU.
     device.GetQueue().Submit(1, &commands);
+
+#ifndef __EMSCRIPTEN__
+    surface.Present();
+#endif
 }
 
 // ReSharper disable once CppMemberFunctionMayBeConst - Not semantically constant
@@ -338,17 +342,16 @@ void WebCFD::setup_imgui()
 #ifdef __EMSCRIPTEN__
     /*
      * If we're targeting WebAssembly, the window dimensions reported by GLFW should match the size of the canvas
-     * identified by the CSS selector <code>#canvas</code>.
+     * identified by the CSS selector <code>#canvas</code>. Dear ImGui provides the helper
+     * ImGui_ImplGlfw_InstallEmscriptenCallbacks to interface with the DOM and trigger re-draws as needed.
      */
     ImGui_ImplGlfw_InstallEmscriptenCallbacks(window, "#canvas");
 #endif
 
     // Step 3. Construct and register panels to appear on the WebCFD application UI.
-#if 0
     panels.emplace_back(std::make_unique<ParametersPanel>([this] {
         dockspace_configured = false;
     }));
-#endif
 }
 
 // ReSharper disable once CppDFAUnreachableFunctionCall

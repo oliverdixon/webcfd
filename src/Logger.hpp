@@ -29,6 +29,7 @@ public:
      */
     enum class Level
     {
+        Debug,
         Info,
         Warning,
         Error
@@ -80,6 +81,23 @@ private:
 } // namespace WebCFD
 
 /**
+ * @def LOG_F_DEBUG
+ *
+ * Conditionally logs a formatted debug-level message using WebCFD::Logger::log_f.
+ *
+ * @param msg The format string, followed by formatted values.
+ */
+
+#ifdef NDEBUG
+#define LOG_F_DEBUG(msg, ...)
+#else
+#define LOG_F_DEBUG(msg, ...)                                                                                          \
+    do {                                                                                                               \
+        Logger::log_f(Logger::Level::Info, std::source_location::current(), msg, __VA_ARGS__);                         \
+    } while (0);
+#endif
+
+/**
  * Logs a formatted info-level message using WebCFD::Logger::log_f.
  *
  * @param msg The format string, followed by formatted values.
@@ -108,6 +126,23 @@ private:
     do {                                                                                                               \
         Logger::log_f(Logger::Level::Error, std::source_location::current(), msg, __VA_ARGS__);                        \
     } while (0);
+
+/**
+ * @def LOG_DEBUG
+ *
+ * Conditionally logs an unformatted info-level message using WebCFD::Logger::log.
+ *
+ * @param msg The string literal to log.
+ */
+
+#ifdef NDEBUG
+#define LOG_DEBUG(msg, ...)
+#else
+#define LOG_DEBUG(msg, ...)                                                                                            \
+    do {                                                                                                               \
+        Logger::log(Logger::Level::Info, msg, std::source_location::current());                                        \
+    } while (0);
+#endif
 
 /**
  * Logs an unformatted info-level message using WebCFD::Logger::log.
