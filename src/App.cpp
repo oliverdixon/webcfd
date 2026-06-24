@@ -6,9 +6,9 @@
  */
 
 #include "ConfigurationError.hpp"
-#include "JSBridge.hpp"
 #include "Logger.hpp"
 #include "WebCFD.hpp"
+#include "web/JSBridge.hpp"
 
 /**
  * WebCFD common entry point.

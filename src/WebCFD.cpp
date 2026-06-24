@@ -10,7 +10,7 @@
 #include <imgui_internal.h>
 #include <implot.h>
 
-#if defined(__EMSCRIPTEN__)
+#ifdef __EMSCRIPTEN__
 #include <emscripten/emscripten.h>
 #endif
 #include <dawn/webgpu_cpp_print.h>
@@ -245,10 +245,6 @@ void WebCFD::render() noexcept
     switch (surface_texture.status) {
     case wgpu::SurfaceGetCurrentTextureStatus::Error:
     case wgpu::SurfaceGetCurrentTextureStatus::Lost:
-        surface.Unconfigure();
-        configure_surface(surface, device, surface_capabilities, viewport_width, viewport_height);
-        return;
-
     case wgpu::SurfaceGetCurrentTextureStatus::Outdated:
         surface.Unconfigure();
         configure_surface(surface, device, surface_capabilities, viewport_width, viewport_height);
@@ -304,6 +300,7 @@ void WebCFD::render() noexcept
     device.GetQueue().Submit(1, &commands);
 
 #ifndef __EMSCRIPTEN__
+    // ReSharper disable once CppExpressionWithoutSideEffects
     surface.Present();
 #endif
 }

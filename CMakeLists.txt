@@ -15,6 +15,8 @@ add_subdirectory(dawn EXCLUDE_FROM_ALL)
 
 include(cmake/ImGui.cmake)
 include(cmake/ImPlot.cmake)
+include(cmake/ImPlot3D.cmake)
+
 if(EMSCRIPTEN AND TARGET dawn_glfw)
     target_compile_definitions(dawn_glfw PRIVATE EMSCRIPTEN=1)
 endif()
@@ -50,7 +52,7 @@ add_executable(WebCFD
         src/JSBridge.hpp
 )
 
-target_link_libraries(WebCFD PRIVATE webgpu_glfw imgui implot dr_libs_interface)
+target_link_libraries(WebCFD PRIVATE webgpu_glfw imgui implot implot3d dr_libs_interface)
 target_include_directories(WebCFD PRIVATE dr_libs)
 
 # Broadcast the Dear ImGui configuration file path across all WebCFD compilation units, i.a.w. imgui/imconfig.h advice.
