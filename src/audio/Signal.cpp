@@ -55,7 +55,7 @@ void Signal::add_sample(
 }
 
 void Signal::emplace_sample(
-        const float time,
+        const uint64_t time,
         const float amplitude
 )
 {
@@ -75,16 +75,6 @@ void Signal::reserve_samples(
 std::uint64_t Signal::get_sample_count() const
 {
     return samples.size();
-}
-
-std::vector<Signal::Sample>::iterator Signal::begin()
-{
-    return samples.begin();
-}
-
-std::vector<Signal::Sample>::iterator Signal::end()
-{
-    return samples.end();
 }
 
 std::vector<Signal::Sample>::const_iterator Signal::begin() const
@@ -163,8 +153,8 @@ void Signal::downsample_and_copy(
         const std::size_t range_lower = i * bucket_size + 1;
         const std::size_t range_upper = (i + 1) * bucket_size + 1;
 
-        const float fixed_point_time = source[fixed_point_idx].time;
-        const float fixed_point_amplitude = source[fixed_point_idx].time;
+        const auto fixed_point_time = source[fixed_point_idx].time;
+        const auto fixed_point_amplitude = source[fixed_point_idx].amplitude;
         auto max_area = std::numeric_limits<float>::lowest();
         std::size_t next_fixed_point_idx = 0;
 

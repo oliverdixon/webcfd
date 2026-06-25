@@ -18,19 +18,23 @@ Project::Project(
 {
     // TODO remove. Adding data for testing...
 
-    const auto signal_a = add_signal(std::make_unique<Signal>());
-    const auto signal_b = add_signal(std::make_unique<Signal>("Signal B"));
-    const auto signal_c = add_signal(std::make_unique<Signal>("Signal C"));
+    auto file_signals = WAVDataLoader::load_wave_file("../audio/4channel.wav");
 
-    assert(signal_a && signal_b && signal_c);
+    std::vector<const Signal *> loaded_signals;
+    std::vector<const Sensor *> loaded_sensors;
 
-    const auto sensor_a = add_sensor(std::make_unique<Sensor>("Sensor A"));
-    const auto sensor_b = add_sensor(std::make_unique<Sensor>("Sensor B"));
-    const auto sensor_c = add_sensor(std::make_unique<Sensor>());
+    loaded_signals.reserve(file_signals.size());
+    loaded_sensors.reserve(file_signals.size());
 
-    assert(sensor_a && sensor_b && sensor_c);
+    for (auto&& signal : file_signals) {
+        loaded_signals.push_back(add_signal(std::move(signal)));
+        loaded_sensors.push_back(add_sensor(std::make_unique<Sensor>()));
 
-    add_association(*signal_a, *sensor_b);
+        assert(loaded_signals.back());
+        assert(loaded_sensors.back());
+
+        add_association(*loaded_signals.back(), *loaded_sensors.back());
+    }
 }
 
 const Signal* Project::add_signal(

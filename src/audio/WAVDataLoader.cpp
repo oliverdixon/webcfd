@@ -5,32 +5,32 @@
  * @date 2026-06-24
  */
 
-#include "WAVData.hpp"
+#include "WAVDataLoader.hpp"
 
 #define DR_WAV_IMPLEMENTATION
 #include <dr_wav.h>
 
 #include <limits>
-#include <ranges>
 
 #include "../ConfigurationError.hpp"
 
 namespace WebCFD
 {
 
-template <> constexpr std::string Object<WAVData>::class_name = "Wave file";
-
-WAVData::WAVData(
-        const char* const file_path
+std::vector<std::unique_ptr<Signal>> WAVDataLoader::load_wave_file(
+        const char * const file_path
 )
 {
     drwav drwav_info;
     if (!drwav_init_file(&drwav_info, file_path, nullptr))
         throw ConfigurationError("Cannot open WAV file at " + std::string(file_path));
 
-    channels.resize(drwav_info.channels);
-    for (auto& channel : channels)
-        channel.reserve_samples(drwav_info.totalPCMFrameCount);
+    std::vector<std::unique_ptr<Signal>> signals;
+    signals.resize(drwav_info.channels);
+    for (auto& channel : signals) {
+        channel = std::make_unique<Signal>();
+        channel->reserve_samples(drwav_info.totalPCMFrameCount);
+    }
 
     /*
      * Dr_WAV provides audio data as amplitudes uniformly interleaved across the channels. That is, for a stereo signal,
@@ -53,12 +53,12 @@ WAVData::WAVData(
 
         for (drwav_uint64 frame_idx = 0; frame_idx < frame_count; ++frame_idx) {
             std::size_t channel_idx = 0;
-            for (auto& channel : channels) {
+            for (auto& channel : signals) {
                 /*
                  * The audio data is uniformly spaced, so we can infer the time values by taking the current frame
                  * offset for the chunk (total frames - remaining frames) and adding the current frame index.
                  */
-                channel.emplace_sample(
+                channel->emplace_sample(
                         drwav_info.totalPCMFrameCount - remaining_frames + frame_idx,
                         interleaved[frame_idx * drwav_info.channels + channel_idx]
                 );
@@ -72,45 +72,8 @@ WAVData::WAVData(
     drwav_uninit(&drwav_info);
     if (remaining_frames != 0)
         throw ConfigurationError("Cannot read entire WAV file at " + std::string(file_path) + ". Is it corrupted?");
-}
 
-std::uint64_t WAVData::get_sample_count() const
-{
-    if (channels.empty())
-        throw std::runtime_error("No channels exist in the data. The effective sample count is zero.");
-
-    // The WAV standard requires that all channels share a sample rate, so we can just look at any channel.
-    return channels.front().get_sample_count();
-}
-
-std::vector<Signal>::iterator WAVData::begin()
-{
-    return channels.begin();
-}
-
-std::vector<Signal>::iterator WAVData::end()
-{
-    return channels.end();
-}
-
-std::vector<Signal>::const_iterator WAVData::begin() const
-{
-    return channels.begin();
-}
-
-std::vector<Signal>::const_iterator WAVData::end() const
-{
-    return channels.end();
-}
-
-std::vector<Signal>::const_iterator WAVData::cbegin() const noexcept
-{
-    return channels.cbegin();
-}
-
-std::vector<Signal>::const_iterator WAVData::cend() const noexcept
-{
-    return channels.cend();
+    return signals;
 }
 
 } // namespace WebCFD

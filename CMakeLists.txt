@@ -46,8 +46,8 @@ add_executable(WebCFD
         src/ConfigurationError.hpp
         src/SimulationParameters.hpp
         src/SimulationParameters.cpp
-        src/audio/WAVData.cpp
-        src/audio/WAVData.hpp
+        src/audio/WAVDataLoader.cpp
+        src/audio/WAVDataLoader.hpp
         src/web/JSBridge.cpp
         src/web/JSBridge.hpp
         src/audio/Signal.cpp

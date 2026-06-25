@@ -30,7 +30,22 @@ public:
     void draw() noexcept override;
 
 private:
+    void draw_signal_waveforms() const noexcept;
+    void draw_channel_mappings() const noexcept;
+
+    const Signal * get_downsampled_signal(const Signal& signal) const;
+
+    mutable std::unordered_map<Signal::id_type, Signal> downsampled_waveforms;
+    mutable ImPlotRect max_bounding_box{
+        std::numeric_limits<double>::max(),
+        std::numeric_limits<double>::lowest(),
+        -1.0,
+        1.0
+    };
+
     const std::string panel_name = "Manager";
+    static constexpr float default_downsample_factor = 50.0f;
+
     ImPlotSpec plotting_spec;
     Project * active_project = nullptr;
 };

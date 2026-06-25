@@ -11,7 +11,7 @@
 
 #include "BidirectionalUnorderedMapping.hpp"
 #include "audio/Sensor.hpp"
-#include "audio/WAVData.hpp"
+#include "audio/WAVDataLoader.hpp"
 
 namespace WebCFD
 {
@@ -46,10 +46,10 @@ public:
     const Sensor* add_sensor(std::unique_ptr<Sensor>&& sensor);
 
     /**
-     * Creates a new association between a signal and sensor.
+     * Creates a new association between a Signal and Sensor.
      *
-     * @param signal The associated signal
-     * @param sensor The associated sensor
+     * @param signal The associated Signal
+     * @param sensor The associated Sensor
      *
      * @throws std::runtime_error The given Signal was not known to the project.
      * @throws std::runtime_error The given Sensor was not known to the project.
@@ -86,7 +86,7 @@ public:
                     * of these containers.
                     */
                    assert(container);
-                   return *container.get();
+                   return *container;
                });
     }
 
@@ -107,7 +107,7 @@ public:
         return sensors | std::views::values |
                std::views::transform([](const std::unique_ptr<Sensor>& container) -> const Sensor& {
                    assert(container);
-                   return *container.get();
+                   return *container;
                });
     }
 

@@ -23,7 +23,7 @@ namespace WebCFD
  *  internal representation models <code>contiguous_range</code>. This eases integration with C APIs, for example:
  *  <pre>
  *     ImPlot::PlotLine(
- *         nullptr,
+ *         "f(x)",
  *         &downsampled_channel.begin()->time,
  *         &downsampled_channel.begin()->amplitude,
  *         static_cast<int>(downsampled_channel.get_sample_count()),
@@ -59,9 +59,11 @@ public:
      * @param sample_count The desired number of samples in the downsampled data.
      * @param name Optional display name.
      */
-    Signal(const Signal& source,
-           std::uint64_t sample_count,
-           std::string_view name = {});
+    Signal(
+            const Signal& source,
+            std::uint64_t sample_count,
+            std::string_view name = {}
+    );
 
     /**
      * Downsamples an existing Signal instance across all channels by the given factor.
@@ -70,9 +72,11 @@ public:
      * @param downsample_factor The factor by which the number of samples should be reduced during downsampling.
      * @param name Optional display name.
      */
-    Signal(const Signal& source,
-           float downsample_factor,
-           std::string_view name = {});
+    Signal(
+            const Signal& source,
+            float downsample_factor,
+            std::string_view name = {}
+    );
 
     /**
      * Add a sample to the end of the channel sample data.
@@ -90,7 +94,7 @@ public:
      * @throws std::runtime_error if the sample would violate the monotonically increasing invariant.
      */
     void emplace_sample(
-            float time,
+            uint64_t time,
             float amplitude
     );
 
@@ -103,16 +107,9 @@ public:
 
     [[nodiscard]] std::uint64_t get_sample_count() const;
 
-    [[nodiscard]] std::vector<Sample>::iterator begin();
-
-    [[nodiscard]] std::vector<Sample>::iterator end();
-
     [[nodiscard]] std::vector<Sample>::const_iterator begin() const;
-
     [[nodiscard]] std::vector<Sample>::const_iterator end() const;
-
     [[nodiscard]] std::vector<Sample>::const_iterator cbegin() const noexcept;
-
     [[nodiscard]] std::vector<Sample>::const_iterator cend() const noexcept;
 
 private:
