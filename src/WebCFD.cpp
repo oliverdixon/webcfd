@@ -9,6 +9,7 @@
 #include <backends/imgui_impl_wgpu.h>
 #include <imgui_internal.h>
 #include <implot.h>
+#include <implot3d.h>
 
 #ifdef __EMSCRIPTEN__
 #include <emscripten/emscripten.h>
@@ -22,7 +23,6 @@
 #include "Logger.hpp"
 #include "RobotoMedium.hpp"
 #include "WebCFD.hpp"
-#include "panels/WaveformViewPanel.hpp"
 
 namespace WebCFD
 {
@@ -58,11 +58,6 @@ WebCFD::WebCFD() :
     configure_surface(surface, device, surface_capabilities, viewport_width, viewport_height);
 
     setup_imgui();
-
-#ifndef __EMSCRIPTEN__
-    WAVData wav_data{"../audio/stereo.wav"};
-    waveform_test_panel = std::make_unique<WaveformViewPanel>("Sample", *wav_data.begin());
-#endif
 }
 
 void WebCFD::run_event_loop()
@@ -112,8 +107,7 @@ void WebCFD::update_wav_file(
         const char* const path
 )
 {
-    WAVData wav_data{path};
-    waveform_test_panel = std::make_unique<WaveformViewPanel>("Sample", *wav_data.begin());
+    throw std::runtime_error("Unimplemented");
 }
 
 GLFWwindow* WebCFD::create_window(
@@ -271,11 +265,9 @@ void WebCFD::render() noexcept
 
     ImGui::DockSpaceOverViewport(dockspace_id, viewport, ImGuiDockNodeFlags_None);
 
-    if (waveform_test_panel != nullptr)
-        waveform_test_panel->draw();
-
-    if (array_test_panel != nullptr)
-        array_test_panel->draw();
+    menu_panel->draw();
+    project_panel->draw();
+    viewport_panel->draw();
 
     ImGui::Render();
 

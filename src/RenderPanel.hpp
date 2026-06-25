@@ -46,7 +46,7 @@ public:
             const SimulationParameters& parameters
     );
 
-    void draw() override;
+    void draw() noexcept override;
 
     [[nodiscard]] const char* get_imgui_name() const noexcept override;
 

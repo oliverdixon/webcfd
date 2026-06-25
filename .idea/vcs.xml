@@ -25,5 +25,8 @@
     <mapping directory="$PROJECT_DIR$/dr_libs" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/imgui" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/implot" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/implot/example/cmake-build-debug/_deps/glfw-src" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/implot/example/cmake-build-debug/_deps/imgui-src" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/implot3d" vcs="Git" />
   </component>
 </project>

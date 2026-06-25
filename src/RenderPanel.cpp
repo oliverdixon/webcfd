@@ -31,7 +31,7 @@ RenderPanel::RenderPanel(
 {
 }
 
-void RenderPanel::draw()
+void RenderPanel::draw() noexcept
 {
     ImGui::Begin(panel_name.c_str());
 

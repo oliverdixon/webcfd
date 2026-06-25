@@ -27,7 +27,7 @@ public:
     /**
      * Draw the panel to the active rendering context.
      */
-    virtual void draw() = 0;
+    virtual void draw() noexcept = 0;
 
     /**
      * Retrieves the name of the IPanel for Dear ImGui API functions.

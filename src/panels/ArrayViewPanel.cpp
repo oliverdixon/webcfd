@@ -27,7 +27,7 @@ const char* ArrayViewPanel::get_imgui_name() const noexcept
     return panel_name.c_str();
 }
 
-void ArrayViewPanel::draw()
+void ArrayViewPanel::draw() noexcept
 {
     ImGui::Begin(panel_name.c_str(), nullptr);
 

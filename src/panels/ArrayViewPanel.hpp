@@ -25,7 +25,7 @@ public:
 
     [[nodiscard]] const char* get_imgui_name() const noexcept override;
 
-    void draw() override;
+    void draw() noexcept override;
 
 private:
     const std::string panel_name;
