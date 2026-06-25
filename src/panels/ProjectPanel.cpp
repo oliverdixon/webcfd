@@ -22,8 +22,9 @@ void ProjectPanel::draw() noexcept
 
     if (ImGui::Begin(panel_name.c_str())) {
         if (active_project == nullptr)
-            ImGui::Text("No active project.");
+            ImGui::SeparatorText("No active project.");
         else {
+            ImGui::SeparatorText(active_project->get_imgui_name());
             if (ImGui::CollapsingHeader("Signals", default_flags))
                 for (const auto& signal : active_project->observe_signals())
                     ImGui::Text("%s", signal.get_imgui_name());

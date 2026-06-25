@@ -163,7 +163,7 @@ private:
     wgpu::SurfaceCapabilities surface_capabilities;
     GLFWwindow* window = nullptr;
 
-    std::unique_ptr<Project> project = std::make_unique<Project>("Unnamed project");
+    std::unique_ptr<Project> project = std::make_unique<Project>();
 
     std::unique_ptr<MenuPanel> menu_panel = std::make_unique<MenuPanel>();
     std::unique_ptr<ProjectPanel> project_panel = std::make_unique<ProjectPanel>(project.get());

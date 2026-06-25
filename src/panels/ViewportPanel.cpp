@@ -46,7 +46,9 @@ void ViewportPanel::draw() noexcept
             }
 
             if (ImGui::BeginTabItem("Channel Mapping")) {
-                if (ImGui::BeginTable("ChannelMappingTable", 3, ImGuiTableFlags_Borders)) {
+                if (!active_project->are_associations_defined())
+                    ImGui::Text("No associations are defined.");
+                else if (ImGui::BeginTable("ChannelMappingTable", 3, ImGuiTableFlags_Borders)) {
                     ImGui::TableNextColumn();
                     ImGui::Text("Signal");
                     ImGui::TableNextColumn();
@@ -54,8 +56,19 @@ void ViewportPanel::draw() noexcept
                     ImGui::TableNextColumn();
                     ImGui::Text("Mapping Status");
 
+                    for (const auto& [signal, sensor] : active_project->observe_associations()) {
+                        ImGui::TableNextRow();
+                        ImGui::TableNextColumn();
+                        ImGui::Text("%s", signal.get_imgui_name());
+                        ImGui::TableNextColumn();
+                        ImGui::Text("%s", sensor.get_imgui_name());
+                        ImGui::TableNextColumn();
+                        ImGui::Text("OK");
+                    }
+
                     ImGui::EndTable();
                 }
+
                 ImGui::EndTabItem();
             }
 

@@ -40,6 +40,11 @@ public:
         return name.c_str();
     }
 
+    [[nodiscard]] static std::string_view get_class_name() noexcept
+    {
+        return class_name;
+    }
+
 protected:
     Object() :
         id(IDAllocator<Derived>::allocate()),
