@@ -1,0 +1,260 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "WebCFD",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "metadata",
+    "signals",
+    "sensors",
+    "mappings"
+  ],
+  "properties": {
+    "metadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "description": {
+          "type": "string"
+        },
+        "author": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "modified_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "schema_version": {
+          "type": "string",
+          "default": "1.0.0"
+        }
+      }
+    },
+    "signals": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/signal"
+      },
+      "uniqueItems": true
+    },
+    "sensors": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/sensor"
+      },
+      "uniqueItems": true
+    },
+    "mappings": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/mapping"
+      },
+      "uniqueItems": true
+    }
+  },
+  "$defs": {
+    "id": {
+      "type": "string",
+      "pattern": "^[A-Za-z_][A-Za-z0-9_-]*$"
+    },
+    "signal": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "name",
+        "source"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/embedded_wav_signal"
+            },
+            {
+              "$ref": "#/$defs/filesystem_wav_signal"
+            }
+          ]
+        }
+      }
+    },
+    "embedded_wav_signal": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "sample_rate_hz",
+        "samples"
+      ],
+      "properties": {
+        "kind": {
+          "const": "embedded_wav"
+        },
+        "sample_rate_hz": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "channel_count": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "samples": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/audio_sample"
+          }
+        }
+      }
+    },
+    "filesystem_wav_signal": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "path",
+        "channel"
+      ],
+      "properties": {
+        "kind": {
+          "const": "filesystem_wav"
+        },
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "channel": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "audio_sample": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "time",
+        "amplitude"
+      ],
+      "properties": {
+        "time": {
+          "type": "number",
+          "minimum": 0
+        },
+        "amplitude": {
+          "type": "number"
+        }
+      }
+    },
+    "sensor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "name",
+        "position",
+        "colour"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "position": {
+          "$ref": "#/$defs/vec3"
+        },
+        "colour": {
+          "$ref": "#/$defs/rgba"
+        }
+      }
+    },
+    "vec3": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "x",
+        "y",
+        "z"
+      ],
+      "properties": {
+        "x": {
+          "type": "number"
+        },
+        "y": {
+          "type": "number"
+        },
+        "z": {
+          "type": "number"
+        }
+      }
+    },
+    "rgba": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "r",
+        "g",
+        "b",
+        "a"
+      ],
+      "properties": {
+        "r": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "g": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "b": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "a": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        }
+      }
+    },
+    "mapping": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sensor_id",
+        "signal_id"
+      ],
+      "properties": {
+        "sensor_id": {
+          "$ref": "#/$defs/id"
+        },
+        "signal_id": {
+          "$ref": "#/$defs/id"
+        }
+      }
+    }
+  }
+}

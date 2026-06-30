@@ -1,0 +1,60 @@
+{
+  "metadata": {
+    "name": "Demo Array Project",
+    "description": "Simple sound source localisation test project",
+    "schema_version": "1.0.0"
+  },
+  "signals": [
+    {
+      "id": "signal_left",
+      "name": "Left channel",
+      "source": {
+        "kind": "filesystem_wav",
+        "path": "audio/test.wav",
+        "channel": 0
+      }
+    },
+    {
+      "id": "signal_embedded_1",
+      "name": "Embedded test signal",
+      "source": {
+        "kind": "embedded_wav",
+        "sample_rate_hz": 48000,
+        "channel_count": 1,
+        "samples": [
+          {
+            "time": 0.0,
+            "amplitude": 0.0
+          },
+          {
+            "time": 0.0000208333,
+            "amplitude": 0.15
+          }
+        ]
+      }
+    }
+  ],
+  "sensors": [
+    {
+      "id": "sensor_1",
+      "name": "Sensor 1",
+      "position": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "colour": {
+        "r": 1.0,
+        "g": 0.0,
+        "b": 0.0,
+        "a": 1.0
+      }
+    }
+  ],
+  "mappings": [
+    {
+      "sensor_id": "sensor_1",
+      "signal_id": "signal_left"
+    }
+  ]
+}
