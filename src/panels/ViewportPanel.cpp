@@ -18,7 +18,6 @@ ViewportPanel::ViewportPanel(
     active_project(initial_project)
 {
     plotting_spec_2d.Stride = sizeof(Signal::Sample);
-    plotting_spec_3d.Stride = sizeof(decltype(contiguous_sensor_cache)::value_type);
 }
 
 const char* ViewportPanel::get_imgui_name() const noexcept
@@ -44,15 +43,6 @@ void ViewportPanel::draw() noexcept
     }
 
     ImGui::End();
-}
-
-void ViewportPanel::update_sensor_cache()
-{
-    contiguous_sensor_cache.clear();
-
-    if (active_project != nullptr)
-        for (const auto& sensor : active_project->observe_sensors())
-            contiguous_sensor_cache.emplace_back(sensor);
 }
 
 void ViewportPanel::draw_signal_waveforms() const noexcept
@@ -94,9 +84,9 @@ void ViewportPanel::draw_sensor_geometry() const noexcept
     if (!active_project->are_sensors_stored())
         ImGui::Text("No sensors are loaded.");
     else if (ImPlot3D::BeginPlot("Sensor Positions")) {
-        const auto& [xs, ys, zs] = (*contiguous_sensor_cache.begin()).position;
-        ImPlot3D::PlotScatter("", &xs, &ys, &zs, static_cast<int>(contiguous_sensor_cache.size()), plotting_spec_3d);
+        ImPlot3D::PlotScatterG("", [](const int idx, void * data) -> ImPlot3DPoint {
 
+        });
         ImPlot3D::EndPlot();
     }
 

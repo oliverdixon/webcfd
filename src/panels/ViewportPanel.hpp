@@ -28,8 +28,6 @@ public:
 
     void draw() noexcept override;
 
-    void update_sensor_cache();
-
 private:
     void draw_signal_waveforms() const noexcept;
     void draw_sensor_geometry() const noexcept;
@@ -73,16 +71,6 @@ private:
             -1.0,
             1.0
     };
-
-    /**
-     * Stores a contiguous list of Sensor objects for use with ImPlot3D.
-     *
-     * @todo Provide callbacks for adding/removing sensors. It'll have to re-compute the array for each change, which is
-     *       acceptable since the number of sensors is typically small.
-     *
-     * @todo It shouldn't copy entire sensors. Just the positions and some identifying metadata (e.g. the ID).
-     */
-    std::vector<Sensor> contiguous_sensor_cache;
 
     const std::string panel_name = "Manager";
     static constexpr float default_downsample_factor = 50.0f;

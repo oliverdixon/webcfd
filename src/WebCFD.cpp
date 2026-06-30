@@ -58,7 +58,6 @@ WebCFD::WebCFD() :
     configure_surface(surface, device, surface_capabilities, viewport_width, viewport_height);
 
     setup_imgui();
-    viewport_panel->update_sensor_cache();
 }
 
 void WebCFD::run_event_loop()
