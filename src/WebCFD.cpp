@@ -314,9 +314,6 @@ void WebCFD::setup_imgui()
     ImPlot3D::CreateContext();
 
     auto& io = ImGui::GetIO();
-#ifdef WEBCFD_DISABLE_IMGUI_PERSISTENCE
-    io.IniFilename = nullptr;
-#endif
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
     io.Fonts->AddFontFromMemoryCompressedTTF(
             data::RobotoMedium_compressed_data,

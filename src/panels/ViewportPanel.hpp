@@ -14,6 +14,7 @@
 #include <string>
 
 #include "../Project.hpp"
+#include "ErrorModal.hpp"
 #include "IPanel.hpp"
 
 namespace WebCFD
@@ -29,9 +30,18 @@ public:
     void draw() noexcept override;
 
 private:
+    mutable struct AddChannelMappingRowCache
+    {
+        const Signal * selected_signal = nullptr;
+        const Sensor * selected_sensor = nullptr;
+    } new_mapping_cache;
+
     void draw_signal_waveforms() const noexcept;
     void draw_sensor_geometry() const noexcept;
+
     void draw_channel_mappings() const noexcept;
+    void draw_new_channel_mapping() const noexcept;
+    void draw_existing_channel_mapping() const noexcept;
 
     /**
      * Retrieves a downsampled Signal from the cache. If the downsampled variant is not present, it is computed and
@@ -72,8 +82,11 @@ private:
             1.0
     };
 
+    mutable ErrorModal error_modal;
+
     const std::string panel_name = "Manager";
     static constexpr float default_downsample_factor = 50.0f;
+    static constexpr auto table_flags = ImGuiTableFlags_Borders;
 
     ImPlotSpec plotting_spec_2d;
     ImPlot3DSpec plotting_spec_3d;

@@ -27,6 +27,8 @@ const char* ViewportPanel::get_imgui_name() const noexcept
 
 void ViewportPanel::draw() noexcept
 {
+    error_modal.draw();
+
     if (ImGui::Begin(panel_name.c_str(), nullptr, ImGuiWindowFlags_HorizontalScrollbar | ImGuiWindowFlags_NoTitleBar)) {
         if (ImGui::BeginTabBar("##ViewportTabBar")) {
             draw_signal_waveforms();
@@ -50,7 +52,7 @@ void ViewportPanel::draw_signal_waveforms() const noexcept
     if (!ImGui::BeginTabItem("Signal Waveforms"))
         return;
 
-    if (!active_project->are_signals_stored())
+    if (!active_project->get_signal_count())
         ImGui::Text("No signals are loaded.");
     else if (ImPlot::BeginAlignedPlots("WaveformAlignedGroup")) {
         for (const auto& signal : active_project->observe_signals())
@@ -81,12 +83,15 @@ void ViewportPanel::draw_sensor_geometry() const noexcept
     if (!ImGui::BeginTabItem("Sensor Geometry"))
         return;
 
-    if (!active_project->are_sensors_stored())
+    if (!active_project->get_sensors_count())
         ImGui::Text("No sensors are loaded.");
     else if (ImPlot3D::BeginPlot("Sensor Positions")) {
-        ImPlot3D::PlotScatterG("", [](const int idx, void * data) -> ImPlot3DPoint {
-
-        });
+        ImPlot3D::PlotScatterG(
+                "",
+                Project::get_sensor_point,
+                active_project,
+                static_cast<int>(active_project->get_sensors_count())
+        );
         ImPlot3D::EndPlot();
     }
 
@@ -98,30 +103,106 @@ void ViewportPanel::draw_channel_mappings() const noexcept
     if (!ImGui::BeginTabItem("Channel Mapping"))
         return;
 
-    if (!active_project->are_associations_defined())
-        ImGui::Text("No associations are defined.");
-    else if (ImGui::BeginTable("ChannelMappingTable", 3, ImGuiTableFlags_Borders)) {
-        ImGui::TableNextColumn();
-        ImGui::Text("Signal");
-        ImGui::TableNextColumn();
-        ImGui::Text("Sensor");
-        ImGui::TableNextColumn();
-        ImGui::Text("Mapping Status");
+    ImGui::SeparatorText("Create Channel Mapping");
+    draw_new_channel_mapping();
 
+    // If a new mapping has been fully described, add it and prompt for another.
+    if (new_mapping_cache.selected_signal != nullptr && new_mapping_cache.selected_sensor != nullptr) {
+        try {
+            active_project->add_association(*new_mapping_cache.selected_signal, *new_mapping_cache.selected_sensor);
+        } catch (const std::runtime_error& exception) {
+            error_modal.raise_error("Cannot add channel mapping.", exception);
+        }
+
+        new_mapping_cache.selected_signal = nullptr;
+        new_mapping_cache.selected_sensor = nullptr;
+    }
+
+    ImGui::SeparatorText("Existing Channel Mapping");
+    draw_existing_channel_mapping();
+
+    ImGui::EndTabItem();
+}
+
+void ViewportPanel::draw_new_channel_mapping() const noexcept
+{
+    if (ImGui::BeginTable("##NewChannelMapping", 2, table_flags)) {
+        ImGui::TableSetupColumn("Signal");
+        ImGui::TableSetupColumn("Sensor");
+        ImGui::TableHeadersRow();
+        ImGui::TableNextRow();
+        ImGui::TableNextColumn();
+
+        // Prompt for the associated signal.
+        if (ImGui::BeginCombo(
+                    "##NewAssociationSignal",
+                    new_mapping_cache.selected_signal == nullptr ? "Select signal..."
+                                                                 : new_mapping_cache.selected_signal->get_imgui_name(),
+                    0
+            )) {
+            for (const auto& signal : active_project->observe_signals()) {
+                const bool is_selected = new_mapping_cache.selected_signal == nullptr
+                                                 ? false
+                                                 : signal == *new_mapping_cache.selected_signal;
+
+                // Checks if something has changed (thus current value needs updating).
+                if (ImGui::Selectable(signal.get_imgui_name(), is_selected))
+                    new_mapping_cache.selected_signal = &signal;
+
+                // Checks if the current item is selected.
+                if (is_selected)
+                    ImGui::SetItemDefaultFocus();
+            }
+
+            ImGui::EndCombo();
+        }
+
+        ImGui::TableNextColumn();
+
+        // Prompt for the associated sensor.
+        if (ImGui::BeginCombo(
+                    "##NewAssociationSensor",
+                    new_mapping_cache.selected_sensor == nullptr ? "Select sensor..."
+                                                                 : new_mapping_cache.selected_sensor->get_imgui_name(),
+                    0
+            )) {
+            for (const auto& sensor : active_project->observe_sensors()) {
+                const bool is_selected = new_mapping_cache.selected_sensor == nullptr
+                                                 ? false
+                                                 : sensor == *new_mapping_cache.selected_sensor;
+
+                if (ImGui::Selectable(sensor.get_imgui_name(), is_selected))
+                    new_mapping_cache.selected_sensor = &sensor;
+
+                if (is_selected)
+                    ImGui::SetItemDefaultFocus();
+            }
+
+            ImGui::EndCombo();
+        }
+
+        ImGui::EndTable();
+    }
+}
+
+void ViewportPanel::draw_existing_channel_mapping() const noexcept
+{
+    if (ImGui::BeginTable("##ExistingChannelMapping", 2, table_flags)) {
+        ImGui::TableSetupColumn("Signal");
+        ImGui::TableSetupColumn("Sensor");
+        ImGui::TableHeadersRow();
+
+        // Display existing associations.
         for (const auto& [signal, sensor] : active_project->observe_associations()) {
             ImGui::TableNextRow();
             ImGui::TableNextColumn();
             ImGui::Text("%s", signal.get_imgui_name());
             ImGui::TableNextColumn();
             ImGui::Text("%s", sensor.get_imgui_name());
-            ImGui::TableNextColumn();
-            ImGui::Text("OK");
         }
 
         ImGui::EndTable();
     }
-
-    ImGui::EndTabItem();
 }
 
 const Signal* ViewportPanel::get_downsampled_signal(

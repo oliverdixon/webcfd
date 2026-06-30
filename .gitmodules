@@ -13,4 +13,5 @@
 	url = git@github.com:epezent/implot.git
 [submodule "implot3d"]
 	path = implot3d
-	url = git@github.com:brenocq/implot3d
+	url = git@github.com:oliverdixon/implot3d
+	branch = add-custom-getter-support

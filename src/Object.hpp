@@ -49,6 +49,11 @@ public:
     Object(const Object&) = delete;
     Object& operator=(const Object&) = delete;
 
+    [[nodiscard]] bool operator==(const Object& other) const noexcept
+    {
+        return id == other.id;
+    }
+
 protected:
     struct CopyTag
     {};

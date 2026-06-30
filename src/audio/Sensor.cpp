@@ -17,6 +17,14 @@ Sensor::Sensor(
 }
 
 Sensor::Sensor(
+        const Position position,
+        std::string_view name
+) :
+    position(position)
+{
+}
+
+Sensor::Sensor(
         const Sensor& old_sensor
 ) :
     Object(CopyTag{}, old_sensor)

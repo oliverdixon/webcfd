@@ -6,6 +6,8 @@
 
 #include <format>
 
+#include "audio/Sensor.hpp"
+
 namespace WebCFD
 {
 
@@ -80,19 +82,30 @@ void Project::add_association(
         );
 }
 
-bool Project::are_signals_stored() const noexcept
+std::size_t Project::get_signal_count() const noexcept
 {
-    return !signals.empty();
+    return signals.size();
 }
 
-bool Project::are_sensors_stored() const noexcept
+std::size_t Project::get_sensors_count() const noexcept
 {
-    return !sensors.empty();
+    return sensors.size();
 }
 
-bool Project::are_associations_defined() const noexcept
+std::size_t Project::get_associations_count() const noexcept
 {
-    return !channel_mapping.empty();
+    return channel_mapping.size();
+}
+
+ImPlot3DPoint Project::get_sensor_point(
+        const int idx,
+        const void* const project_instance
+) noexcept
+{
+    const auto project_ptr = static_cast<const Project *>(project_instance);
+    const auto [x, y, z] = project_ptr->sensors.values()[idx]->position;
+
+    return { x, y, z };
 }
 
 std::pair<

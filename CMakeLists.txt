@@ -65,6 +65,8 @@ add_executable(WebCFD
         src/BidirectionalUnorderedMapping.hpp
         src/Object.hpp
         src/IDAllocator.hpp
+        src/panels/ErrorModal.cpp
+        src/panels/ErrorModal.hpp
 )
 
 target_link_libraries(WebCFD PRIVATE webgpu_glfw imgui implot implot3d dr_libs_interface)
@@ -74,7 +76,6 @@ target_include_directories(WebCFD PRIVATE dr_libs)
 # An equivalent definition is made for the 'imgui' target in cmake/ImGui.cmake.
 target_compile_definitions(WebCFD PUBLIC
         IMGUI_USER_CONFIG="${CMAKE_CURRENT_SOURCE_DIR}/src/ImGuiConfig.h"
-        $<$<CONFIG:Debug>:WEBCFD_DISABLE_IMGUI_PERSISTENCE>
 )
 
 # Update generated C++ to embed WGSL sources.

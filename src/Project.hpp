@@ -5,9 +5,12 @@
 #ifndef WEBCFD_PROJECT_HPP
 #define WEBCFD_PROJECT_HPP
 
+#include <implot3d.h>
+
 #include <memory>
 #include <ranges>
 #include <string_view>
+#include <flat_map>
 
 #include "BidirectionalUnorderedMapping.hpp"
 #include "audio/Sensor.hpp"
@@ -18,8 +21,8 @@ namespace WebCFD
 
 class Project : public Object<Project>
 {
-    std::unordered_map<Signal::id_type, std::unique_ptr<Signal>> signals;
-    std::unordered_map<Sensor::id_type, std::unique_ptr<Sensor>> sensors;
+    std::flat_map<Signal::id_type, std::unique_ptr<Signal>> signals;
+    std::flat_map<Sensor::id_type, std::unique_ptr<Sensor>> sensors;
 
 public:
     /**
@@ -60,12 +63,7 @@ public:
             const Sensor& sensor
     );
 
-    /**
-     * Checks if any Signal objects are owned by the Project.
-     *
-     * @return Are there any Signal objects in residence?
-     */
-    [[nodiscard]] bool are_signals_stored() const noexcept;
+    [[nodiscard]] size_t get_signal_count() const noexcept;
 
     /**
      * Provides a transformed view for stored Signal objects in the Project.
@@ -95,7 +93,7 @@ public:
      *
      * @return Are there any Sensor objects in residence?
      */
-    [[nodiscard]] bool are_sensors_stored() const noexcept;
+    [[nodiscard]] size_t get_sensors_count() const noexcept;
 
     /**
      * Provides a transformed view for stored Sensor objects in the Project.
@@ -116,7 +114,7 @@ public:
      *
      * @return Are there any Signal-Sensor mappings defined?
      */
-    [[nodiscard]] bool are_associations_defined() const noexcept;
+    [[nodiscard]] size_t get_associations_count() const noexcept;
 
     /**
      * Provides a transformed view for defined channel mappings.
@@ -129,6 +127,11 @@ public:
                    return resolve_pair(association.first, association.second);
                });
     }
+
+    [[nodiscard]] static ImPlot3DPoint get_sensor_point(
+            int idx,
+            const void* project_instance
+    ) noexcept;
 
 private:
     /**
