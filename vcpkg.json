@@ -1,0 +1,42 @@
+{
+  "name": "webcfd",
+  "version-date": "2026-07-01",
+  "dependencies": [
+    {
+      "name": "dawn",
+      "version>=": "20260624.223603",
+      "default-features": false,
+      "features": [
+        "wayland",
+        "vulkan"
+      ],
+      "platform": "!emscripten"
+    },
+    {
+      "name": "imgui",
+      "version>=": "1.92.8#1",
+      "default-features": false,
+      "features": [
+        "docking-experimental",
+        "glfw-binding",
+        "webgpu-binding"
+      ]
+    },
+    {
+      "name": "rapidjson",
+      "version>=": "2025-02-26"
+    },
+    {
+      "name": "drlibs",
+      "version>=": "2026-03-03"
+    },
+    {
+      "name": "implot",
+      "version>=": "1.0"
+    },
+    {
+      "name": "implot3d",
+      "version>=": "0.4-oliverdixon"
+    }
+  ]
+}

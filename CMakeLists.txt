@@ -8,23 +8,18 @@ project(WebCFD)
 
 set(CMAKE_CXX_STANDARD 23)
 
-# Dawn, ImGui, ImPlot, and dr_libs submodules configuration
+if(NOT EMSCRIPTEN)
+    find_package(Dawn REQUIRED)
+endif()
 
-set(DAWN_FETCH_DEPENDENCIES ON)
-add_subdirectory(dawn EXCLUDE_FROM_ALL)
-
-include(cmake/ImGui.cmake)
-include(cmake/ImPlot.cmake)
-include(cmake/ImPlot3D.cmake)
+find_package(ImGui REQUIRED)
+find_package(RapidJSON REQUIRED)
+find_package(ImPlot REQUIRED)
+find_package(ImPlot3D REQUIRED)
 
 if(EMSCRIPTEN AND TARGET dawn_glfw)
     target_compile_definitions(dawn_glfw PRIVATE EMSCRIPTEN=1)
 endif()
-
-set(DR_LIBS_NO_MP3 ON CACHE BOOL "Disable dr_mp3")
-set(DR_LIBS_NO_FLAC ON CACHE BOOL "Disable dr_flac")
-set(DR_LIBS_FORCE_CXX ON CACHE BOOL "Enable dr_cxx")
-add_subdirectory(dr_libs EXCLUDE_FROM_ALL)
 
 # WebCFD common configuration
 add_executable(WebCFD
@@ -67,20 +62,24 @@ add_executable(WebCFD
         src/IDAllocator.hpp
         src/panels/ErrorModal.cpp
         src/panels/ErrorModal.hpp
+        src/ProjectFactory.cpp
+        src/ProjectFactory.hpp
 )
 
 target_link_libraries(WebCFD PRIVATE
         webgpu_glfw
         imgui
-        implot
+        ${IMPLOT_LIBRARIES}
         implot3d
-        dr_libs_interface
 )
 
-target_include_directories(WebCFD PRIVATE dr_libs)
+target_include_directories(WebCFD PRIVATE
+        ${IMPLOT_INCLUDE_DIRS}
+        ${DRLIBS_INCLUDE_DIRS}
+        ${RAPIDJSON_INCLUDE_DIRS}
+)
 
 # Broadcast the Dear ImGui configuration file path across all WebCFD compilation units, i.a.w. imgui/imconfig.h advice.
-# An equivalent definition is made for the 'imgui' target in cmake/ImGui.cmake.
 target_compile_definitions(WebCFD PUBLIC
         IMGUI_USER_CONFIG="${CMAKE_CURRENT_SOURCE_DIR}/src/ImGuiConfig.h"
 )

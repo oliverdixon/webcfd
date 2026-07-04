@@ -76,7 +76,7 @@ function(embed_wgsl_directory target_name shader_source_dir)
     file(GLOB_RECURSE wgsl_files CONFIGURE_DEPENDS "${shader_source_dir}/*.wgsl")
 
     if(NOT wgsl_files)
-        message(WARNING "No WGSL shaders found in: ${shader_source_dir}")
+        message(STATUS "No WGSL shaders found in: ${shader_source_dir}")
         return()
     endif()
 

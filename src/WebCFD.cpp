@@ -5,8 +5,8 @@
  * @date 2026-05-05
  */
 
-#include <backends/imgui_impl_glfw.h>
-#include <backends/imgui_impl_wgpu.h>
+#include <imgui_impl_glfw.h>
+#include <imgui_impl_wgpu.h>
 #include <imgui_internal.h>
 #include <implot.h>
 #include <implot3d.h>

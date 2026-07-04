@@ -2,38 +2,74 @@
   "version": 6,
   "configurePresets": [
     {
-      "name": "native-debug",
+      "name": "default",
+      "hidden": true,
       "generator": "Ninja",
-      "binaryDir": "${sourceDir}/cmake-build-native-debug",
+      "cacheVariables": {
+        "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake"
+      }
+    },
+    {
+      "name": "native",
+      "inherits": "default",
+      "cacheVariables": {
+        "VCPKG_TARGET_TRIPLET": "x64-linux"
+      }
+    },
+    {
+      "name": "wasm",
+      "inherits": "default",
+      "cacheVariables": {
+        "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "$env{EMSDK}/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake",
+        "VCPKG_TARGET_TRIPLET": "wasm32-emscripten"
+      }
+    },
+    {
+      "name": "debug",
+      "hidden": true,
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug"
       }
     },
     {
-      "name": "native-release",
-      "generator": "Ninja",
-      "binaryDir": "${sourceDir}/cmake-build-native-release",
+      "name": "release",
+      "hidden": true,
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Release"
       }
     },
+
+    {
+      "name": "native-debug",
+      "inherits": [
+        "native",
+        "debug"
+      ],
+      "binaryDir": "${sourceDir}/cmake-build-native-debug"
+    },
+    {
+      "name": "native-release",
+      "inherits": [
+        "native",
+        "release"
+      ],
+      "binaryDir": "${sourceDir}/cmake-build-native-release"
+    },
     {
       "name": "wasm-debug",
-      "generator": "Ninja",
-      "binaryDir": "${sourceDir}/cmake-build-wasm-debug",
-      "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Debug",
-        "CMAKE_TOOLCHAIN_FILE": "$env{EMSDK}/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake"
-      }
+      "inherits": [
+        "wasm",
+        "debug"
+      ],
+      "binaryDir": "${sourceDir}/cmake-build-wasm-debug"
     },
     {
       "name": "wasm-release",
-      "generator": "Ninja",
-      "binaryDir": "${sourceDir}/cmake-build-wasm-release",
-      "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Release",
-        "CMAKE_TOOLCHAIN_FILE": "$env{EMSDK}/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake"
-      }
+      "inherits": [
+        "wasm",
+        "release"
+      ],
+      "binaryDir": "${sourceDir}/cmake-build-wasm-release"
     }
   ]
 }
