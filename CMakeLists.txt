@@ -97,7 +97,6 @@ if (EMSCRIPTEN)
             LINK_DEPENDS "${web_shell}")
 
     set_target_properties(WebCFD PROPERTIES SUFFIX ".html")
-    target_link_libraries(WebCFD PRIVATE emdawnwebgpu_cpp)
     target_compile_options(WebCFD PRIVATE "-fwasm-exceptions")
     target_link_options(WebCFD PRIVATE
             "-fwasm-exceptions"
