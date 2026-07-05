@@ -125,7 +125,7 @@ private:
      *  violate constexpr requirements. Should this be revised? Probably. Will it be? Probably not.
      * </p>
      */
-    static constexpr std::string class_name = "Untyped Object";
+    static constexpr std::string class_name = "Object";
 
     const id_type id;
     std::size_t copy_count = 0;

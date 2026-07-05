@@ -5,6 +5,8 @@
 #ifndef WEBCFD_MENUPANEL_HPP
 #define WEBCFD_MENUPANEL_HPP
 
+#include <string>
+
 #include "IPanel.hpp"
 
 namespace WebCFD

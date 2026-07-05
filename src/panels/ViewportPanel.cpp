@@ -8,6 +8,7 @@
 #include "ViewportPanel.hpp"
 
 #include <format>
+#include <algorithm>
 
 namespace WebCFD
 {
@@ -112,7 +113,9 @@ void ViewportPanel::draw_sensor_geometry() noexcept
         ImGui::TableSetupColumn("Z Position", ImGuiTableColumnFlags_WidthStretch);
         ImGui::TableHeadersRow();
 
-        for (auto [row_idx, sensor] : std::views::enumerate(active_project->mutate_sensors())) {
+        std::size_t row_idx = 0;
+
+        for (auto& sensor : active_project->mutate_sensors()) {
             ImGui::PushID(sensor.get_id());
 
             ImGui::TableNextRow();
@@ -145,6 +148,8 @@ void ViewportPanel::draw_sensor_geometry() noexcept
             ImGui::InputFloat("##z", &sensor.position.z, 0.01f, 1.0f);
 
             ImGui::PopID();
+
+            ++row_idx;
         }
 
         ImGui::EndTable();
