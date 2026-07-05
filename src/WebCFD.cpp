@@ -15,13 +15,13 @@
 #include <emscripten/emscripten.h>
 #endif
 #include <dawn/webgpu_cpp_print.h>
-#include <webgpu/webgpu_glfw.h>
 
 #include <ranges>
 
 #include "ConfigurationError.hpp"
 #include "Logger.hpp"
 #include "RobotoMedium.hpp"
+#include "SurfaceFactory.hpp"
 #include "WebCFD.hpp"
 
 namespace WebCFD
@@ -44,7 +44,7 @@ WebCFD::WebCFD() :
     viewport_width = static_cast<std::uint32_t>(actual_width);
     viewport_height = static_cast<std::uint32_t>(actual_height);
 
-    surface = wgpu::glfw::CreateSurfaceForWindow(instance, window);
+    surface = SurfaceFactory::create_surface(instance, window);
 
     if (const auto adapter_wait = instance.WaitAny(request_adapter(), operation_timeout);
         adapter_wait != wgpu::WaitStatus::Success || !adapter)
