@@ -8,10 +8,7 @@ project(WebCFD)
 
 set(CMAKE_CXX_STANDARD 23)
 
-if(NOT EMSCRIPTEN)
-    find_package(Dawn REQUIRED)
-endif()
-
+find_package(Dawn CONFIG REQUIRED)
 find_package(ImGui REQUIRED)
 find_package(RapidJSON REQUIRED)
 find_package(ImPlot REQUIRED)
@@ -34,7 +31,6 @@ add_executable(WebCFD
         src/ViewportRenderer.cpp
         src/ViewportRenderer.hpp
         src/RobotoMedium.hpp
-        src/ImGuiConfig.h
         src/Logger.cpp
         src/Logger.hpp
         src/ConfigurationError.cpp
@@ -64,24 +60,14 @@ add_executable(WebCFD
         src/panels/ErrorModal.hpp
         src/ProjectFactory.cpp
         src/ProjectFactory.hpp
+        src/SurfaceFactory.cpp
+        src/SurfaceFactory.hpp
 )
 
 target_link_libraries(WebCFD PRIVATE
-        webgpu_glfw
-        imgui
-        ${IMPLOT_LIBRARIES}
-        implot3d
-)
-
-target_include_directories(WebCFD PRIVATE
-        ${IMPLOT_INCLUDE_DIRS}
-        ${DRLIBS_INCLUDE_DIRS}
-        ${RAPIDJSON_INCLUDE_DIRS}
-)
-
-# Broadcast the Dear ImGui configuration file path across all WebCFD compilation units, i.a.w. imgui/imconfig.h advice.
-target_compile_definitions(WebCFD PUBLIC
-        IMGUI_USER_CONFIG="${CMAKE_CURRENT_SOURCE_DIR}/src/ImGuiConfig.h"
+        imgui::imgui
+        implot::implot
+        implot3d::implot3d
 )
 
 # Update generated C++ to embed WGSL sources.
@@ -146,5 +132,7 @@ if (EMSCRIPTEN)
     add_dependencies(WebCFD WebCFDShellExtra)
 else()
     set(CMAKE_LINKER_TYPE "native_ld")
+    find_package(glfw3 REQUIRED)
+    target_compile_definitions(WebCFD PRIVATE GLFW_EXPOSE_NATIVE_WAYLAND)
     target_link_libraries(WebCFD PRIVATE dawn::webgpu_dawn glfw)
 endif()

@@ -3,14 +3,27 @@
   "version-date": "2026-07-01",
   "dependencies": [
     {
+      "name": "glfw3",
+      "version>=": "3.4#1",
+      "features": [
+        "wayland"
+      ],
+      "platform": "!emscripten"
+    },
+    {
       "name": "dawn",
       "version>=": "20260624.223603",
       "default-features": false,
       "features": [
-        "wayland",
-        "vulkan"
-      ],
-      "platform": "!emscripten"
+        {
+          "name": "wayland",
+          "platform": "!emscripten"
+        },
+        {
+          "name": "vulkan",
+          "platform": "!emscripten"
+        }
+      ]
     },
     {
       "name": "imgui",
