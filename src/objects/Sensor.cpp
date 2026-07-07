@@ -39,4 +39,24 @@ Sensor::Sensor(
 {
 }
 
+void Sensor::set_colour(
+        Colour new_colour
+) noexcept
+{
+    colour = std::move(new_colour);
+}
+
+void Sensor::set_colour(
+        const float r,
+        const float g,
+        const float b,
+        const float a
+) noexcept
+{
+    colour.r = r;
+    colour.g = g;
+    colour.b = b;
+    colour.a = a;
+}
+
 } // namespace WebCFD

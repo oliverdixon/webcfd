@@ -86,7 +86,6 @@ private:
     static constexpr float default_downsample_factor = 50.0f;
     static constexpr auto table_flags = ImGuiTableFlags_SizingStretchProp | ImGuiTableFlags_Borders |
         ImGuiTableFlags_RowBg;
-    static constexpr ImU32 default_sensor_colour = IM_COL32(0.0f, 0.0f, 255.0f, 255.0f);
 
     ImPlotSpec plotting_spec_2d;
     ImPlot3DSpec plotting_spec_3d;

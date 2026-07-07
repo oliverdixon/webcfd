@@ -32,15 +32,14 @@ void ViewportPanel::draw() noexcept
         if (ImGui::BeginTabBar("##ViewportTabBar")) {
             if (active_project != nullptr && active_project->get_sensors_count() != sensor_colours.size()) {
                 // Ensure that we maintain the correct number of colours for the current number of sensors.
-                const auto size_before = sensor_colours.size();
                 sensor_colours.resize(active_project->get_sensors_count());
-
-                // Initialise the new colour entries to the default value.
-                if (size_before == 0)
-                    std::ranges::fill(sensor_colours, default_sensor_colour);
-                else if (size_before < sensor_colours.size())
-                    for (std::size_t tail_idx = size_before - 1; tail_idx < sensor_colours.size(); ++tail_idx)
-                        sensor_colours[tail_idx] = default_sensor_colour;
+                for (auto [src, dst] : std::views::zip(active_project->observe_sensors(), sensor_colours))
+                    dst = IM_COL32(
+                            static_cast<int>(src.colour.r * 255.0f),
+                            static_cast<int>(src.colour.g * 255.0f),
+                            static_cast<int>(src.colour.b * 255.0f),
+                            static_cast<int>(src.colour.a * 255.0f)
+                    );
 
                 // ... and update the plotting specification in case the resize invalidated pointers.
                 plotting_spec_3d.MarkerFillColors = &*sensor_colours.begin();
@@ -123,13 +122,20 @@ void ViewportPanel::draw_sensor_geometry() noexcept
 
             const ImVec4 colour = ImGui::ColorConvertU32ToFloat4(sensor_colours[row_idx]);
             float rgb[4] = {colour.x, colour.y, colour.z, colour.w};
-            if (ImGui::ColorEdit4("##colour", rgb, ImGuiColorEditFlags_NoInputs))
+
+            if (ImGui::ColorEdit4("##colour", rgb, ImGuiColorEditFlags_NoInputs)) {
+                sensor.colour.r = colour.x;
+                sensor.colour.g = colour.y;
+                sensor.colour.b = colour.z;
+                sensor.colour.a = colour.w;
+
                 sensor_colours[row_idx] = IM_COL32(
                         static_cast<int>(rgb[0] * 255.0f),
                         static_cast<int>(rgb[1] * 255.0f),
                         static_cast<int>(rgb[2] * 255.0f),
                         static_cast<int>(rgb[3] * 255.0f)
                 );
+            }
 
             ImGui::TableNextColumn();
             ImGui::SetNextItemWidth(-std::numeric_limits<float>::min());
