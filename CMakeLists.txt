@@ -37,8 +37,8 @@ add_executable(WebCFD
         src/errors/ConfigurationError.hpp
         src/SimulationParameters.hpp
         src/SimulationParameters.cpp
-        src/objects/SignalFactory.cpp
-        src/objects/SignalFactory.hpp
+        src/objects/persistence/SignalFactory.cpp
+        src/objects/persistence/SignalFactory.hpp
         src/web/JSBridge.cpp
         src/web/JSBridge.hpp
         src/objects/Signal.cpp
@@ -65,6 +65,9 @@ add_executable(WebCFD
         src/objects/persistence/JSONSerialiser.cpp
         src/objects/persistence/JSONSerialiser.hpp
         src/objects/persistence/ISerialiser.hpp
+        src/objects/persistence/IDeserialiser.hpp
+        src/objects/persistence/JSONDeserialiser.cpp
+        src/objects/persistence/JSONDeserialiser.hpp
 )
 
 target_link_libraries(WebCFD PRIVATE

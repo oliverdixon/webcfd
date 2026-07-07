@@ -8,6 +8,7 @@
 
 #include "Sensor.hpp"
 #include "persistence/JSONSerialiser.hpp"
+#include "persistence/SignalFactory.hpp"
 
 namespace WebCFD
 {
@@ -41,7 +42,7 @@ Project::Project(
         add_association(signal, sensor);
 
     JSONSerialiser serialiser;
-    std::cout << JSONSerialiser::pretty_print(serialiser.serialise(*this)) << std::endl;
+    std::cout << JSONSerialiser::pretty_print(serialiser.serialise_project(*this)) << std::endl;
 }
 
 const Signal* Project::add_signal(
@@ -83,6 +84,27 @@ void Project::add_association(
                         "Could not associate {} with {}: a component is already mapped.",
                         signal.get_name(),
                         sensor.get_name()
+                )
+        );
+}
+
+void Project::add_association(
+        const Signal::id_type signal_id,
+        const Sensor::id_type sensor_id
+)
+{
+    if (!signals.contains(signal_id))
+        throw std::runtime_error(std::format("Signal with ID {} does not exist in the Project.", signal_id));
+
+    if (!sensors.contains(sensor_id))
+        throw std::runtime_error(std::format("Sensor with ID {} does not exist in the Project.", sensor_id));
+
+    if (!channel_mapping.emplace(signal_id, sensor_id).second)
+        throw std::runtime_error(
+                std::format(
+                        "Could not associate Signal with ID {} to Sensor with ID {}: a component is already mapped.",
+                        signal_id,
+                        sensor_id
                 )
         );
 }

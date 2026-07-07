@@ -14,7 +14,7 @@
 
 #include "BidirectionalUnorderedMapping.hpp"
 #include "Sensor.hpp"
-#include "SignalFactory.hpp"
+#include "Signal.hpp"
 
 namespace WebCFD
 {
@@ -54,13 +54,28 @@ public:
      * @param signal The associated Signal
      * @param sensor The associated Sensor
      *
-     * @throws std::runtime_error The given Signal was not known to the project.
-     * @throws std::runtime_error The given Sensor was not known to the project.
+     * @throws std::runtime_error The given Signal was not known to the Project.
+     * @throws std::runtime_error The given Sensor was not known to the Project.
      * @throws std::runtime_error A component (the Signal or the Sensor) is already mapped.
      */
     void add_association(
             const Signal& signal,
             const Sensor& sensor
+    );
+
+    /**
+     * Creates a new association between a Signal and Sensor.
+     *
+     * @param signal_id The ID of the associated Signal
+     * @param sensor_id The ID of the associated Sensor
+     *
+     * @throws std::runtime_error A Signal with the given ID was not known to the Project.
+     * @throws std::runtime_error A Sensor with the given ID not known to the Project.
+     * @throws std::runtime_error A component (the Signal or the Sensor) is already mapped.
+     */
+    void add_association(
+            Signal::id_type signal_id,
+            Sensor::id_type sensor_id
     );
 
     [[nodiscard]] size_t get_signal_count() const noexcept;
