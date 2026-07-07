@@ -10,9 +10,9 @@ namespace WebCFD
 {
 
 ProjectPanel::ProjectPanel(
-        Project * const project
+        Project * const initial_project
 ) :
-    active_project(project)
+    active_project(initial_project)
 {
 }
 

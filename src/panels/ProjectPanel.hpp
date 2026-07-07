@@ -14,7 +14,7 @@ namespace WebCFD
 class ProjectPanel final : public IPanel
 {
 public:
-    explicit ProjectPanel(Project * project);
+    explicit ProjectPanel(Project * initial_project = nullptr);
 
     void draw() noexcept override;
 

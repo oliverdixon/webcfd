@@ -68,6 +68,8 @@ add_executable(WebCFD
         src/objects/persistence/IDeserialiser.hpp
         src/objects/persistence/JSONDeserialiser.cpp
         src/objects/persistence/JSONDeserialiser.hpp
+        src/panels/SignalWaveformPanel.cpp
+        src/panels/SignalWaveformPanel.hpp
 )
 
 target_link_libraries(WebCFD PRIVATE
