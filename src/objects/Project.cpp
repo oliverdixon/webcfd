@@ -7,6 +7,7 @@
 #include <format>
 
 #include "Sensor.hpp"
+#include "persistence/JSONSerialiser.hpp"
 
 namespace WebCFD
 {
@@ -34,9 +35,13 @@ Project::Project(
 
         assert(loaded_signals.back());
         assert(loaded_sensors.back());
-
-        add_association(*loaded_signals.back(), *loaded_sensors.back());
     }
+
+    for (auto [signal, sensor] : std::views::zip(observe_signals(), std::views::reverse(observe_sensors())))
+        add_association(signal, sensor);
+
+    JSONSerialiser serialiser;
+    std::cout << JSONSerialiser::pretty_print(serialiser.serialise(*this)) << std::endl;
 }
 
 const Signal* Project::add_signal(

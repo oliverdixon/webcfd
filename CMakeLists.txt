@@ -62,6 +62,9 @@ add_executable(WebCFD
         src/SurfaceFactory.hpp
         src/errors/LocatableError.cpp
         src/errors/LocatableError.hpp
+        src/objects/persistence/JSONSerialiser.cpp
+        src/objects/persistence/JSONSerialiser.hpp
+        src/objects/persistence/ISerialiser.hpp
 )
 
 target_link_libraries(WebCFD PRIVATE
