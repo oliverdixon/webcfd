@@ -24,17 +24,11 @@ add_executable(EchoMap
         src/EchoMap.hpp
         src/App.cpp
         src/panels/IPanel.hpp
-        src/RenderPanel.cpp
-        src/RenderPanel.hpp
-        src/ViewportRenderer.cpp
-        src/ViewportRenderer.hpp
         src/RobotoMedium.hpp
         src/Logger.cpp
         src/Logger.hpp
         src/errors/ConfigurationError.cpp
         src/errors/ConfigurationError.hpp
-        src/SimulationParameters.hpp
-        src/SimulationParameters.cpp
         src/objects/persistence/SignalFactory.cpp
         src/objects/persistence/SignalFactory.hpp
         src/web/JSBridge.cpp
