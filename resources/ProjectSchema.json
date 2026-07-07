@@ -9,7 +9,13 @@
     "sensors",
     "mappings"
   ],
+
   "properties": {
+    "schema_version": {
+      "type": "integer",
+      "const": 1
+    },
+
     "metadata": {
       "type": "object",
       "additionalProperties": false,
@@ -34,10 +40,6 @@
         "modified_at": {
           "type": "string",
           "format": "date-time"
-        },
-        "schema_version": {
-          "type": "string",
-          "default": "1.0.0"
         }
       }
     },
