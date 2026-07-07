@@ -9,8 +9,12 @@
 namespace simdjson
 {
 
-template<typename builder_type>
-void tag_invoke(serialize_tag, builder_type& builder, const WebCFD::Project& project)
+template <typename builder_type>
+void tag_invoke(
+        serialize_tag,
+        builder_type& builder,
+        const WebCFD::Project& project
+)
 {
     static constexpr unsigned int schema_version = 1;
     bool first_element = true;
@@ -23,11 +27,7 @@ void tag_invoke(serialize_tag, builder_type& builder, const WebCFD::Project& pro
     builder.escape_and_append_with_quotes("metadata");
     builder.append_colon();
     builder.start_object();
-    builder.append_key_value("id", project.get_id());
-    builder.append_comma();
     builder.append_key_value("name", project.get_name());
-    builder.append_comma();
-    builder.append_key_value("description", "UNDETERMINED");
     builder.end_object();
     builder.append_comma();
 
@@ -70,9 +70,9 @@ void tag_invoke(serialize_tag, builder_type& builder, const WebCFD::Project& pro
             builder.append_comma();
 
         builder.start_object();
-        builder.append_key_value("sensor_id", sensor.get_id());
+        builder.append_key_value("sensor", sensor.get_name());
         builder.append_comma();
-        builder.append_key_value("signal_id", signal.get_id());
+        builder.append_key_value("signal", signal.get_name());
         builder.end_object();
 
         first_element = false;
@@ -82,14 +82,16 @@ void tag_invoke(serialize_tag, builder_type& builder, const WebCFD::Project& pro
     builder.end_object();
 }
 
-template<typename builder_type>
-void tag_invoke(serialize_tag, builder_type& builder, const WebCFD::Sensor& sensor)
+template <typename builder_type>
+void tag_invoke(
+        serialize_tag,
+        builder_type& builder,
+        const WebCFD::Sensor& sensor
+)
 {
     builder.start_object();
 
     // Sensor Metadata
-    builder.append_key_value("id", sensor.get_id());
-    builder.append_comma();
     builder.append_key_value("name", sensor.get_name());
     builder.append_comma();
 
@@ -121,14 +123,16 @@ void tag_invoke(serialize_tag, builder_type& builder, const WebCFD::Sensor& sens
     builder.end_object();
 }
 
-template<typename builder_type>
-void tag_invoke(serialize_tag, builder_type& builder, const WebCFD::Signal& signal)
+template <typename builder_type>
+void tag_invoke(
+        serialize_tag,
+        builder_type& builder,
+        const WebCFD::Signal& signal
+)
 {
     builder.start_object();
 
     // Signal Metadata
-    builder.append_key_value("id", signal.get_id());
-    builder.append_comma();
     builder.append_key_value("name", signal.get_name());
     builder.append_comma();
 
@@ -177,12 +181,12 @@ void tag_invoke(serialize_tag, builder_type& builder, const WebCFD::Signal& sign
     builder.end_object();
 }
 
-}
+} // namespace simdjson
 
 namespace WebCFD
 {
 
-std::string_view JSONSerialiser::serialise(
+std::string_view JSONSerialiser::serialise_project(
         const Project& project
 )
 {
@@ -191,7 +195,7 @@ std::string_view JSONSerialiser::serialise(
     return sb.view();
 }
 
-std::string_view JSONSerialiser::serialise(
+std::string_view JSONSerialiser::serialise_signal(
         const Signal& signal
 )
 {
@@ -200,7 +204,7 @@ std::string_view JSONSerialiser::serialise(
     return sb.view();
 }
 
-std::string_view JSONSerialiser::serialise(
+std::string_view JSONSerialiser::serialise_sensor(
         const Sensor& sensor
 )
 {

@@ -1,12 +1,10 @@
 {
   "schema_version": 1,
   "metadata": {
-    "id": 0,
     "name": "Project 0"
   },
   "signals": [
     {
-      "id": 0,
       "name": "4channel#1",
       "source": {
         "kind": "filesystem",
@@ -15,7 +13,6 @@
       }
     },
     {
-      "id": 1,
       "name": "4channel#2",
       "source": {
         "kind": "filesystem",
@@ -24,7 +21,6 @@
       }
     },
     {
-      "id": 2,
       "name": "4channel#3",
       "source": {
         "kind": "filesystem",
@@ -33,7 +29,6 @@
       }
     },
     {
-      "id": 3,
       "name": "4channel#4",
       "source": {
         "kind": "filesystem",
@@ -50,7 +45,6 @@
         "b": 0.0,
         "a": 1.0
       },
-      "id": 0,
       "name": "Sensor 0",
       "position": {
         "x": 0.0,
@@ -65,7 +59,6 @@
         "b": 0.0,
         "a": 1.0
       },
-      "id": 1,
       "name": "Sensor 1",
       "position": {
         "x": 0.0,
@@ -80,7 +73,6 @@
         "b": 0.0,
         "a": 1.0
       },
-      "id": 2,
       "name": "Sensor 2",
       "position": {
         "x": 0.0,
@@ -95,7 +87,6 @@
         "b": 0.0,
         "a": 1.0
       },
-      "id": 3,
       "name": "Sensor 3",
       "position": {
         "x": 0.0,
@@ -106,20 +97,20 @@
   ],
   "mappings": [
     {
-      "sensor_id": 3,
-      "signal_id": 3
+      "sensor": "4channel#4",
+      "signal": "Sensor 0"
     },
     {
-      "sensor_id": 2,
-      "signal_id": 2
+      "sensor": "4channel#3",
+      "signal": "Sensor 1"
     },
     {
-      "sensor_id": 1,
-      "signal_id": 1
+      "sensor": "4channel#2",
+      "signal": "Sensor 2"
     },
     {
-      "sensor_id": 0,
-      "signal_id": 0
+      "sensor": "4channel#1",
+      "signal": "Sensor 3"
     }
   ]
 }

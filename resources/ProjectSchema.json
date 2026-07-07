@@ -19,13 +19,9 @@
       "type": "object",
       "additionalProperties": false,
       "required": [
-        "id",
         "name"
       ],
       "properties": {
-        "id": {
-          "$ref": "#/$defs/id"
-        },
         "name": {
           "type": "string",
           "minLength": 1
@@ -69,21 +65,14 @@
     }
   },
   "$defs": {
-    "id": {
-      "type": "integer"
-    },
     "signal": {
       "type": "object",
       "additionalProperties": false,
       "required": [
-        "id",
         "name",
         "source"
       ],
       "properties": {
-        "id": {
-          "$ref": "#/$defs/id"
-        },
         "name": {
           "type": "string",
           "minLength": 1
@@ -167,15 +156,11 @@
       "type": "object",
       "additionalProperties": false,
       "required": [
-        "id",
         "name",
         "position",
         "colour"
       ],
       "properties": {
-        "id": {
-          "$ref": "#/$defs/id"
-        },
         "name": {
           "type": "string",
           "minLength": 1
@@ -244,15 +229,17 @@
       "type": "object",
       "additionalProperties": false,
       "required": [
-        "sensor_id",
-        "signal_id"
+        "signal",
+        "sensor"
       ],
       "properties": {
-        "sensor_id": {
-          "$ref": "#/$defs/id"
+        "signal": {
+          "type": "string",
+          "minLength": 1
         },
-        "signal_id": {
-          "$ref": "#/$defs/id"
+        "sensor": {
+          "type": "string",
+          "minLength": 1
         }
       }
     }
