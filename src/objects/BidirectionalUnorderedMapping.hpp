@@ -98,37 +98,47 @@ public:
     /**
      * Emplaces an entry to the mapping.
      *
-     * @tparam Args Forwarded argument types of the constructed entry.
-     * @param args Forwarded arguments for the entry constructor.
+     * @tparam KeyT Type of the forward key
+     * @tparam ValueT Type of the forward value
+     * @param key Key from the forward perspective
+     * @param value Value from the forward perspective
      * @return
      *  <ol>
      *      <li>Constant iterator to the inserted element, or the end iterator if the insertion failed.</li>
      *      <li>Did an insertion take place?</li>
      *  </ol>
      */
-    template <class... Args>
+    template <
+            typename KeyT,
+            typename ValueT>
     std::pair<
             const_iterator,
             bool>
     emplace(
-            Args&&... args
+            KeyT&& key,
+            ValueT&& value
     )
     {
-        auto forward_insertion = forward_map.emplace(std::forward<Args>(args)...);
-        auto reverse_insertion = reverse_map.emplace(std::forward<Args>(args)...);
-
+        auto forward_insertion = forward_map.emplace(std::forward<KeyT>(key), std::forward<ValueT>(value));
         if (!forward_insertion.second)
-            // Something in the forward map prevented insertion. We can expose its iterator.
-            return forward_insertion;
+            return {forward_insertion.first, false};
 
-        if (!reverse_insertion.second)
-            // Something in the reverse map prevented insertion. We can't expose its iterator.
-            return {forward_map.end(), false};
+        try {
+            const auto& inserted_key = forward_insertion.first->first;
+            // ReSharper disable once CppTooWideScopeInitStatement - Intentionally wide for readability.
+            const auto& inserted_value = forward_insertion.first->second;
+
+            if (!reverse_map.emplace(inserted_value, inserted_key).second) {
+                forward_map.erase(forward_insertion.first);
+                return {forward_map.end(), false};
+            }
+        } catch (...) {
+            forward_map.erase(forward_insertion.first);
+            throw;
+        }
 
         assert(forward_map.size() == reverse_map.size());
-
-        // Insertion was successful. We can expose the inserted element iterator in the forward map.
-        return forward_insertion;
+        return {forward_insertion.first, true};
     }
 
     /**
