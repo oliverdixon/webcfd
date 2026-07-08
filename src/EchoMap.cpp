@@ -22,11 +22,22 @@
 #include "SurfaceFactory.hpp"
 #include "EchoMap.hpp"
 #include "errors/ConfigurationError.hpp"
+#include "objects/Project.hpp"
+#include "panels/ChannelMappingPanel.hpp"
+#include "panels/MenuPanel.hpp"
+#include "panels/ProjectPanel.hpp"
+#include "panels/SensorGeometryPanel.hpp"
+#include "panels/SignalWaveformPanel.hpp"
 
 namespace EchoMap
 {
 
 EchoMap::EchoMap() :
+    menu_panel(std::make_unique<MenuPanel>()),
+    project_panel(std::make_unique<ProjectPanel>()),
+    signal_waveform_panel(std::make_unique<SignalWaveformPanel>()),
+    sensor_geometry_panel(std::make_unique<SensorGeometryPanel>()),
+    channel_mapping_panel(std::make_unique<ChannelMappingPanel>()),
     dockspace_id(ImHashStr("MainDockSpace"))
 {
     static constexpr auto timed_wait_any = wgpu::InstanceFeatureName::TimedWaitAny;

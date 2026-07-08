@@ -12,15 +12,16 @@
 #include <imgui.h>
 #include <webgpu/webgpu_cpp.h>
 
-#include "objects/Project.hpp"
-#include "panels/ChannelMappingPanel.hpp"
-#include "panels/MenuPanel.hpp"
-#include "panels/ProjectPanel.hpp"
-#include "panels/SensorGeometryPanel.hpp"
-#include "panels/SignalWaveformPanel.hpp"
-
 namespace EchoMap
 {
+
+class Project;
+
+class ChannelMappingPanel;
+class MenuPanel;
+class ProjectPanel;
+class SensorGeometryPanel;
+class SignalWaveformPanel;
 
 /**
  * The EchoMap maintains state for the application including WebGPU and Dear ImGui context, encapsulating initialisation,
@@ -167,11 +168,11 @@ private:
 
     std::unique_ptr<Project> project;
 
-    std::unique_ptr<MenuPanel> menu_panel = std::make_unique<MenuPanel>();
-    std::unique_ptr<ProjectPanel> project_panel = std::make_unique<ProjectPanel>();
-    std::unique_ptr<SignalWaveformPanel> signal_waveform_panel = std::make_unique<SignalWaveformPanel>();
-    std::unique_ptr<SensorGeometryPanel> sensor_geometry_panel = std::make_unique<SensorGeometryPanel>();
-    std::unique_ptr<ChannelMappingPanel> channel_mapping_panel = std::make_unique<ChannelMappingPanel>();
+    std::unique_ptr<MenuPanel> menu_panel;
+    std::unique_ptr<ProjectPanel> project_panel;
+    std::unique_ptr<SignalWaveformPanel> signal_waveform_panel;
+    std::unique_ptr<SensorGeometryPanel> sensor_geometry_panel;
+    std::unique_ptr<ChannelMappingPanel> channel_mapping_panel;
 
     ImGuiID dockspace_id;
     bool dockspace_configured = false;
