@@ -252,6 +252,8 @@ auto tag_invoke(
         return error;
 
     if (kind == "filesystem") {
+        // Signals sourced from the file system are not loaded by the parser; we just populate the source information.
+
         std::string_view path;
         if ((error = source["path"].get(path)))
             return error;
@@ -261,29 +263,53 @@ auto tag_invoke(
             return error;
 
         signal.set_source(path, channel_num);
-    } else if (kind == "embedded") {
+    } else if (kind == "embeddedUniform" || kind == "embeddedVariable") {
+        /*
+         * Embedded signals (uniformly and variably sampled) are constructed by the parser. Both types share timing
+         * metadata.
+         */
+
+        ondemand::object timing;
+        if ((error = source["timing"].get_object().get(timing)))
+            return error;
+
         std::size_t reported_sample_count;
-        if ((error = source["sample_count"].get(reported_sample_count)))
+        if ((error = timing["sample_count"].get(reported_sample_count)))
             return error;
 
         std::size_t sample_rate;
-        if ((error = source["sample_rate"].get(sample_rate)))
+        if ((error = timing["sample_rate"].get(sample_rate)))
             return error;
+        signal.set_sample_rate(sample_rate);
 
         float time_offset;
-        if ((error = source["time_offset"].get(time_offset)))
+        if ((error = timing["time_offset"].get(time_offset)))
             return error;
+        signal.set_time_offset(time_offset);
 
         ondemand::array samples;
         if ((error = source["samples"].get_array().get(samples)))
             return error;
 
-        for (auto sample_wrapper : samples) {
-            float amplitude;
-            if ((error = sample_wrapper.get(amplitude)))
-                return error;
-            signal.emplace_sample(amplitude);
-        }
+        if (kind == "embeddedUniform")
+            for (auto sample_wrapper : samples) {
+                float amplitude;
+                if ((error = sample_wrapper.get(amplitude)))
+                    return error;
+                signal.emplace_sample(amplitude);
+            }
+        else
+            for (auto sample_wrapper : samples) {
+                ondemand::object sample_obj;
+                if ((error = sample_wrapper.get_object().get(sample_obj)))
+                    return error;
+                EchoMap::Signal::Sample sample_data; // NOLINT(*-pro-type-member-init) - Immediately initialised.
+                if ((error = sample_obj["time"].get(sample_data.time)))
+                    return error;
+                if ((error = sample_obj["amplitude"].get(sample_data.amplitude)))
+                    return error;
+                signal.emplace_sample(sample_data.time, sample_data.amplitude);
+            }
 
         if (reported_sample_count != signal.get_sample_count())
             throw std::runtime_error(

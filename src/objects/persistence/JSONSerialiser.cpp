@@ -153,28 +153,47 @@ void tag_invoke(
 
     // ... for embedded or dirty sources, append samples in situ.
     else {
-        if (!signal.is_uniformly_sampled())
-            // TODO
-            throw std::runtime_error("Cannot currently serialise embedded variably sampled signals.");
-
-        builder.append_key_value("kind", "embedded");
+        builder.append_key_value("kind", signal.is_uniformly_sampled() ? "embeddedUniform" : "embeddedVariable");
         builder.append_comma();
+
+        builder.escape_and_append_with_quotes("timing");
+        builder.append_colon();
+        builder.start_object();
         builder.append_key_value("time_offset", signal.get_time_offset());
         builder.append_comma();
         builder.append_key_value("sample_rate", signal.get_sample_rate());
         builder.append_comma();
         builder.append_key_value("sample_count", signal.get_sample_count());
+        builder.end_object();
+
         builder.append_comma();
         builder.escape_and_append_with_quotes("samples");
+        builder.append_colon();
         builder.start_array();
 
         bool first_element = true;
-        for (const auto sample : signal) {
-            if (!first_element)
+
+        if (signal.is_uniformly_sampled())
+            for (const auto sample : signal) {
+                if (!first_element)
+                    builder.append_comma();
+
+                builder.append(sample);
+                first_element = false;
+            }
+        else
+            for (const auto sample : signal.timed_samples()) {
+                if (!first_element)
+                    builder.append_comma();
+
+                builder.start_object();
+                builder.append_key_value("time", sample.time);
                 builder.append_comma();
-            builder.append(sample);
-            first_element = false;
-        }
+                builder.append_key_value("amplitude", sample.amplitude);
+                builder.end_object();
+
+                first_element = false;
+            }
 
         builder.end_array();
     }
@@ -194,7 +213,7 @@ std::string_view JSONSerialiser::serialise_project(
 {
     sb.clear();
     sb.append(project);
-    return sb.view();
+    return sb.view(); // NOLINT(*-return-braced-init-list) - Warning comes from inlined library code.
 }
 
 std::string JSONSerialiser::pretty_print(

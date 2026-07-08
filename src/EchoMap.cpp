@@ -12,6 +12,7 @@
 #include <implot3d.h>
 
 #include "objects/persistence/JSONDeserialiser.hpp"
+#include "objects/persistence/JSONSerialiser.hpp"
 
 #ifdef __EMSCRIPTEN__
 #include <emscripten/emscripten.h>
@@ -72,6 +73,10 @@ EchoMap::EchoMap() :
     // TODO remove: loading sample project for testing.
     JSONDeserialiser deserialiser;
     project = deserialiser.deserialise_project("../resources/ExampleProject.json");
+
+    // TODO remove: saving sample project for testing.
+    JSONSerialiser serialiser;
+    std::cout << JSONSerialiser::pretty_print(serialiser.serialise_project(*project)) << std::endl;
 
     project_panel->set_active_project(project.get());
     signal_waveform_panel->set_active_project(project.get());

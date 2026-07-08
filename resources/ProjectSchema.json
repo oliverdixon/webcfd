@@ -80,7 +80,10 @@
         "source": {
           "oneOf": [
             {
-              "$ref": "#/$defs/embedded"
+              "$ref": "#/$defs/embeddedUniform"
+            },
+            {
+              "$ref": "#/$defs/embeddedVariable"
             },
             {
               "$ref": "#/$defs/filesystem"
@@ -89,36 +92,61 @@
         }
       }
     },
-    "embedded": {
+    "embeddedUniform": {
       "type": "object",
       "additionalProperties": false,
       "required": [
         "kind",
-        "time_offset",
-        "sample_rate",
-        "sample_count",
+        "timing",
         "samples"
       ],
       "properties": {
         "kind": {
-          "const": "embedded"
+          "const": "embeddedUniform"
         },
-        "time_offset": {
-          "type": "number",
-          "minimum": 0
-        },
-        "sample_rate": {
-          "type": "number",
-          "exclusiveMinimum": 0
-        },
-        "sample_count": {
-          "type": "number",
-          "minimum": 0
+        "timing": {
+          "$ref": "#/$defs/timing"
         },
         "samples": {
           "type": "array",
           "items": {
             "type": "number"
+          }
+        }
+      }
+    },
+    "embeddedVariable": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "timing",
+        "samples"
+      ],
+      "properties": {
+        "kind": {
+          "const": "embeddedVariable"
+        },
+        "timing": {
+          "$ref": "#/$defs/timing"
+        },
+        "samples": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "time",
+              "amplitude"
+            ],
+            "properties": {
+              "time": {
+                "type": "number"
+              },
+              "amplitude": {
+                "type": "number"
+              }
+            }
           }
         }
       }
@@ -163,6 +191,28 @@
         },
         "colour": {
           "$ref": "#/$defs/rgba"
+        }
+      }
+    },
+    "timing": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sample_rate",
+        "sample_count",
+        "time_offset"
+      ],
+      "properties": {
+        "sample_rate": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "sample_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "time_offset": {
+          "type": "number"
         }
       }
     },
