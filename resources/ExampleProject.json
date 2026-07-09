@@ -8,7 +8,7 @@
       "name": "4channel#1",
       "source": {
         "kind": "filesystem",
-        "path": "/home/owd/Documents/echomap/cmake-build-debug-native/../audio/4channel.wav",
+        "path": "/home/owd/Documents/echomap/cmake-build-native-debug/../audio/4channel.wav",
         "channel": 1
       }
     },
@@ -16,7 +16,7 @@
       "name": "4channel#2",
       "source": {
         "kind": "filesystem",
-        "path": "/home/owd/Documents/echomap/cmake-build-debug-native/../audio/4channel.wav",
+        "path": "/home/owd/Documents/echomap/cmake-build-native-debug/../audio/4channel.wav",
         "channel": 2
       }
     },
@@ -24,7 +24,7 @@
       "name": "4channel#3",
       "source": {
         "kind": "filesystem",
-        "path": "/home/owd/Documents/echomap/cmake-build-debug-native/../audio/4channel.wav",
+        "path": "/home/owd/Documents/echomap/cmake-build-native-debug/../audio/4channel.wav",
         "channel": 3
       }
     },
@@ -32,7 +32,7 @@
       "name": "4channel#4",
       "source": {
         "kind": "filesystem",
-        "path": "/home/owd/Documents/echomap/cmake-build-debug-native/../audio/4channel.wav",
+        "path": "/home/owd/Documents/echomap/cmake-build-native-debug/../audio/4channel.wav",
         "channel": 4
       }
     },
