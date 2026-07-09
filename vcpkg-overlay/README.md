@@ -18,3 +18,7 @@ tagged release.
 ## implot3d
 
 Required to pull the [oliverdixon/implot3d](https://github.com/oliverdixon/implot3d) fork containing unmerged features.
+
+## simdjson
+
+Required to build the library with `-pthread` flags for Emscripten.

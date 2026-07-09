@@ -37,10 +37,7 @@
     },
     {
       "name": "simdjson",
-      "version>=": "4.6.4",
-      "features": [
-        "exceptions"
-      ]
+      "version>=": "4.6.4"
     },
     {
       "name": "drlibs",

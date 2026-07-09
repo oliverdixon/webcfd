@@ -109,7 +109,12 @@ if (EMSCRIPTEN)
             LINK_DEPENDS "${web_shell}")
 
     set_target_properties(EchoMap PROPERTIES SUFFIX ".html")
-    target_compile_options(EchoMap PRIVATE "-fwasm-exceptions")
+
+    target_compile_options(EchoMap PRIVATE
+            "-fwasm-exceptions"
+            "-pthread"
+    )
+
     target_link_options(EchoMap PRIVATE
             "-fwasm-exceptions"
             "-sJSPI"
@@ -117,6 +122,9 @@ if (EMSCRIPTEN)
             "-sFORCE_FILESYSTEM=1"
             "-sEXPORTED_FUNCTIONS=['_main','_echomap_on_wav_file_picked']"
             "-sEXPORTED_RUNTIME_METHODS=['FS','ccall']"
+            "-pthread"
+            "-sPTHREAD_POOL_SIZE=navigator.hardwareConcurrency"
+            "-sPROXY_TO_PTHREAD=1"
             "--shell-file=${web_shell}"
             $<$<CONFIG:Debug,RelWithDebInfo>:--profiling-funcs>
     )
