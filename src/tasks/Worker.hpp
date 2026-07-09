@@ -5,6 +5,7 @@
 #ifndef ECHOMAP_WORKER_HPP
 #define ECHOMAP_WORKER_HPP
 
+#include <functional>
 #include <thread>
 
 #include "IResult.hpp"
@@ -17,7 +18,12 @@ namespace echomap
 class Worker
 {
 public:
-    Worker();
+    /**
+     * Callable target to invoke when a new result is produced.
+     */
+    using WakeCallback = std::function<void()>;
+
+    explicit Worker(WakeCallback wake_callback = {});
 
     void submit(std::unique_ptr<ITask>&& task);
 
@@ -29,6 +35,7 @@ private:
     ThreadSafeQueue<std::unique_ptr<ITask>> task_queue;
     ThreadSafeQueue<std::unique_ptr<IResult>> result_queue;
 
+    WakeCallback wake_callback;
     std::jthread thread;
 };
 

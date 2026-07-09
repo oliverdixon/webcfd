@@ -4,6 +4,8 @@
 
 #include "LocatableError.hpp"
 
+#include <string>
+
 namespace echomap
 {
 

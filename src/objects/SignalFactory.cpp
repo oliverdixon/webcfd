@@ -214,7 +214,7 @@ std::unique_ptr<Signal> SignalFactory::lttb_downsample(
 
         const auto average_range_start = static_cast<std::size_t>(std::floor((i + 1) * bucket_size)) + 1;
         const auto average_range_end =
-                std::min(static_cast<std::size_t>(std::floor((i + 2) * bucket_size)) + 1, source_size);
+                std::min(static_cast<std::uint64_t>(std::floor((i + 2) * bucket_size)) + 1, source_size);
         const auto average_range_length = average_range_end - average_range_start;
 
         for (auto range_idx = average_range_start; range_idx < average_range_end; ++range_idx) {
@@ -232,7 +232,7 @@ std::unique_ptr<Signal> SignalFactory::lttb_downsample(
         // Get the range for the current bucket and compute triangle areas over the three buckets.
         const auto range_lower = static_cast<std::size_t>(std::floor(i * bucket_size)) + 1;
         const auto range_upper =
-                std::min(static_cast<std::size_t>(std::floor((i + 1) * bucket_size)) + 1, source_size - 1);
+                std::min(static_cast<std::uint64_t>(std::floor((i + 1) * bucket_size)) + 1, source_size - 1);
 
         // (C++ note: we need to combine Sample::TimeT and Sample::AmplitudeT here, so float seems like a safe choice.)
         auto max_area = std::numeric_limits<float>::lowest();

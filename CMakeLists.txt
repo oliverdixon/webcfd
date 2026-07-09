@@ -66,13 +66,15 @@ add_executable(EchoMap
         src/panels/ChannelMappingPanel.hpp
         src/tasks/ThreadSafeQueue.hpp
         src/tasks/ITask.hpp
-        src/tasks/LoadWaveFileTask.cpp
-        src/tasks/LoadWaveFileTask.hpp
+        src/tasks/LoadProjectTask.cpp
+        src/tasks/LoadProjectTask.hpp
         src/tasks/Worker.cpp
         src/tasks/Worker.hpp
         src/tasks/IResult.hpp
         src/tasks/ErrorResult.cpp
         src/tasks/ErrorResult.hpp
+        src/tasks/LoadProjectResult.cpp
+        src/tasks/LoadProjectResult.hpp
 )
 
 target_link_libraries(EchoMap PRIVATE
@@ -124,7 +126,6 @@ if (EMSCRIPTEN)
             "-sEXPORTED_RUNTIME_METHODS=['FS','ccall']"
             "-pthread"
             "-sPTHREAD_POOL_SIZE=navigator.hardwareConcurrency"
-            "-sPROXY_TO_PTHREAD=1"
             "--shell-file=${web_shell}"
             $<$<CONFIG:Debug,RelWithDebInfo>:--profiling-funcs>
     )

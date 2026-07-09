@@ -8,14 +8,14 @@
 namespace echomap
 {
 
-class Project;
+class EchoMap;
 
 class IResult
 {
 public:
     virtual ~IResult() = default;
 
-    virtual void apply(Project& project) = 0;
+    virtual void apply(EchoMap& app) = 0;
 };
 
 } // namespace echomap

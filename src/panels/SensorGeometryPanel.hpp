@@ -10,6 +10,8 @@
 
 #include <implot3d.h>
 
+#include <string>
+
 #include "IPanel.hpp"
 
 namespace echomap

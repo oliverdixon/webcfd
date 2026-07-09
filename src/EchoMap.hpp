@@ -12,16 +12,13 @@
 #include <imgui.h>
 #include <webgpu/webgpu_cpp.h>
 
+#include "tasks/Worker.hpp"
+
 namespace echomap
 {
 
+class IPanel;
 class Project;
-
-class ChannelMappingPanel;
-class MenuPanel;
-class ProjectPanel;
-class SensorGeometryPanel;
-class SignalWaveformPanel;
 
 /**
  * The EchoMap maintains state for the application including WebGPU and Dear ImGui context, encapsulating initialisation,
@@ -60,6 +57,9 @@ public:
      * @param path Path of the new wave file on the file system.
      */
     void update_wav_file(const char* path);
+
+    [[nodiscard]] std::unique_ptr<Project> take_project(bool update_ui) noexcept;
+    void put_project(std::unique_ptr<Project> new_project) noexcept;
 
 private:
     static constexpr auto operation_timeout = std::numeric_limits<std::uint64_t>::max();
@@ -139,6 +139,10 @@ private:
      */
     bool handle_window_resize() noexcept;
 
+    void process_worker_results();
+
+    void update_panel_project() const;
+
 #ifdef __EMSCRIPTEN__
 
     // ReSharper disable once CppParameterMayBeConstPtrOrRef - Function signature enforced by Emscripten API.
@@ -167,12 +171,9 @@ private:
     GLFWwindow* window = nullptr;
 
     std::unique_ptr<Project> project;
+    std::vector<std::unique_ptr<IPanel>> panels;
 
-    std::unique_ptr<MenuPanel> menu_panel;
-    std::unique_ptr<ProjectPanel> project_panel;
-    std::unique_ptr<SignalWaveformPanel> signal_waveform_panel;
-    std::unique_ptr<SensorGeometryPanel> sensor_geometry_panel;
-    std::unique_ptr<ChannelMappingPanel> channel_mapping_panel;
+    Worker worker;
 
     ImGuiID dockspace_id;
     bool dockspace_configured = false;

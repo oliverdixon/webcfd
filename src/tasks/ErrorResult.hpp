@@ -18,7 +18,7 @@ class ErrorResult : public IResult
 public:
     explicit ErrorResult(std::string_view message);
 
-    void apply(Project& project) override;
+    void apply(EchoMap& app) override;
 
 private:
     std::string message;

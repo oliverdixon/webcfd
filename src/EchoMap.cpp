@@ -11,17 +11,16 @@
 #include <implot.h>
 #include <implot3d.h>
 
-#include "objects/persistence/JSONDeserialiser.hpp"
-#include "objects/persistence/JSONSerialiser.hpp"
+#include "tasks/LoadProjectTask.hpp"
 
 #ifdef __EMSCRIPTEN__
 #include <emscripten/emscripten.h>
 #endif
 
+#include "EchoMap.hpp"
 #include "Logger.hpp"
 #include "RobotoMedium.hpp"
 #include "SurfaceFactory.hpp"
-#include "EchoMap.hpp"
 #include "errors/ConfigurationError.hpp"
 #include "objects/Project.hpp"
 #include "panels/ChannelMappingPanel.hpp"
@@ -30,15 +29,19 @@
 #include "panels/SensorGeometryPanel.hpp"
 #include "panels/SignalWaveformPanel.hpp"
 
+#if defined(__EMSCRIPTEN__) and !defined(__EMSCRIPTEN_PTHREADS__)
+#warning "The Emscripten application will be single-threaded."
+#endif
+
 namespace echomap
 {
 
 EchoMap::EchoMap() :
-    menu_panel(std::make_unique<MenuPanel>()),
-    project_panel(std::make_unique<ProjectPanel>()),
-    signal_waveform_panel(std::make_unique<SignalWaveformPanel>()),
-    sensor_geometry_panel(std::make_unique<SensorGeometryPanel>()),
-    channel_mapping_panel(std::make_unique<ChannelMappingPanel>()),
+    worker{[] {
+#ifndef __EMSCRIPTEN__
+        glfwPostEmptyEvent();
+#endif
+    }},
     dockspace_id(ImHashStr("MainDockSpace"))
 {
     static constexpr auto timed_wait_any = wgpu::InstanceFeatureName::TimedWaitAny;
@@ -70,18 +73,14 @@ EchoMap::EchoMap() :
 
     setup_imgui();
 
-    // TODO remove: loading sample project for testing.
-    JSONDeserialiser deserialiser;
-    project = deserialiser.deserialise_project("../resources/ExampleProject.json");
+    panels.push_back(std::make_unique<MenuPanel>());
+    panels.push_back(std::make_unique<ProjectPanel>());
+    panels.push_back(std::make_unique<SignalWaveformPanel>());
+    panels.push_back(std::make_unique<SensorGeometryPanel>());
+    panels.push_back(std::make_unique<ChannelMappingPanel>());
 
-    // TODO remove: saving sample project for testing.
-    JSONSerialiser serialiser;
-    std::cout << JSONSerialiser::pretty_print(serialiser.serialise_project(*project)) << std::endl;
-
-    project_panel->set_active_project(project.get());
-    signal_waveform_panel->set_active_project(project.get());
-    sensor_geometry_panel->set_active_project(project.get());
-    channel_mapping_panel->set_active_project(project.get());
+    // TODO remove: test async project load.
+    worker.submit(std::make_unique<LoadProjectTask>("../resources/ExampleProject.json"));
 }
 
 void EchoMap::run_event_loop()
@@ -254,6 +253,8 @@ wgpu::Future EchoMap::request_device() noexcept
 
 void EchoMap::render() noexcept
 {
+    process_worker_results();
+
     if (!handle_window_resize())
         return;
 
@@ -289,11 +290,8 @@ void EchoMap::render() noexcept
 
     ImGui::DockSpaceOverViewport(dockspace_id, viewport, ImGuiDockNodeFlags_None);
 
-    menu_panel->draw();
-    project_panel->draw();
-    signal_waveform_panel->draw();
-    sensor_geometry_panel->draw();
-    channel_mapping_panel->draw();
+    for (const auto& panel : panels)
+        panel->draw();
 
     ImGui::Render();
 
@@ -403,6 +401,43 @@ bool EchoMap::handle_window_resize() noexcept
 
     // The window size is unchanged.
     return true;
+}
+
+void EchoMap::process_worker_results()
+{
+    while (const auto result = worker.try_get_result())
+        try {
+            result->apply(*this);
+        } catch (const std::exception& exception) {
+            Logger::log(Logger::Level::Error, exception.what(), std::source_location::current());
+        }
+}
+
+void EchoMap::update_panel_project() const
+{
+    for (const auto& panel : panels)
+        panel->set_active_project(project.get());
+}
+
+std::unique_ptr<Project> EchoMap::take_project(
+        const bool update_ui
+) noexcept
+{
+    auto taken = std::move(project);
+    if (update_ui)
+        update_panel_project();
+    return std::move(taken);
+}
+
+void EchoMap::put_project(
+        std::unique_ptr<Project> new_project
+) noexcept
+{
+    const auto old_project_ptr = project.get();
+    project = std::move(new_project);
+
+    if (project.get() != old_project_ptr)
+        update_panel_project();
 }
 
 } // namespace echomap

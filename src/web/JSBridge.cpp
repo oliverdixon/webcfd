@@ -11,7 +11,7 @@
 
 #include <emscripten/em_macros.h>
 
-#include "../ConfigurationError.hpp"
+#include "../errors/ConfigurationError.hpp"
 #include "../Logger.hpp"
 
 namespace echomap

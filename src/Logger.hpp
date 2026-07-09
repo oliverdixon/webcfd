@@ -16,10 +16,10 @@ namespace echomap
 {
 
 /**
- * A portable (native and browser) logger implementation for formatted messages.
+ * A portable (native and browser) and thread-safe logger implementation for formatted messages.
  *
- * If compiled for a native backend, the standard IO stream is used. If compiled for WebAssembly, the JavaScript API is
- * used to produce log messages in the browser console.
+ * If compiled for a native backend, the standard C++20 synchronised IO stream is used. If compiled for WebAssembly, the
+ * JavaScript API is used to produce log messages in the browser console.
  */
 class Logger
 {
@@ -93,7 +93,7 @@ private:
 #else
 #define LOG_F_DEBUG(msg, ...)                                                                                          \
     do {                                                                                                               \
-        Logger::log_f(Logger::Level::Debug, std::source_location::current(), msg, __VA_ARGS__);                         \
+        Logger::log_f(Logger::Level::Debug, std::source_location::current(), msg, __VA_ARGS__);                        \
     } while (0);
 #endif
 
@@ -140,7 +140,7 @@ private:
 #else
 #define LOG_DEBUG(msg, ...)                                                                                            \
     do {                                                                                                               \
-        Logger::log(Logger::Level::Debug, msg, std::source_location::current());                                        \
+        Logger::log(Logger::Level::Debug, msg, std::source_location::current());                                       \
     } while (0);
 #endif
 

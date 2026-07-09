@@ -7,6 +7,7 @@
 
 #include <source_location>
 #include <stdexcept>
+#include <string_view>
 
 namespace echomap
 {

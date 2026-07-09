@@ -11,6 +11,7 @@
 #include <emscripten/console.h>
 #else
 #include <iostream>
+#include <syncstream>
 #endif
 
 namespace echomap
@@ -41,7 +42,7 @@ void Logger::log(
         break;
     }
 #else
-    auto& stream = level == Level::Error ? std::cerr : std::cout;
+    auto stream = std::osyncstream(level == Level::Error ? std::cerr : std::cout);
     stream << line << '\n';
 #endif
 }

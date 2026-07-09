@@ -17,11 +17,11 @@ ErrorResult::ErrorResult(
 }
 
 void ErrorResult::apply(
-        Project& project
+        EchoMap& app
 )
 {
-    std::ignore = project;
-    throw std::runtime_error(message);
+    std::ignore = app;
+    throw std::runtime_error(message); // TODO use a proper interface on EchoMap to report errors.
 }
 
 } // namespace echomap

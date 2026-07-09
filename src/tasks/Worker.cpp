@@ -9,7 +9,8 @@
 namespace echomap
 {
 
-Worker::Worker() :
+Worker::Worker(WakeCallback wake_callback) :
+    wake_callback(std::move(wake_callback)),
     thread{
         [this](const std::stop_token& stop_token) {
             execute(stop_token);
@@ -43,10 +44,15 @@ void Worker::execute(
             break;
 
         try {
-            if (auto result = (*job)->execute(stop_token); result != nullptr)
+            if (auto result = (*job)->execute(stop_token); result != nullptr) {
                 result_queue.produce(std::move(result));
+                if (wake_callback)
+                    wake_callback();
+            }
         } catch (const std::exception& exception) {
             result_queue.produce(std::make_unique<ErrorResult>(exception.what()));
+            if (wake_callback)
+                wake_callback();
         }
     }
 }
