@@ -92,7 +92,7 @@ void SensorGeometryPanel::draw_geometry_summary() noexcept
         std::size_t row_idx = 0;
 
         for (auto& sensor : active_project->mutate_sensors()) {
-            ImGui::PushID(sensor.get_id());
+            ImGui::PushID(static_cast<int>(sensor.get_id()));
 
             ImGui::TableNextRow();
             ImGui::TableNextColumn();

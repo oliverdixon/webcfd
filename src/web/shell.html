@@ -17,11 +17,15 @@
 <header>
     Input WAV file: <input id="wav-picker" type="file" accept=".wav,audio/wav">
 </header>
-<canvas id="canvas" oncontextmenu="event.preventDefault()" tabindex="-1"></canvas>
+<canvas id="canvas" tabindex="-1"></canvas>
 <script type='text/javascript'>
     const canvas = document.getElementById("canvas");
 
-    var Module = {
+    canvas.addEventListener("contextmenu", (event) => {
+        event.preventDefault();
+    });
+
+    let Module = {
         canvas,
 
         print: text => console.log(text),

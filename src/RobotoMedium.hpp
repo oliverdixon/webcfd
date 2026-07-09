@@ -8,6 +8,7 @@
 #ifndef ECHOMAP_ROBOTOMEDIUM_HPP
 #define ECHOMAP_ROBOTOMEDIUM_HPP
 
+// ReSharper disable once CppUnusedIncludeDirective - Clear false positive.
 #include <cstdint>
 
 namespace echomap::data

@@ -18,8 +18,9 @@ Sensor::Sensor(
 
 Sensor::Sensor(
         const Position position,
-        std::string_view name
+        const std::string_view name
 ) :
+    Object(name),
     position(position)
 {
 }
@@ -40,10 +41,10 @@ Sensor::Sensor(
 }
 
 void Sensor::set_colour(
-        Colour new_colour
+        const Colour new_colour
 ) noexcept
 {
-    colour = std::move(new_colour);
+    colour = new_colour;
 }
 
 void Sensor::set_colour(

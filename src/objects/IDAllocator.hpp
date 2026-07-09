@@ -5,7 +5,6 @@
 #ifndef ECHOMAP_IDALLOCATOR_HPP
 #define ECHOMAP_IDALLOCATOR_HPP
 
-#include <concepts>
 #include <cstdint>
 
 namespace echomap

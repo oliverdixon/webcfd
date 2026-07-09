@@ -88,7 +88,7 @@ std::unique_ptr<Signal> SignalFactory::downsample(
 )
 {
     auto sample_count = static_cast<std::uint64_t>(static_cast<float>(source.get_sample_count()) / downsample_factor);
-    if (sample_count < downsample_factor)
+    if (static_cast<float>(sample_count) < downsample_factor)
         sample_count = static_cast<std::uint64_t>(downsample_factor);
 
     auto downsampled = name.empty() ? lttb_downsample(
@@ -141,7 +141,7 @@ void SignalFactory::load_wave_file_into_channels(
             throw ConfigurationError("Cannot read WAV file at " + std::string(file_path) + ". Is it corrupted?");
 
         for (drwav_uint64 frame_idx = 0; frame_idx < frame_count; ++frame_idx)
-            for (std::size_t channel_idx = 0; channel_idx < drwav_info.channels; ++channel_idx) {
+            for (drwav_uint16 channel_idx = 0; channel_idx < drwav_info.channels; ++channel_idx) {
                 if (auto* const destination = std::ranges::begin(channels)[channel_idx]; destination != nullptr)
                     /*
                      * The audio data is uniformly spaced, so we can infer the time values by taking the current frame
@@ -200,21 +200,22 @@ std::unique_ptr<Signal> SignalFactory::lttb_downsample(
         return std::move(downsampled);
     }
 
-    const double bucket_size = static_cast<double>(source_size - 2) / static_cast<double>(threshold - 2);
+    const auto bucket_size =
+            static_cast<unsigned int>(static_cast<double>(source_size - 2) / static_cast<double>(threshold - 2));
     std::size_t fixed_point_idx = 0;
 
     // Always add the first point.
     downsampled->emplace_sample(source.get_time_at_index(0), source[0]);
 
-    for (std::size_t i = 0; i < threshold - 2; ++i) {
+    for (std::size_t dst_point_idx = 0; dst_point_idx < threshold - 2; ++dst_point_idx) {
         Signal::Sample::TimeT average_time = 0.0f;
         Signal::Sample::AmplitudeT average_amplitude = 0.0f;
 
         // Calculate the point-average for the next bucket, containing our fixed point.
 
-        const auto average_range_start = static_cast<std::size_t>(std::floor((i + 1) * bucket_size)) + 1;
+        const auto average_range_start = static_cast<std::size_t>(std::floor((dst_point_idx + 1) * bucket_size)) + 1;
         const auto average_range_end =
-                std::min(static_cast<std::uint64_t>(std::floor((i + 2) * bucket_size)) + 1, source_size);
+                std::min(static_cast<std::uint64_t>(std::floor((dst_point_idx + 2) * bucket_size)) + 1, source_size);
         const auto average_range_length = average_range_end - average_range_start;
 
         for (auto range_idx = average_range_start; range_idx < average_range_end; ++range_idx) {
@@ -230,9 +231,11 @@ std::unique_ptr<Signal> SignalFactory::lttb_downsample(
         const auto fp_amplitude = source[fixed_point_idx];
 
         // Get the range for the current bucket and compute triangle areas over the three buckets.
-        const auto range_lower = static_cast<std::size_t>(std::floor(i * bucket_size)) + 1;
-        const auto range_upper =
-                std::min(static_cast<std::uint64_t>(std::floor((i + 1) * bucket_size)) + 1, source_size - 1);
+        const auto range_lower = static_cast<std::size_t>(std::floor(dst_point_idx * bucket_size)) + 1;
+        const auto range_upper = std::min(
+                static_cast<std::uint64_t>(std::floor((dst_point_idx + 1) * bucket_size)) + 1,
+                source_size - 1
+        );
 
         // (C++ note: we need to combine Sample::TimeT and Sample::AmplitudeT here, so float seems like a safe choice.)
         auto max_area = std::numeric_limits<float>::lowest();

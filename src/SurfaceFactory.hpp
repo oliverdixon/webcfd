@@ -36,6 +36,7 @@ public:
     );
 
 private:
+    // ReSharper disable once CppDoxygenSyntaxError
     /**
      * Produce an owning container of the WebGPU Surface descriptor for the given GLFW window.
      *

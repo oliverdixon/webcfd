@@ -118,7 +118,7 @@ void Signal::set_sample_rate(
 ) noexcept
 {
     timing_baseline.sample_rate = new_sample_rate;
-    timing_baseline.sample_rate_r = new_sample_rate == 0 ? 0 : 1.0f / new_sample_rate;
+    timing_baseline.sample_rate_r = new_sample_rate == 0 ? 0 : 1.0f / static_cast<float>(new_sample_rate);
 }
 
 decltype(Signal::samples)::const_iterator Signal::begin() const
@@ -194,7 +194,8 @@ void Signal::emplace_time(
     assert(!samples.empty());
 
     constexpr Sample::TimeT epsilon = 1.0e-6f;
-    const auto expected = timing_baseline.time_offset + (samples.size() - 1) * timing_baseline.sample_rate_r;
+    const auto expected =
+            timing_baseline.time_offset + static_cast<float>(samples.size() - 1) * timing_baseline.sample_rate_r;
 
     // Check the time derived from the baseline, as if we're continuing with a uniformly sampled signal.
     if (const auto offset = given_time - expected; std::abs(offset) <= epsilon) {

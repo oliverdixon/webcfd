@@ -170,6 +170,7 @@ protected:
     }
 
 private:
+    // ReSharper disable once CppDoxygenSyntaxError
     /**
      * Display name for objects of the type determined by the templated class.
      *

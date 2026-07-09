@@ -7,8 +7,6 @@
 
 #include "ConfigurationError.hpp"
 
-#include <string>
-
 namespace echomap
 {
 
