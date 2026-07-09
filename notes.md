@@ -48,7 +48,7 @@ By taking Fourier transforms of the signals captured in the time domain, we
 compute a vector of signals in the frequency domain:
 
 $$
-\left\{ X_1(\omega), \ldots, X_M(\omega) \right\}
+\left\\{ X_1(\omega), \ldots, X_M(\omega) \right\\}
 $$
 
 SSL may then be formulated as an optimisation problem such as maximum-likelihood
@@ -74,9 +74,14 @@ In the frequency domain, the SRP-PHAT of a point $\vec{q}$ in space is defined
 as
 
 $$
-P(\vec{q}) = \sum_{m=1}^M \sum_{l=1}^M \int_0^{2\pi} \frac{X_m(\omega)
-X_l^*(\omega)}{\vert X_m(\omega) X_l^*(\omega) \vert} \exp(i\omega
-\tau_{ml}^{\vec{q}})~d\omega,
+P(\vec{q}) =
+\sum_{m=1}^{M}
+\sum_{l=1}^{M}
+\int_{0}^{2\pi}
+\frac{X_{m}(\omega) X_{l}^{\*}(\omega)}
+{\left|X_{m}(\omega) X_{l}^{\*}(\omega)\right|}
+\\,\exp(i \omega \tau_{ml}^{\vec{q}})
+\\,d\omega .
 $$
 
 where $\tau_{ml}^{\vec{q}} = \tau_m^{\vec{q}} - \tau_l^{\vec{q}}$ is the
@@ -86,15 +91,21 @@ $\vec{q}$. $X^*_l(\omega)$ is the complex conjugate of $X_l(\omega)$.
 We can reduce the number of computations by a factor of $M$ by rearranging:
 
 $$
-P(\vec{q}) = \int_0^{2\pi} \left\vert \sum_{m=1}^M
-\frac{X_m(\omega)}{\vert X_m(\omega) \vert} \exp(i\omega\tau_m^{\vec{q}})
-\right\vert^2~d\omega
+P(\vec{q}) =
+\int_{0}^{2\pi}
+\left|
+\sum_{m=1}^{M}
+\frac{X_{m}(\omega)}
+{\left|X_{m}(\omega)\right|}
+\\,\exp(i \omega \tau_{m}^{\vec{q}})
+\right|^{2}
+\\,d\omega
 $$
 
 We may then estimate the source location:
 
 $$
-\vec{q} \approx \argmax_{\vec{q}\in\mathcal{Q}} P(\vec{q})
+\vec{q} \approx \mathop{\mathrm{arg\\,max}}_{\vec{q}\in\mathcal{Q}}\\, P\vec{q}
 $$
 
 where $\mathcal{Q}$ denotes the set of candidate locations.
@@ -104,17 +115,18 @@ where $\mathcal{Q}$ denotes the set of candidate locations.
 In the time domain, we can represent the SRP-PHAT as
 
 $$
-P(\vec{q}) = \sum_{m=1}^M \sum_{l=m+1}^M R_{ml}\left( \tau_{ml}^{\vec{q}}
-\right)
+P(\vec{q}) = \sum_{m=1}^M \sum_{l=m+1}^M R_{ml}(\tau_{ml}^{\vec{q}})
 $$
 
 where $R_{ml}(\tau)$ is the PHAT-weighted GCCs between two microphones $m$ and
 $l$:
 
 $$
-R_{ml}\left( \tau_{ml}^{\vec{q}} \right) = \frac{1}{2\pi} \int_0^{2\pi}
-\frac{X_m(\omega)X_l^*(\omega)}{\vert X_m(\omega)X_l^*(\omega) \vert}
-\exp(i\omega\tau)~d\omega.
+R_{ml}\left(\tau_{ml}^{\vec{q}}\right) =
+\frac{1}{2\pi}
+\int_{0}^{2\pi}
+\frac{X_{m}(\omega) X_{l}^{\*}(\omega)}
+{\left|X_{m}(\omega) X_{l}^{\*}(\omega)\right|}
+\\,\exp(i \omega \tau)
+\\,d\omega .
 $$
-
-
