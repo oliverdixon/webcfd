@@ -18,3 +18,5 @@
     * Procure example data from European project.
     * Study ODAS (and maybe BeamformIt?) as reference implementations. Implement the time domain variant first, then the
       frequency domain version.
+
+6. Add detailed description to README.

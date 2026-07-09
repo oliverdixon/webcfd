@@ -2,9 +2,50 @@
 
 ## Summary
 
-TODO: detailed description.
+**EchoMap is a work in progress.**
+
+EchoMap is an experimental cross-platform digital signal processing application for sound-source localisation (SSL). In
+particular, given a series of co-located audio sensors (such as a
+[towed array sonar](https://en.wikipedia.org/wiki/Towed_array_sonar)), and associated time-varying signals captured from
+the sensors, the application attempts to determine the precise location of the source of the recorded signal.
+
+The problem of SSL is not new, but this implementation strives to provide several interesting "quirks":
+
+* Extremely user-friendly cross-platform interface with a pluggable architecture.
+* Capability to delegate computationally intensive work to hardware accelerators, such as a graphics processing unit.
+* Targets the WebAssembly platform to run entirely within any modern browser, using the WebGPU standard to make use of
+  the accelerators.
+* Free, open-source, permissively licensed, portable, modern C++26, interoperable persistence format (JSON and SQLite3)
+  etc.
+
+Existing FOSS implementations of SSL in desktop/web applications, such as [ODAS](https://github.com/introlab/odas), are
+widely available. Most will lack one of the above features, but will likely excel in many more unlisted capabilities!
 
 ## Build Instructions
+
+### Quick Start for Desktop Users
+
+```bash
+$ source bootstrap.sh
+$ cmake --preset native-release
+$ cmake --build cmake-build-native-release
+$ cmake-build-native-release/EchoMap
+```
+
+### Quick Start for Web Users
+
+```bash
+$ source bootstrap.sh
+$ cmake --preset wasm-release
+$ cmake --build cmake-build-wasm-release
+$ ./miniserve.sh cmake-build-wasm-release &
+$ xdg-open http://localhost:8080/EchoMap.html
+$ # Interact with EchoMap in the browser...
+$ fg
+$ # Control-C to kill the server.
+```
+
+### Detailed Procedure
 
 1. Source the `/bootstrap.sh` script into a Bash-compatible shell.
 
@@ -14,7 +55,8 @@ TODO: detailed description.
     * Likewise, if `EMSDK` is unset or does not indicate a valid
       [Emscripten SDK](https://emscripten.org/docs/tools_reference/emsdk.html) installation, the bootstrap script will
       fetch, install, and activate the upstream SDK into `/third-party/emsdk`. `EMSDK` will be exported into the
-      environment.
+      environment. At present, the SDK is bootstrapped for all Wasm and non-Wasm builds alike; this is inconsequential
+      on subsequent invocations, and saves the inconvenience of configuring multiple toolchains in IDEs.
     * If you're using an IntelliJ-based IDE (CLion etc.),
       [configure your toolchain](https://www.jetbrains.com/help/clion/how-to-create-toolchain-in-clion.html#env-scripts)
       to source `/bootstrap.sh` as an environment file. The script is sourced into a non-interactive shell, so a wrapper
