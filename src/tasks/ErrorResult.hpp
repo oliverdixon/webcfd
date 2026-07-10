@@ -13,7 +13,9 @@
 namespace echomap
 {
 
-class ErrorResult : public IResult
+class EchoMap;
+
+class ErrorResult : public IResult<EchoMap>
 {
 public:
     explicit ErrorResult(std::string_view message);

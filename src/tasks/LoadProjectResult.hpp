@@ -1,9 +1,12 @@
-//
-// Created by owd on 7/9/26.
-//
+/**
+ * @file
+ * @brief Project-loading result specification
+ * @author Oliver Dixon
+ * @date 2026-07-10
+ */
 
-#ifndef WEBCFD_LOADPROJECTRESULT_HPP
-#define WEBCFD_LOADPROJECTRESULT_HPP
+#ifndef ECHOMAP_LOADPROJECTRESULT_HPP
+#define ECHOMAP_LOADPROJECTRESULT_HPP
 
 #include <memory>
 
@@ -13,7 +16,9 @@
 namespace echomap
 {
 
-class LoadProjectResult : public IResult
+class EchoMap;
+
+class LoadProjectResult : public IResult<EchoMap>
 {
 public:
     explicit LoadProjectResult(std::unique_ptr<Project> loaded_project);
@@ -26,4 +31,4 @@ private:
 
 } // namespace echomap
 
-#endif // WEBCFD_LOADPROJECTRESULT_HPP
+#endif // ECHOMAP_LOADPROJECTRESULT_HPP

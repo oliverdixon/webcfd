@@ -11,6 +11,7 @@
 #include <cmath>
 
 #include "../Logger.hpp"
+#include "SignalFactory.hpp"
 
 namespace echomap
 {
@@ -50,6 +51,13 @@ void Signal::emplace_sample(
         fs_source->dirty = true;
 }
 
+void Signal::emplace_sample(
+        const Sample& sample
+)
+{
+    emplace_sample(sample.time, sample.amplitude);
+}
+
 void Signal::emplace_sample_from_source(
         const Sample::AmplitudeT amplitude
 )
@@ -66,6 +74,13 @@ void Signal::emplace_sample_from_source(
 {
     samples.emplace_back(amplitude);
     emplace_time(time);
+}
+
+void Signal::emplace_sample_from_source(
+        const Sample& sample
+)
+{
+    return emplace_sample_from_source(sample.time, sample.amplitude);
 }
 
 void Signal::reserve_samples(
@@ -141,7 +156,9 @@ decltype(Signal::samples)::const_iterator Signal::cend() const noexcept
     return samples.cend();
 }
 
-Signal::Sample::AmplitudeT Signal::operator[](const std::size_t index) const noexcept
+Signal::Sample::AmplitudeT Signal::operator[](
+        const std::size_t index
+) const noexcept
 {
     return samples[index];
 }
@@ -207,13 +224,38 @@ void Signal::emplace_time(
             time_offsets->emplace_back(0.0f);
     } else {
         /*
-         * If the given time doesn't match what we expect, then a variably sampled entry has been introduced. If the
-         * signal is newly variable, bad news!
+         * If the given time doesn't match what we expect, then a variably sampled entry has been introduced. We need to
+         * consider:
+         *
+         *  1. if insertion of the time would violate the class invariant, such that time values are monotonically
+         *     increasing, then an exception is due; or
+         *
+         *  2. if the time preserves the invariant, but is the first non-uniform entry, then we need to create offset
+         *     entries (which will have offset of zero, since they followed the uniform pattern by construction), and
+         *     emplace our offset on the end.
+         *
+         *  3. if the time preserves the invariant, and is being emplaced into an already-variable signal, then we
+         *     simply note the offset.
          */
 
+        if (samples.size() >= 2)
+            if (const auto previous_time = get_time_at_index(samples.size() - 2); given_time <= previous_time + epsilon)
+                // Case 1.
+                throw std::runtime_error(
+                        std::format(
+                                "Signal {} rejected out-of-order sample at time {}s (previous sample was accepted at "
+                                "time {}s).",
+                                get_name(),
+                                given_time,
+                                previous_time
+                        )
+                );
+
         if (time_offsets.has_value())
+            // Case 3.
             time_offsets->emplace_back(offset);
         else {
+            // Case 2.
             time_offsets.emplace(samples.size(), 0.0f);
             time_offsets->back() = offset;
         }

@@ -1,6 +1,9 @@
-//
-// Created by owd on 7/9/26.
-//
+/**
+ * @file
+ * @brief Project-loading task implementation
+ * @author Oliver Dixon
+ * @date 2026-07-10
+ */
 
 #include "LoadProjectTask.hpp"
 
@@ -10,6 +13,8 @@
 namespace echomap
 {
 
+JSONDeserialiser LoadProjectTask::deserialiser{};
+
 LoadProjectTask::LoadProjectTask(
         const std::filesystem::path& path
 ) :
@@ -17,13 +22,8 @@ LoadProjectTask::LoadProjectTask(
 {
 }
 
-std::unique_ptr<IResult> LoadProjectTask::execute(
-        const std::stop_token stop_token
-)
+std::unique_ptr<IResult<EchoMap>> LoadProjectTask::execute_work()
 {
-    if (stop_token.stop_requested())
-        return nullptr;
-
     return std::make_unique<LoadProjectResult>(deserialiser.deserialise_project(project_file_path));
 }
 

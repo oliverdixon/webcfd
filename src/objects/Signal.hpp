@@ -72,10 +72,54 @@ public:
     /**
      * Emplace a sample to the back of the channel sample data.
      *
+     * The inserted amplitude sample will be associated with the next timestep, computed automatically based on the
+     * defined sample rate and time offset.
+     *
      * @param amplitude Amplitude of the sample to insert
      */
     void emplace_sample(Sample::AmplitudeT amplitude);
+
+    /**
+     * Emplace a sample to the back of the channel sample data.
+     *
+     * @param time The time to associate with the amplitude, in seconds.
+     * @param amplitude The amplitude to associate with the time.
+     *
+     * @throws std::runtime_error The time of the Sample violated the monotonically increasing invariant.
+     */
     void emplace_sample(
+            Sample::TimeT time,
+            Sample::AmplitudeT amplitude
+    );
+
+    /**
+     * Emplace a sample to the back of the channel sample data.
+     *
+     * @param sample The Sample to insert at the back of the stream.
+     *
+     * @throws std::runtime_error The time of the Sample violated the monotonically increasing invariant.
+     */
+    void emplace_sample(const Sample& sample);
+
+    /**
+     * Emplace an externally sourced sample to the back of the channel sample data.
+     *
+     * The inserted amplitude sample will be associated with the next timestep, computed automatically based on the
+     * defined sample rate and time offset.
+     *
+     * @param amplitude Amplitude of the sample to insert.
+     */
+    void emplace_sample_from_source(Sample::AmplitudeT amplitude);
+
+    /**
+     * Emplace an externally sourced sample to the back of the channel sample data.
+     *
+     * @param time The time to associate with the amplitude, in seconds.
+     * @param amplitude The amplitude to associate with the time.
+     *
+     * @throws std::runtime_error The time of the Sample violated the monotonically increasing invariant.
+     */
+    void emplace_sample_from_source(
             Sample::TimeT time,
             Sample::AmplitudeT amplitude
     );
@@ -83,13 +127,11 @@ public:
     /**
      * Emplace an externally sourced sample to the back of the channel sample data.
      *
-     * @param amplitude Amplitude of the sample to insert
+     * @param sample The Sample to insert at the back of the stream.
+     *
+     * @throws std::runtime_error The time of the Sample violated the monotonically increasing invariant.
      */
-    void emplace_sample_from_source(Sample::AmplitudeT amplitude);
-    void emplace_sample_from_source(
-            Sample::TimeT time,
-            Sample::AmplitudeT amplitude
-    );
+    void emplace_sample_from_source(const Sample& sample);
 
     /**
      * Reserves memory to store the given number of total samples in the channel.
@@ -176,6 +218,13 @@ private:
         float sample_rate_r = 0.0f;       /**< Reciprocal of the sample rate; zero if sample rate is zero. */
     };
 
+    /**
+     * Implementation helper to associate the latest amplitude sample with the given time.
+     *
+     * @param given_time The time to associate with the latest sample.
+     *
+     * @throws std::runtime_error The time of the Sample violated the monotonically increasing invariant.
+     */
     void emplace_time(Sample::TimeT given_time);
 
     Baseline timing_baseline;        /**< A baseline of timing parameters. */

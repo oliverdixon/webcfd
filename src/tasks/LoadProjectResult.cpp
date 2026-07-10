@@ -1,6 +1,9 @@
-//
-// Created by owd on 7/9/26.
-//
+/**
+ * @file
+ * @brief Project-loading result implementation
+ * @author Oliver Dixon
+ * @date 2026-07-10
+ */
 
 #include "LoadProjectResult.hpp"
 

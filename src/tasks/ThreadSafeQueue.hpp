@@ -1,6 +1,9 @@
-//
-// Created by owd on 7/9/26.
-//
+/**
+ * @file
+ * @brief Thread-safe queue specification and implementation
+ * @author Oliver Dixon
+ * @date 2026-07-10
+ */
 
 #ifndef ECHOMAP_THREADSAFEQUEUE_HPP
 #define ECHOMAP_THREADSAFEQUEUE_HPP
@@ -13,11 +16,26 @@
 namespace echomap
 {
 
-template <class ValueT> class ThreadSafeQueue
+/**
+ * Provides a straightforward thread-safe double-ended queue implementation.
+ *
+ * Values of the templated type may be enqueued ("produced") and dequeued ("consumed") in a blocking or non-blocking
+ * (but interruptable) model. All operations are atomic.
+ *
+ * @tparam ValueT The type of values to be queued.
+ */
+template <class ValueT>
+    requires std::move_constructible<ValueT>
+class ThreadSafeQueue
 {
 public:
+    /**
+     * Enqueue a value.
+     *
+     * @param value The value to enqueue.
+     */
     void produce(
-            ValueT&& value
+            ValueT value
     )
     {
         std::lock_guard lock(mutex);
@@ -25,6 +43,14 @@ public:
         cv.notify_one();
     }
 
+    /**
+     * Attempt to dequeue a value.
+     *
+     * This function does not block.
+     *
+     * @param out The destination slot for the dequeued value, mutated if and only if a value was dequeued.
+     * @return Was a value dequeued?
+     */
     bool try_consume(
             ValueT& out
     )
@@ -39,6 +65,15 @@ public:
         return true;
     }
 
+    /**
+     * Attempt to dequeue a value.
+     *
+     * This function blocks until interrupted by the stop token or a value is available on the queue.
+     *
+     * @param stop_token The interrupt token for the thread block.
+     * @return The dequeued value, or an empty optional if the block was interrupted prior to a value becoming
+     *  available.
+     */
     std::optional<ValueT> wait_consume(
             std::stop_token stop_token
     )
@@ -54,6 +89,16 @@ public:
         auto value = std::move(queue.front());
         queue.pop_front();
         return value;
+    }
+
+    /**
+     * Checks the state of the queue.
+     *
+     * @return Is the queue empty?
+     */
+    [[nodiscard]] bool empty() const noexcept
+    {
+        return queue.empty();
     }
 
 private:
