@@ -22,7 +22,7 @@ LoadProjectTask::LoadProjectTask(
 {
 }
 
-std::unique_ptr<IResult<EchoMap>> LoadProjectTask::execute_work()
+std::unique_ptr<IResult> LoadProjectTask::execute_work()
 {
     return std::make_unique<LoadProjectResult>(deserialiser.deserialise_project(project_file_path));
 }

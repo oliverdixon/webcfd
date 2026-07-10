@@ -11,6 +11,7 @@
 #include <implot.h>
 #include <implot3d.h>
 
+#include "tasks/LoadProjectResult.hpp"
 #include "tasks/LoadProjectTask.hpp"
 
 #ifdef __EMSCRIPTEN__
@@ -407,7 +408,7 @@ void EchoMap::process_worker_results()
 {
     while (const auto result = worker.try_get_result())
         try {
-            result->apply(*this);
+            result->despatch(*this);
         } catch (const std::exception& exception) {
             Logger::log(Logger::Level::Error, exception.what(), std::source_location::current());
         }
@@ -438,6 +439,13 @@ void EchoMap::put_project(
 
     if (project.get() != old_project_ptr)
         update_panel_project();
+}
+
+void EchoMap::handle(
+        LoadProjectResult& result
+)
+{
+    put_project(result.take_project());
 }
 
 } // namespace echomap

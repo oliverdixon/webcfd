@@ -16,15 +16,13 @@
 namespace echomap
 {
 
-class EchoMap;
-
 /**
  * Denotes a unit of work for loading and constructing an EchoMap Project from its serialised form on the filesystem.
  *
  * @warning The LoadProjectTask is not thread-safe due to persisting global state of the parser for re-use across
  *  Project loads.
  */
-class LoadProjectTask : public ITask<EchoMap>
+class LoadProjectTask : public ITask
 {
 public:
     /**
@@ -43,7 +41,7 @@ private:
      * @throws std::runtime_error If the Project could not be fully loaded and validated.
      * @see JSONDeserialiser::deserialise_project
      */
-    std::unique_ptr<IResult<EchoMap>> execute_work() override;
+    std::unique_ptr<IResult> execute_work() override;
 
     /**
      * Shared instance of the deserialiser.

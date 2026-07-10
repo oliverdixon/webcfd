@@ -24,7 +24,7 @@ Worker::Worker(
 }
 
 void Worker::submit(
-        std::unique_ptr<ITask<EchoMap>>&& task
+        std::unique_ptr<ITask>&& task
 )
 {
     task_queue.produce(std::move(task));
@@ -35,9 +35,9 @@ bool Worker::is_result_available() const noexcept
     return !result_queue.empty();
 }
 
-std::unique_ptr<IResult<EchoMap>> Worker::try_get_result()
+std::unique_ptr<IResult> Worker::try_get_result()
 {
-    if (std::unique_ptr<IResult<EchoMap>> result; result_queue.try_consume(result))
+    if (std::unique_ptr<IResult> result; result_queue.try_consume(result))
         return std::move(result);
 
     return nullptr;

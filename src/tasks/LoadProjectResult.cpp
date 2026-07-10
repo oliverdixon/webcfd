@@ -19,11 +19,16 @@ LoadProjectResult::LoadProjectResult(
 {
 }
 
-void LoadProjectResult::apply(
-        EchoMap& app
+void LoadProjectResult::despatch(
+        IResultHandler& handler
 )
 {
-    app.put_project(std::move(loaded_project));
+    handler.handle(*this);
+}
+
+std::unique_ptr<Project> LoadProjectResult::take_project() noexcept
+{
+    return std::move(loaded_project);
 }
 
 } // namespace echomap

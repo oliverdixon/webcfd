@@ -12,6 +12,7 @@
 #include <imgui.h>
 #include <webgpu/webgpu_cpp.h>
 
+#include "tasks/IResultHandler.hpp"
 #include "tasks/Worker.hpp"
 
 namespace echomap
@@ -24,7 +25,7 @@ class Project;
  * The EchoMap maintains state for the application including WebGPU and Dear ImGui context, encapsulating initialisation,
  * game loop, interaction, and clean-up.
  */
-class EchoMap
+class EchoMap : IResultHandler
 {
 public:
     /**
@@ -49,7 +50,7 @@ public:
     /**
      * Clean up all persistent state registered by the application instance.
      */
-    ~EchoMap() noexcept;
+    ~EchoMap() noexcept override;
 
     /**
      * Indicate to the wave form controllers that a new file has been selected.
@@ -60,6 +61,8 @@ public:
 
     [[nodiscard]] std::unique_ptr<Project> take_project(bool update_ui) noexcept;
     void put_project(std::unique_ptr<Project> new_project) noexcept;
+
+    void handle(LoadProjectResult& result) override;
 
 private:
     static constexpr auto operation_timeout = std::numeric_limits<std::uint64_t>::max();

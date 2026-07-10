@@ -16,11 +16,11 @@ ErrorResult::ErrorResult(
 {
 }
 
-void ErrorResult::apply(
-        EchoMap& app
+void ErrorResult::despatch(
+        IResultHandler& handler
 )
 {
-    std::ignore = app;
+    std::ignore = handler;
     throw std::runtime_error(message); // TODO use a proper interface on EchoMap to report errors.
 }
 

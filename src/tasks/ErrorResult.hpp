@@ -13,14 +13,12 @@
 namespace echomap
 {
 
-class EchoMap;
-
-class ErrorResult : public IResult<EchoMap>
+class ErrorResult : public IResult
 {
 public:
     explicit ErrorResult(std::string_view message);
 
-    void apply(EchoMap& app) override;
+    void despatch(IResultHandler& handler) override;
 
 private:
     std::string message;

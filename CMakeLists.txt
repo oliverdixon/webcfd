@@ -75,6 +75,7 @@ add_executable(EchoMap
         src/tasks/ErrorResult.hpp
         src/tasks/LoadProjectResult.cpp
         src/tasks/LoadProjectResult.hpp
+        src/tasks/IResultHandler.hpp
 )
 
 target_link_libraries(EchoMap PRIVATE

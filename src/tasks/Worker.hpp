@@ -18,8 +18,6 @@
 namespace echomap
 {
 
-class EchoMap;
-
 /**
  * A Worker provides an encapsulated thread-safe despatch model for submitting work and reviewing results.
  *
@@ -41,7 +39,6 @@ class EchoMap;
 class Worker
 {
 public:
-    using ReceiverT = EchoMap;                    /**< The receiver to which IResult outcomes are applied. */
     using ResultCallback = std::function<void()>; /**< The type of callback to indicate new results. */
 
     /**
@@ -56,7 +53,7 @@ public:
      *
      * @param task A description of the task, detained within an owning container transferred to the Worker.
      */
-    void submit(std::unique_ptr<ITask<ReceiverT>>&& task);
+    void submit(std::unique_ptr<ITask>&& task);
 
     /**
      * Checks the state of the result queue.
@@ -72,7 +69,7 @@ public:
      *
      * @return The IResult posted by the latest job, or <code>nullptr</code> if no IResult was available.
      */
-    std::unique_ptr<IResult<ReceiverT>> try_get_result();
+    std::unique_ptr<IResult> try_get_result();
 
 private:
     /**
@@ -82,8 +79,8 @@ private:
      */
     void execute(const std::stop_token& stop_token) noexcept;
 
-    ThreadSafeQueue<std::unique_ptr<ITask<ReceiverT>>> task_queue;
-    ThreadSafeQueue<std::unique_ptr<IResult<ReceiverT>>> result_queue;
+    ThreadSafeQueue<std::unique_ptr<ITask>> task_queue;
+    ThreadSafeQueue<std::unique_ptr<IResult>> result_queue;
 
     ResultCallback result_callback; /**< Callable to inform clients of new results. */
     std::jthread worker_thread;     /**< RAII computation thread to handle ITask work pieces. */

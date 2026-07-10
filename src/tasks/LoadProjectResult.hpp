@@ -16,14 +16,14 @@
 namespace echomap
 {
 
-class EchoMap;
-
-class LoadProjectResult : public IResult<EchoMap>
+class LoadProjectResult : public IResult
 {
 public:
     explicit LoadProjectResult(std::unique_ptr<Project> loaded_project);
 
-    void apply(EchoMap& app) override;
+    void despatch(IResultHandler& handler) override;
+
+    [[nodiscard]] std::unique_ptr<Project> take_project() noexcept;
 
 private:
     std::unique_ptr<Project> loaded_project;

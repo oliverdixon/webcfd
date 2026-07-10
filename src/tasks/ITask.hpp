@@ -17,10 +17,7 @@ namespace echomap
 
 /**
  * An ITask represents an invocable piece of work that produces an IResult.
- *
- * @tparam ReceiverT The receiver for IResult objects produced by the ITask.
  */
-template<class ReceiverT>
 class ITask
 {
 public:
@@ -35,7 +32,7 @@ public:
      * @param stop_token Token for cancelling execution.
      * @return An owning container detaining the result of the work, or <code>nullptr</code> if the cancelled.
      */
-    std::unique_ptr<IResult<ReceiverT>> execute(
+    std::unique_ptr<IResult> execute(
             const std::stop_token& stop_token
     )
     {
@@ -50,7 +47,7 @@ public:
      *
      * @return An owning container detaining the result of the work.
      */
-    std::unique_ptr<IResult<ReceiverT>> operator()()
+    std::unique_ptr<IResult> operator()()
     {
         return execute({});
     }
@@ -61,7 +58,7 @@ private:
      *
      * @return An owning container detaining the result of the work.
      */
-    virtual std::unique_ptr<IResult<ReceiverT>> execute_work() = 0;
+    virtual std::unique_ptr<IResult> execute_work() = 0;
 };
 
 } // namespace echomap

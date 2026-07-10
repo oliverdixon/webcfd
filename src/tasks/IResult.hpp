@@ -11,12 +11,12 @@
 namespace echomap
 {
 
+class IResultHandler;
+
 /**
  * An IResult represents a callable description of results obtained following an ITask.
- *
- * @tparam ReceiverT The object to receive the IResult.
  */
-template <class ReceiverT> class IResult
+class IResult
 {
 public:
     /**
@@ -27,18 +27,18 @@ public:
     /**
      * Inform the given receiver of the result.
      *
-     * @param receiver The target to receive to results.
+     * @param handler The target to receive to results.
      */
-    virtual void apply(ReceiverT& receiver) = 0;
+    virtual void despatch(IResultHandler& handler) = 0;
 
     /**
      * Alias for @ref apply.
      *
-     * @param receiver The target to receive to results.
+     * @param handler The target to receive to results.
      */
-    void operator()(ReceiverT& receiver)
+    void operator()(IResultHandler& handler)
     {
-        apply(receiver);
+        despatch(handler);
     }
 };
 
