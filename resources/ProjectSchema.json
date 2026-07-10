@@ -97,15 +97,25 @@
       "additionalProperties": false,
       "required": [
         "kind",
-        "timing",
+        "sample_count",
+        "time_offset",
+        "sample_rate",
         "samples"
       ],
       "properties": {
         "kind": {
           "const": "embeddedUniform"
         },
-        "timing": {
-          "$ref": "#/$defs/timing"
+        "sample_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "time_offset": {
+          "type": "number"
+        },
+        "sample_rate": {
+          "type": "integer",
+          "minimum": 0
         },
         "samples": {
           "type": "array",
@@ -120,15 +130,23 @@
       "additionalProperties": false,
       "required": [
         "kind",
-        "timing",
+        "sample_count",
         "samples"
       ],
       "properties": {
         "kind": {
           "const": "embeddedVariable"
         },
-        "timing": {
-          "$ref": "#/$defs/timing"
+        "sample_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "time_offset": {
+          "type": "number"
+        },
+        "sample_rate": {
+          "type": "integer",
+          "minimum": 0
         },
         "samples": {
           "type": "array",
@@ -191,28 +209,6 @@
         },
         "colour": {
           "$ref": "#/$defs/rgba"
-        }
-      }
-    },
-    "timing": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": [
-        "sample_rate",
-        "sample_count",
-        "time_offset"
-      ],
-      "properties": {
-        "sample_rate": {
-          "type": "integer",
-          "minimum": 0
-        },
-        "sample_count": {
-          "type": "integer",
-          "minimum": 0
-        },
-        "time_offset": {
-          "type": "number"
         }
       }
     },

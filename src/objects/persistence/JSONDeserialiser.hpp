@@ -7,6 +7,10 @@
 
 #include <simdjson.h>
 
+#include <unordered_map>
+
+#include "../Sensor.hpp"
+#include "../Signal.hpp"
 #include "IDeserialiser.hpp"
 
 namespace echomap

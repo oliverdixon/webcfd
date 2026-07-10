@@ -156,17 +156,17 @@ void tag_invoke(
         builder.append_key_value("kind", signal.is_uniformly_sampled() ? "embeddedUniform" : "embeddedVariable");
         builder.append_comma();
 
-        builder.escape_and_append_with_quotes("timing");
-        builder.append_colon();
-        builder.start_object();
-        builder.append_key_value("time_offset", signal.get_time_offset());
-        builder.append_comma();
-        builder.append_key_value("sample_rate", signal.get_sample_rate());
-        builder.append_comma();
-        builder.append_key_value("sample_count", signal.get_sample_count());
-        builder.end_object();
+        if (signal.is_uniformly_sampled() || signal.get_time_offset() != echomap::Signal::Sample::TimeT(0) ||
+            signal.get_sample_count() != 0) {
+            builder.append_key_value("time_offset", signal.get_time_offset());
+            builder.append_comma();
+            builder.append_key_value("sample_rate", signal.get_sample_rate());
+            builder.append_comma();
+        }
 
+        builder.append_key_value("sample_count", signal.get_sample_count());
         builder.append_comma();
+
         builder.escape_and_append_with_quotes("samples");
         builder.append_colon();
         builder.start_array();
@@ -182,14 +182,14 @@ void tag_invoke(
                 first_element = false;
             }
         else
-            for (const auto sample : signal.timed_samples()) {
+            for (const auto [time, amplitude] : signal.timed_samples()) {
                 if (!first_element)
                     builder.append_comma();
 
                 builder.start_object();
-                builder.append_key_value("time", sample.time);
+                builder.append_key_value("time", time);
                 builder.append_comma();
-                builder.append_key_value("amplitude", sample.amplitude);
+                builder.append_key_value("amplitude", amplitude);
                 builder.end_object();
 
                 first_element = false;

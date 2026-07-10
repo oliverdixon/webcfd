@@ -20,3 +20,10 @@
       frequency domain version.
 
 6. Add detailed description to README.
+
+7. Add human-readable descriptions to the JSON schema(s).
+
+8. Investigate use of SQLite as an alternative storage format.
+   * Used by Audacity (`aup3`) for similar data.
+   * There is a well-regarded C++ library: https://github.com/fnc12/sqlite_orm (also on vcpkg)
+   * Suited for binary blobs and relational structure.

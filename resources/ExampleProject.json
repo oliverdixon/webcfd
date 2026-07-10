@@ -40,11 +40,9 @@
       "name": "TestEmbeddedUniform",
       "source": {
         "kind": "embeddedUniform",
-        "timing": {
-          "time_offset": 0,
-          "sample_rate": 10,
-          "sample_count": 16
-        },
+        "time_offset": 0,
+        "sample_rate": 10,
+        "sample_count": 16,
         "samples": [
           0.0,
           0.08,
@@ -69,11 +67,7 @@
       "name": "TestEmbeddedVariable",
       "source": {
         "kind": "embeddedVariable",
-        "timing": {
-          "time_offset": 0,
-          "sample_rate": 48000,
-          "sample_count": 16
-        },
+        "sample_count": 16,
         "samples": [
           {
             "time": 0.0,
