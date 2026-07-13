@@ -70,6 +70,79 @@ public:
     );
 
     /**
+     * Retrieves the total number of samples in the Signal stream.
+     *
+     * @return The number of samples detained by the Signal.
+     */
+    [[nodiscard]] std::uint64_t get_sample_count() const noexcept;
+
+    /**
+     * Retrieves the optional Source of the Signal.
+     *
+     * <p>
+     *  The return value of this operation can be used to determine the origin of the Signal: if the optional is empty,
+     *  the signal should be considered "embedded". Otherwise, it has an origin on the filesystem at the given
+     *  SignalSource.
+     * </p>
+     * <p>
+     *  If the Signal has an external source, the stored samples in the Signal object do not necessarily match the
+     *  external file, as callers may have invoked @ref add_sample with arbitrary samples. The Source should only be
+     *  considered a hint. This can be checked by inspecting the Source::dirty flag.
+     * </p>
+     *
+     * @return The Source of the Signal, or an empty optional if the Signal is not externally sourced.
+     */
+    [[nodiscard]] const std::optional<Source>& observe_source() const noexcept;
+
+    [[nodiscard]] Sample::TimeT get_time_offset() const noexcept;
+
+    [[nodiscard]] std::size_t get_sample_rate() const noexcept;
+
+    [[nodiscard]] decltype(samples)::const_iterator begin() const;
+    [[nodiscard]] decltype(samples)::const_iterator end() const;
+    [[nodiscard]] decltype(samples)::const_iterator cbegin() const noexcept;
+    [[nodiscard]] decltype(samples)::const_iterator cend() const noexcept;
+
+    [[nodiscard]] auto timed_samples() const
+    {
+        return std::views::iota(std::size_t{0}, samples.size()) |
+               std::views::transform([this](const std::size_t index) -> Sample {
+                   return {.time = get_time_at_index(index), .amplitude = samples[index]};
+               });
+    }
+
+    [[nodiscard]] Sample::AmplitudeT operator[](std::size_t index) const noexcept;
+
+    [[nodiscard]] bool is_uniformly_sampled() const noexcept;
+
+    /**
+     * Determines the corresponding time of the amplitude appearing at the given index in the sample array.
+     *
+     * @param index The index of the amplitude in the sample array.
+     * @return The timestamp corresponding to the referenced sample.
+     *
+     * @pre The index is within the bounds of the sample array.
+     */
+    [[nodiscard]] Sample::TimeT get_time_at_index(std::size_t index) const noexcept;
+
+    Signal(const Signal& old_signal);
+    Signal(const Signal& old_signal,
+           std::string_view new_name);
+
+private:
+    /**
+     * Provides basic timing information relating to the Signal samples.
+     */
+    struct Baseline
+    {
+        Sample::TimeT time_offset = 0.0f; /**< Timestamp, in seconds, of the first sample. */
+        std::size_t sample_rate = 0;      /**< Constant sample rate, in Hz, of the signal. */
+        float sample_rate_r = 0.0f;       /**< Reciprocal of the sample rate; zero if sample rate is zero. */
+    };
+
+    friend class SignalFactory;
+
+    /**
      * Emplace a sample to the back of the channel sample data.
      *
      * The inserted amplitude sample will be associated with the next timestep, computed automatically based on the
@@ -140,83 +213,13 @@ public:
      */
     void reserve_samples(std::size_t count);
 
-    /**
-     * Retrieves the total number of samples in the Signal stream.
-     *
-     * @return The number of samples detained by the Signal.
-     */
-    [[nodiscard]] std::uint64_t get_sample_count() const noexcept;
-
-    /**
-     * Retrieves the optional Source of the Signal.
-     *
-     * <p>
-     *  The return value of this operation can be used to determine the origin of the Signal: if the optional is empty,
-     *  the signal should be considered "embedded". Otherwise, it has an origin on the filesystem at the given
-     *  SignalSource.
-     * </p>
-     * <p>
-     *  If the Signal has an external source, the stored samples in the Signal object do not necessarily match the
-     *  external file, as callers may have invoked @ref add_sample with arbitrary samples. The Source should only be
-     *  considered a hint. This can be checked by inspecting the Source::dirty flag.
-     * </p>
-     *
-     * @return The Source of the Signal, or an empty optional if the Signal is not externally sourced.
-     */
-    [[nodiscard]] const std::optional<Source>& observe_source() const noexcept;
-
     void set_source(
             const std::filesystem::path& path,
             std::size_t channel
     );
 
-    [[nodiscard]] Sample::TimeT get_time_offset() const noexcept;
     void set_time_offset(Sample::TimeT new_time_offset) noexcept;
-
-    [[nodiscard]] std::size_t get_sample_rate() const noexcept;
     void set_sample_rate(std::size_t new_sample_rate) noexcept;
-
-    [[nodiscard]] decltype(samples)::const_iterator begin() const;
-    [[nodiscard]] decltype(samples)::const_iterator end() const;
-    [[nodiscard]] decltype(samples)::const_iterator cbegin() const noexcept;
-    [[nodiscard]] decltype(samples)::const_iterator cend() const noexcept;
-
-    [[nodiscard]] auto timed_samples() const
-    {
-        return std::views::iota(std::size_t{0}, samples.size()) |
-               std::views::transform([this](const std::size_t index) -> Sample {
-                   return {.time = get_time_at_index(index), .amplitude = samples[index]};
-               });
-    }
-
-    [[nodiscard]] Sample::AmplitudeT operator[](std::size_t index) const noexcept;
-
-    [[nodiscard]] bool is_uniformly_sampled() const noexcept;
-
-    /**
-     * Determines the corresponding time of the amplitude appearing at the given index in the sample array.
-     *
-     * @param index The index of the amplitude in the sample array.
-     * @return The timestamp corresponding to the referenced sample.
-     *
-     * @pre The index is within the bounds of the sample array.
-     */
-    [[nodiscard]] Sample::TimeT get_time_at_index(std::size_t index) const noexcept;
-
-    Signal(const Signal& old_signal);
-    Signal(const Signal& old_signal,
-           std::string_view new_name);
-
-private:
-    /**
-     * Provides basic timing information relating to the Signal samples.
-     */
-    struct Baseline
-    {
-        Sample::TimeT time_offset = 0.0f; /**< Timestamp, in seconds, of the first sample. */
-        std::size_t sample_rate = 0;      /**< Constant sample rate, in Hz, of the signal. */
-        float sample_rate_r = 0.0f;       /**< Reciprocal of the sample rate; zero if sample rate is zero. */
-    };
 
     /**
      * Implementation helper to associate the latest amplitude sample with the given time.
