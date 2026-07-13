@@ -18,6 +18,7 @@ DownsampleResult::DownsampleResult(
         const Signal::id_type source_id,
         std::unique_ptr<Signal> downsampled
 ) :
+    IResult(std::format("DownsampleResult: {}", downsampled->get_name())),
     source_id(source_id),
     downsampled(std::move(downsampled))
 {

@@ -10,6 +10,7 @@
 
 #include <stop_token>
 
+#include "../objects/Object.hpp"
 #include "IResult.hpp"
 
 namespace echomap
@@ -18,9 +19,16 @@ namespace echomap
 /**
  * An ITask represents an invocable piece of work that produces an IResult.
  */
-class ITask
+class ITask : public Object<ITask>
 {
 public:
+    explicit ITask(
+            const std::string_view task_name
+    ) :
+        Object(task_name)
+    {
+    }
+
     /**
      * Destruct the ITask base.
      */
@@ -60,6 +68,8 @@ private:
      */
     virtual std::unique_ptr<IResult> execute_work() = 0;
 };
+
+template <> constexpr std::string Object<ITask>::class_name = "Task";
 
 } // namespace echomap
 

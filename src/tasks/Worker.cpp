@@ -7,6 +7,7 @@
 
 #include "Worker.hpp"
 
+#include "../Logger.hpp"
 #include "ErrorResult.hpp"
 
 namespace echomap
@@ -17,9 +18,8 @@ Worker::Worker(
 ) :
     result_callback(std::move(result_callback)),
     worker_thread{[this](const std::stop_token& stop_token) {
-            execute(stop_token);
-        }
-    }
+        execute(stop_token);
+    }}
 {
 }
 
@@ -27,6 +27,7 @@ void Worker::submit(
         std::unique_ptr<ITask>&& task
 )
 {
+    LOG_F_DEBUG("Scheduling {} {}: {}.", task->get_class_name(), task->get_id(), task->get_name());
     task_queue.produce(std::move(task));
 }
 
@@ -37,8 +38,10 @@ bool Worker::is_result_available() const noexcept
 
 std::unique_ptr<IResult> Worker::try_get_result()
 {
-    if (std::unique_ptr<IResult> result; result_queue.try_consume(result))
+    if (std::unique_ptr<IResult> result; result_queue.try_consume(result)) {
+        LOG_F_DEBUG("Consuming {} {}: {}.", result->get_class_name(), result->get_id(), result->get_name());
         return std::move(result);
+    }
 
     return nullptr;
 }
@@ -52,7 +55,17 @@ void Worker::execute(
         if (auto job = task_queue.wait_consume(stop_token); job.has_value()) {
             try {
                 // Likewise, ITask::execute runs the work synchronously on our computation thread.
-                if (auto result = (*job)->execute(stop_token); result != nullptr) {
+                auto& task = *job->get();
+                LOG_F_DEBUG("Executing {} {}: {}.", task.get_class_name(), task.get_id(), task.get_name());
+                if (auto result = task.execute(stop_token); result != nullptr) {
+                    LOG_F_DEBUG("Finished {} {}: {}.", task.get_class_name(), task.get_id(), task.get_name());
+                    LOG_F_DEBUG(
+                            "Publishing {} {}: {}.",
+                            result->get_class_name(),
+                            result->get_id(),
+                            result->get_name()
+                    );
+
                     result_queue.produce(std::move(result));
                     if (result_callback)
                         result_callback();

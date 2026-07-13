@@ -37,7 +37,9 @@ public:
      * master and computation threads.
      *
      * @param signal The shared-ownership Signal to downsample.
-     * @param factor The multiplicate factor by which the Signal should be downsampled.
+     * @param factor The multiplicative factor by which the Signal should be downsampled.
+     *
+     * @pre The given Signal must detain a non-nullptr Signal.
      */
     explicit DownsampleTask(
             std::shared_ptr<Signal> signal,

@@ -18,6 +18,7 @@ JSONDeserialiser LoadProjectTask::deserialiser{};
 LoadProjectTask::LoadProjectTask(
         const std::filesystem::path& path
 ) :
+    ITask(std::format("LoadProjectTask: {}", path.c_str())),
     project_file_path(path)
 {
 }

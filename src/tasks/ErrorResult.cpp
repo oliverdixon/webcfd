@@ -12,6 +12,7 @@ namespace echomap
 ErrorResult::ErrorResult(
         const std::string_view message
 ) :
+    IResult("ErrorResult"),
     message(message)
 {
 }

@@ -7,6 +7,8 @@
 
 #include "Logger.hpp"
 
+#include <thread>
+
 #ifdef __EMSCRIPTEN__
 #include <emscripten/console.h>
 #else
@@ -23,8 +25,14 @@ void Logger::log(
         const std::source_location location
 )
 {
-    const auto line =
-            std::format("[{}] {}:{} says: {}", level_to_string(level), location.file_name(), location.line(), message);
+    const auto line = std::format(
+            "[{} ({})] {}:{} says: {}",
+            level_to_string(level),
+            std::this_thread::get_id(),
+            location.file_name(),
+            location.line(),
+            message
+    );
 
 #ifdef __EMSCRIPTEN__
     switch (level) {

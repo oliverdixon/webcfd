@@ -19,9 +19,11 @@ DownsampleTask::DownsampleTask(
         std::shared_ptr<Signal> signal,
         const float factor
 ) :
+    ITask(std::format("DownsampleTask: {}", signal->get_name())),
     signal(std::move(signal)),
     factor(factor)
 {
+    assert(this->signal != nullptr);
 }
 
 std::unique_ptr<IResult> DownsampleTask::execute_work()
