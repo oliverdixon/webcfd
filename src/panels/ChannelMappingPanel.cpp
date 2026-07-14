@@ -67,6 +67,8 @@ void ChannelMappingPanel::draw_new_channel_mapping() noexcept
         ImGui::TableNextRow();
         ImGui::TableNextColumn();
 
+        bool need_to_force = false;
+
         // Prompt for the associated signal.
         ImGui::SetNextItemWidth(-std::numeric_limits<float>::min());
         if (ImGui::BeginCombo(
@@ -87,6 +89,7 @@ void ChannelMappingPanel::draw_new_channel_mapping() noexcept
             }
 
             ImGui::EndCombo();
+            need_to_force = true;
         }
 
         ImGui::TableNextColumn();
@@ -109,9 +112,13 @@ void ChannelMappingPanel::draw_new_channel_mapping() noexcept
             }
 
             ImGui::EndCombo();
+            need_to_force = true;
         }
 
         ImGui::EndTable();
+
+        if (need_to_force)
+            app.increment_forced_frames(4);
     }
 }
 

@@ -94,7 +94,7 @@ private:
 #define LOG_F_DEBUG(msg, ...)                                                                                          \
     do {                                                                                                               \
         Logger::log_f(Logger::Level::Debug, std::source_location::current(), msg, __VA_ARGS__);                        \
-    } while (0);
+    } while (0)
 #endif
 
 /**
@@ -105,7 +105,7 @@ private:
 #define LOG_F_INFO(msg, ...)                                                                                           \
     do {                                                                                                               \
         Logger::log_f(Logger::Level::Info, std::source_location::current(), msg, __VA_ARGS__);                         \
-    } while (0);
+    } while (0)
 
 /**
  * Logs a formatted warning-level message using echomap::Logger::log_f.
@@ -115,7 +115,7 @@ private:
 #define LOG_F_WARN(msg, ...)                                                                                           \
     do {                                                                                                               \
         Logger::log_f(Logger::Level::Warning, std::source_location::current(), msg, __VA_ARGS__);                      \
-    } while (0);
+    } while (0)
 
 /**
  * Logs a formatted error-level message using echomap::Logger::log_f.
@@ -125,7 +125,7 @@ private:
 #define LOG_F_ERROR(msg, ...)                                                                                          \
     do {                                                                                                               \
         Logger::log_f(Logger::Level::Error, std::source_location::current(), msg, __VA_ARGS__);                        \
-    } while (0);
+    } while (0)
 
 /**
  * @def LOG_DEBUG
@@ -141,7 +141,7 @@ private:
 #define LOG_DEBUG(msg, ...)                                                                                            \
     do {                                                                                                               \
         Logger::log(Logger::Level::Debug, msg, std::source_location::current());                                       \
-    } while (0);
+    } while (0)
 #endif
 
 /**
@@ -152,7 +152,7 @@ private:
 #define LOG_INFO(msg)                                                                                                  \
     do {                                                                                                               \
         Logger::log(Logger::Level::Info, msg, std::source_location::current());                                        \
-    } while (0);
+    } while (0)
 
 /**
  * Logs an unformatted warning-level message using echomap::Logger::log.
@@ -162,7 +162,7 @@ private:
 #define LOG_WARN(msg)                                                                                                  \
     do {                                                                                                               \
         Logger::log(Logger::Level::Warning, msg, std::source_location::current());                                     \
-    } while (0);
+    } while (0)
 
 /**
  * Logs an unformatted error-level message using echomap::Logger::log.
@@ -172,6 +172,6 @@ private:
 #define LOG_ERROR(msg)                                                                                                 \
     do {                                                                                                               \
         Logger::log(Logger::Level::Error, msg, std::source_location::current());                                       \
-    } while (0);
+    } while (0)
 
 #endif // ECHOMAP_LOGGER_H

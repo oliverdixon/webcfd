@@ -16,7 +16,7 @@ namespace echomap
 
 template <> constexpr std::string Object<FrequencySpectrum>::class_name = "FreqSpec";
 
-std::string_view FrequencySpectrum::get_window_function_name(
+std::string FrequencySpectrum::get_window_function_name(
         const WindowFunction function
 ) noexcept
 {

@@ -80,6 +80,16 @@ public:
      */
     void submit_lightweight_task(LightweightTask task);
 
+    /**
+     * Indicate to the renderer that the following frames should always be rendered, regardless of whether there are any
+     * new events to process.
+     *
+     * The forced frame count stacks (as in a source) until the renderer drains it to zero (as in a sink).
+     *
+     * @param count The number of frames to force.
+     */
+    void increment_forced_frames(unsigned int count = 1) noexcept;
+
     void handle(LoadProjectResult& result) override;
     void handle(DownsampleResult& result) override;
     void handle(DFTResult& result) override;
@@ -213,6 +223,7 @@ private:
 
     ImGuiID dockspace_id;
     bool dockspace_configured = false;
+    unsigned int forced_frames = 0;
 };
 
 } // namespace echomap

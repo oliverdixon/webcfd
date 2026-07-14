@@ -9,23 +9,29 @@
 
 #include "SignalDFTPanel.hpp"
 
+#include "../EchoMap.hpp"
+#include "../Logger.hpp"
 #include "../objects/FrequencySpectrum.hpp"
 #include "../objects/Project.hpp"
-#include "../tasks/DFTTask.hpp"
 #include "../tasks/DFTResult.hpp"
+#include "../tasks/DFTTask.hpp"
 #include "../tasks/Worker.hpp"
-#include "../Logger.hpp"
 
 namespace echomap
 {
 
 SignalDFTPanel::SignalDFTPanel(
         Worker& parent_worker,
+        EchoMap& app,
         const Project* const initial_project
 ) :
     parent_worker(parent_worker),
-    active_project(initial_project)
+    active_project(initial_project),
+    app(app)
 {
+    for (std::size_t window_idx = 0; window_idx < all_window_functions.size(); ++window_idx)
+        window_function_names[window_idx] =
+                FrequencySpectrum::get_window_function_name(all_window_functions[window_idx]);
 }
 
 void SignalDFTPanel::draw() noexcept
@@ -33,32 +39,11 @@ void SignalDFTPanel::draw() noexcept
     if (ImGui::Begin(panel_name.c_str())) {
         if (active_project == nullptr)
             ImGui::Text("No project is loaded.");
-        else if (active_project->get_signal_count() > 0 && ImPlot::BeginAlignedPlots("##DFTAlignedGroup")) {
-            ImPlot::PushStyleColor(ImPlotCol_FrameBg, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
-
-            for (const auto& signal : active_project->share_signals())
-                if (const auto spectrum = get_spectra(signal); spectrum == nullptr)
-                    ImGui::Text("Could not take DFT of %s due to system error.", signal->get_imgui_name());
-                else if (ImPlot::BeginPlot(spectrum->get_imgui_name())) {
-
-                    ImPlot::SetupAxes("Frequency (Hz)", "Magnitude");
-                    ImPlot::SetupAxisLinks(ImAxis_X1, &bounding_box.X.Min, &bounding_box.X.Max);
-                    ImPlot::SetupAxisLinks(ImAxis_Y1, &bounding_box.Y.Min, &bounding_box.Y.Max);
-
-                    CallbackData callback_data = {.spectrum = spectrum};
-                    ImPlot::PlotLineG(
-                            "",
-                            &SignalDFTPanel::get_indexed_frequency_bin,
-                            &callback_data,
-                            static_cast<int>(spectrum->bins.size()),
-                            plotting_spec_2d
-                    );
-
-                    ImPlot::EndPlot();
-                }
-
-            ImPlot::EndAlignedPlots();
-            ImPlot::PopStyleColor();
+        else if (!active_project->get_signal_count())
+            ImGui::Text("No signals are loaded.");
+        else {
+            draw_options_section();
+            draw_preview_section();
         }
     }
 
@@ -83,25 +68,18 @@ void SignalDFTPanel::handle(
         DFTResult& result
 )
 {
-    auto spectrum_slot_it = spectra_cache.find(result.get_source_id());
     auto spectrum = result.take_spectrum();
 
-    if (spectrum_slot_it == spectra_cache.end()) {
-        LOG_F_WARN("Received an unexpected result for the DFT of Signal {}.", spectrum->get_name());
-        const auto spectrum_name_view = spectrum->get_name();
-        auto [it, success] = spectra_cache.emplace(result.get_source_id(), std::move(spectrum));
+    if (const auto group_it = spectra_cache.find(result.get_source_id()); group_it == spectra_cache.end())
+        LOG_F_WARN("Dropping an unexpected result for the DFT of Signal {}.", spectrum->get_name());
+    else {
+        const auto idx = std::to_underlying(spectrum->preprocessor);
 
-        if (!success) {
-            LOG_F_ERROR("Could not store the DFT of Signal {} in the cache.", spectrum_name_view);
-            return;
-        }
+        group_it->second.is_pending[idx] = false;
+        group_it->second.spectra[idx] = std::move(spectrum);
 
-        spectrum_slot_it = it;
-    } else
-        spectrum_slot_it->second = std::move(spectrum);
-
-    // Update the bounding box for the graphical representation.
-    update_bounding_box(*spectrum_slot_it->second);
+        update_bounding_box(*group_it->second.spectra[idx]);
+    }
 }
 
 ImPlotPoint SignalDFTPanel::get_indexed_frequency_bin(
@@ -111,6 +89,71 @@ ImPlotPoint SignalDFTPanel::get_indexed_frequency_bin(
 {
     const auto spectrum = static_cast<CallbackData*>(user_data)->spectrum;
     return {spectrum->bins[index].frequency, spectrum->bins[index].magnitude};
+}
+
+void SignalDFTPanel::draw_options_section() noexcept
+{
+    ImGui::SeparatorText("DFT Configuration");
+
+    ImGui::AlignTextToFramePadding();
+    ImGui::TextUnformatted("Window Function");
+    ImGui::SameLine();
+    ImGui::SetNextItemWidth(-std::numeric_limits<float>::min());
+
+    if (auto combo_selected_idx = std::to_underlying(selected_window_function);
+        ImGui::BeginCombo("##DFTOptionsWindowFunction", window_function_names[combo_selected_idx].c_str())) {
+        for (unsigned int item_idx = 0; item_idx < window_function_names.size(); ++item_idx) {
+            const auto is_selected = item_idx == combo_selected_idx;
+            if (ImGui::Selectable(window_function_names[item_idx].c_str(), is_selected) &&
+                combo_selected_idx != item_idx) {
+                combo_selected_idx = item_idx;
+                selected_window_function = static_cast<FrequencySpectrum::WindowFunction>(combo_selected_idx);
+            }
+
+            if (is_selected)
+                ImGui::SetItemDefaultFocus();
+        }
+
+        ImGui::EndCombo();
+        app.increment_forced_frames(4);
+    }
+}
+
+void SignalDFTPanel::draw_preview_section() noexcept
+{
+    ImGui::SeparatorText("DFT Previews");
+
+    if (ImPlot::BeginAlignedPlots("##DFTAlignedGroup")) {
+        ImPlot::PushStyleColor(ImPlotCol_FrameBg, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
+
+        for (const auto& signal : active_project->share_signals())
+            if (const auto spectrum = get_spectra(signal, selected_window_function); spectrum == nullptr)
+                ImGui::Text(
+                        "Loading DFT of %s with the %s window function...",
+                        signal->get_imgui_name(),
+                        FrequencySpectrum::get_window_function_name(selected_window_function).c_str()
+                );
+            else if (ImPlot::BeginPlot(spectrum->get_imgui_name())) {
+
+                ImPlot::SetupAxes("Frequency (Hz)", "Magnitude");
+                ImPlot::SetupAxisLinks(ImAxis_X1, &bounding_box.X.Min, &bounding_box.X.Max);
+                ImPlot::SetupAxisLinks(ImAxis_Y1, &bounding_box.Y.Min, &bounding_box.Y.Max);
+
+                CallbackData callback_data = {.spectrum = spectrum};
+                ImPlot::PlotLineG(
+                        "",
+                        &SignalDFTPanel::get_indexed_frequency_bin,
+                        &callback_data,
+                        static_cast<int>(spectrum->bins.size()),
+                        plotting_spec_2d
+                );
+
+                ImPlot::EndPlot();
+            }
+
+        ImPlot::EndAlignedPlots();
+        ImPlot::PopStyleColor();
+    }
 }
 
 void SignalDFTPanel::update_bounding_box(
@@ -151,27 +194,28 @@ void SignalDFTPanel::update_bounding_box() noexcept
 }
 
 const FrequencySpectrum* SignalDFTPanel::get_spectra(
-        std::shared_ptr<Signal> signal
+        std::shared_ptr<Signal> signal,
+        const FrequencySpectrum::WindowFunction window_function
 )
 {
     assert(signal != nullptr);
-    const auto spectra_it = spectra_cache.find(signal->get_id());
 
-    if (spectra_it == spectra_cache.end()) {
-        /*
-         * If the source signal hasn't already been transformed and cached, submit a job to do it ASAP.
-         *
-         * The result won't be picked up on this render cycle, so return nullptr to indicate the "Loading" state, but it
-         * should come through shortly. We emplace a nullptr in the slot to indicate that the work has been requested,
-         * but not yet completed.
-         */
+    const auto signal_id = signal->get_id();
 
-        spectra_cache.emplace(signal->get_id(), nullptr);
-        parent_worker.submit(std::make_unique<DFTTask>(std::move(signal)));
-        return nullptr;
+    auto [group_it, inserted] = spectra_cache.try_emplace(signal_id);
+
+    auto& entry = group_it->second;
+    const auto idx = std::to_underlying(window_function);
+
+    if (entry.spectra[idx] != nullptr)
+        return entry.spectra[idx].get();
+
+    if (!entry.is_pending[idx]) {
+        entry.is_pending[idx] = true;
+        parent_worker.submit(std::make_unique<DFTTask>(std::move(signal), window_function));
     }
 
-    return spectra_it->second.get();
+    return nullptr;
 }
 
 } // namespace echomap

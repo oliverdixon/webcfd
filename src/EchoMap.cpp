@@ -99,7 +99,7 @@ EchoMap::EchoMap() :
     panels.push_back(std::make_unique<SignalWaveformPanel>(worker));
     panels.push_back(std::make_unique<SensorGeometryPanel>(*this));
     panels.push_back(std::make_unique<ChannelMappingPanel>(*this));
-    panels.push_back(std::make_unique<SignalDFTPanel>(worker));
+    panels.push_back(std::make_unique<SignalDFTPanel>(worker, *this));
 
     // TODO remove: test async project load.
     worker.submit(std::make_unique<LoadProjectTask>("../resources/ExampleProject.json"));
@@ -114,7 +114,12 @@ void EchoMap::run_event_loop()
     instance.ProcessEvents();
 
     while (!glfwWindowShouldClose(window)) {
-        glfwWaitEvents();
+        if (forced_frames > 0) {
+            glfwPollEvents();
+            --forced_frames;
+        } else
+            glfwWaitEvents();
+
         render();
         instance.ProcessEvents();
     }
@@ -463,7 +468,7 @@ void EchoMap::process_lightweight_tasks()
         } catch (const std::exception& exception) {
             error_modal.raise_error(exception.what());
             LOG_F_ERROR(
-                    "LWT with hint {} (#{}) was responsible for error: {}.",
+                    "LWT with hint {} (#{}) was responsible for error: {}",
                     task_hint,
                     task_position,
                     exception.what()
@@ -542,6 +547,13 @@ void EchoMap::submit_lightweight_task(
             static_cast<void*>(&lightweight_tasks.back()),
             lightweight_tasks.size() - 1
     );
+}
+
+void EchoMap::increment_forced_frames(
+        const unsigned int count
+) noexcept
+{
+    forced_frames += count;
 }
 
 void EchoMap::handle(

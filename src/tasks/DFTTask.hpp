@@ -14,6 +14,8 @@
 
 #include "ITask.hpp"
 
+#include "../objects/FrequencySpectrum.hpp"
+
 namespace echomap
 {
 
@@ -35,15 +37,17 @@ public:
      * master and computation threads.
      *
      * @param signal The shared-ownership Signal to analyse.
+     * @param window_function The window function to preprocess the input data.
      *
      * @pre The given Signal must detain a non-nullptr Signal.
      */
-    explicit DFTTask(std::shared_ptr<Signal> signal);
+    explicit DFTTask(std::shared_ptr<Signal> signal, FrequencySpectrum::WindowFunction window_function);
 
 private:
     std::unique_ptr<IResult> execute_work() override;
 
     std::shared_ptr<Signal> signal;
+    const FrequencySpectrum::WindowFunction window_function;
 };
 
 } // namespace echomap

@@ -13,8 +13,8 @@
 #include <memory>
 #include <span>
 
-#include "../Signal.hpp"
 #include "../FrequencySpectrum.hpp"
+#include "../Signal.hpp"
 
 namespace echomap
 {
@@ -31,8 +31,7 @@ public:
      * Construct a FrequencySpectrum of the given uniformly sampled Signal.
      *
      * @param signal The uniformly sampled Signal of which to take the DFT.
-     * @param window_function The window function to apply onto the input time-series; defaults to the identity
-     *  function.
+     * @param window_function The window function to apply onto the input time-series.
      *
      * @return An owning container of the created FrequencySpectrum.
      *
@@ -41,7 +40,7 @@ public:
      */
     [[nodiscard]] static std::unique_ptr<FrequencySpectrum> create_frequency_spectrum(
             const Signal& signal,
-            FrequencySpectrum::WindowFunction window_function = FrequencySpectrum::WindowFunction::Hamming
+            FrequencySpectrum::WindowFunction window_function
     );
 
 private:

@@ -22,7 +22,7 @@ FFTWBuffers::FFTWBuffers(
     coefficients(fftwf_alloc_complex(size / 2 + 1)),
     input(inplace_input.has_value() ? const_cast<float*>(inplace_input->data()) : fftwf_alloc_real(size)),
     input_size(size),
-    is_input_managed(inplace_input.has_value())
+    is_input_managed(!inplace_input.has_value())
 {
     /*
      * It's not very nice, but we cast away the const on the input buffer as required by the FFTW C API. We know that

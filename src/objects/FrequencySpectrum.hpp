@@ -45,7 +45,13 @@ public:
     std::vector<Bin> bins;
     const WindowFunction preprocessor;
 
-    static std::string_view get_window_function_name(WindowFunction function) noexcept;
+    /**
+     * Produce a human-readable string for the given WindowFunction.
+     *
+     * @param function The WindowFunction of interest.
+     * @return A short string providing a name for the given WindowFunction, e.g. "Hamming".
+     */
+    static std::string get_window_function_name(WindowFunction function) noexcept;
 
 private:
     friend FrequencySpectrumFactory;
