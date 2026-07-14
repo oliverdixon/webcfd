@@ -4,7 +4,7 @@
 
 #include "ErrorResult.hpp"
 
-#include <stdexcept>
+#include "IResultHandler.hpp"
 
 namespace echomap
 {
@@ -21,8 +21,12 @@ void ErrorResult::despatch(
         IResultHandler& handler
 )
 {
-    std::ignore = handler;
-    throw std::runtime_error(message); // TODO use a proper interface on EchoMap to report errors.
+    handler.handle(*this);
+}
+
+std::string_view ErrorResult::observe_message() const noexcept
+{
+    return message;
 }
 
 } // namespace echomap

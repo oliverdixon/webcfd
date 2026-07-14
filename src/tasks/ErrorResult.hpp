@@ -20,6 +20,8 @@ public:
 
     void despatch(IResultHandler& handler) override;
 
+    [[nodiscard]] std::string_view observe_message() const noexcept;
+
 private:
     std::string message;
 };

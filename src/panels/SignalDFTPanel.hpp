@@ -86,10 +86,20 @@ private:
             FrequencySpectrum::WindowFunction::Hamming
     };
 
+    enum class CacheEntryState
+    {
+        NotRequested,
+        Success,
+        Pending,
+        Failed
+    };
+
     struct SpectrumCacheEntry
     {
         std::array<std::unique_ptr<FrequencySpectrum>, all_window_functions.size()> spectra;
-        std::array<bool, all_window_functions.size()> is_pending{};
+
+        // TODO: never put into the failed state.  We need to subscribe to errors from the Worker.
+        std::array<CacheEntryState, all_window_functions.size()> status{};
     };
 
     /**

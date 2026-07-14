@@ -118,7 +118,7 @@ void ChannelMappingPanel::draw_new_channel_mapping() noexcept
         ImGui::EndTable();
 
         if (need_to_force)
-            app.increment_forced_frames(4);
+            app.increment_forced_frames();
     }
 }
 

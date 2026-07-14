@@ -582,4 +582,15 @@ void EchoMap::handle(
         panel->handle(result);
 }
 
+void EchoMap::handle(
+        const ErrorResult& result
+)
+{
+    error_modal.raise_error(result.observe_message());
+    increment_forced_frames(); // Force a frame to draw the modal.
+
+    for (const auto& panel : panels)
+        panel->handle(result);
+}
+
 } // namespace echomap

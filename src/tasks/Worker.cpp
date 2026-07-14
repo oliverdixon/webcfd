@@ -59,33 +59,27 @@ void Worker::execute(
     while (!stop_token.stop_requested())
         // ThreadSafeQueue::wait_consume will block the computation thread until some work is available.
         if (auto job = task_queue.wait_consume(stop_token); job.has_value()) {
-            try {
-                // Likewise, ITask::execute runs the work synchronously on our computation thread.
-                auto& task = *job->get();
-                LOG_F_DEBUG("Executing {} {}: {}.", task.get_class_name(), task.get_id(), task.get_name());
-                if (auto result = task.execute(stop_token); result != nullptr) {
-                    LOG_F_DEBUG("Finished {} {}: {}.", task.get_class_name(), task.get_id(), task.get_name());
-                    LOG_F_DEBUG(
-                            "Publishing {} {}: {}.",
-                            result->get_class_name(),
-                            result->get_id(),
-                            result->get_name()
-                    );
+            // Likewise, ITask::execute runs the work synchronously on our computation thread.
+            auto& task = *job->get();
+            LOG_F_DEBUG("Executing {} {}: {}.", task.get_class_name(), task.get_id(), task.get_name());
+            if (auto result = task.execute(stop_token); result != nullptr) {
+                LOG_F_DEBUG("Finished {} {}: {}.", task.get_class_name(), task.get_id(), task.get_name());
+                LOG_F_DEBUG(
+                        "Publishing {} {}: {}.",
+                        result->get_class_name(),
+                        result->get_id(),
+                        result->get_name()
+                );
 
-                    result_queue.produce(std::move(result));
-                    if (result_callback)
-                        result_callback();
-                }
-
-                /*
-                 * Once the ITask pulled from the task queue goes out of scope here, it will be destructed. We're left
-                 * with only the IResult posted on the result queue.
-                 */
-            } catch (const std::exception& exception) {
-                result_queue.produce(std::make_unique<ErrorResult>(exception.what()));
+                result_queue.produce(std::move(result));
                 if (result_callback)
                     result_callback();
             }
+
+            /*
+             * Once the ITask pulled from the task queue goes out of scope here, it will be destructed. We're left
+             * with only the IResult posted on the result queue.
+             */
         }
 }
 

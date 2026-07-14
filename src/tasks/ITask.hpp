@@ -10,7 +10,9 @@
 
 #include <stop_token>
 
+#include "../Logger.hpp"
 #include "../objects/Object.hpp"
+#include "ErrorResult.hpp"
 #include "IResult.hpp"
 
 namespace echomap
@@ -32,7 +34,7 @@ public:
     /**
      * Destruct the ITask base.
      */
-    virtual ~ITask() = default;
+    virtual ~ITask() noexcept = default;
 
     /**
      * Execute the work, subject to the given token, and produce an IResult.
@@ -47,7 +49,15 @@ public:
         if (stop_token.stop_requested())
             return nullptr;
 
-        return execute_work();
+        try {
+            return execute_work();
+        } catch (const std::exception& exception) {
+            LOG_F_ERROR("{} failed with message: {}.", get_name(), exception.what());
+            return std::make_unique<ErrorResult>(exception.what());
+        } catch (...) {
+            LOG_F_ERROR("{} failed with a system error.", get_name());
+            return std::make_unique<ErrorResult>("Unknown system error. This is a bug.");
+        }
     }
 
     /**

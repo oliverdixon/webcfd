@@ -5,7 +5,8 @@
 * Use the ImGui DockBuilder API to configure a sane default panel configuration:
   https://github.com/ocornut/imgui/wiki/Docking#programmatically-setting-up-docking-layout-dockbuider-api
 
-* Use a proper publisher-subscriber model for asynchronous results and tasks.
+* Use a proper publisher-subscriber model for asynchronous results and tasks. libsigc++ would allow us to register
+  trackable slots (clients) on IResults.
 
 * Use heuristics to offload FFT work to the GPU via WebGPU for large transforms where the benefits outweigh the costs
   of memory transaction overhead.

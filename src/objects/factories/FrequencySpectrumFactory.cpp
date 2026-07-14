@@ -12,6 +12,7 @@
 #include <fftw3.h>
 
 #include <cmath>
+#include <numbers>
 
 #include "../FrequencySpectrum.hpp"
 #include "../Signal.hpp"

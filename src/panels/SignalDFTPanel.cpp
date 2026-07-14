@@ -75,7 +75,7 @@ void SignalDFTPanel::handle(
     else {
         const auto idx = std::to_underlying(spectrum->preprocessor);
 
-        group_it->second.is_pending[idx] = false;
+        group_it->second.status[idx] = CacheEntryState::Success;
         group_it->second.spectra[idx] = std::move(spectrum);
 
         update_bounding_box(*group_it->second.spectra[idx]);
@@ -122,7 +122,7 @@ void SignalDFTPanel::draw_options_section() noexcept
             }
 
             ImGui::EndCombo();
-            app.increment_forced_frames(4);
+            app.increment_forced_frames();
         }
 
         ImGui::TableNextRow();
@@ -145,39 +145,65 @@ void SignalDFTPanel::draw_preview_section() noexcept
     if (ImPlot::BeginAlignedPlots("##DFTAlignedGroup")) {
         ImPlot::PushStyleColor(ImPlotCol_FrameBg, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
 
-        for (const auto& signal : active_project->share_signals())
-            if (const auto spectrum = get_spectra(signal, selected_window_function); spectrum == nullptr)
-                ImGui::Text(
-                        "Loading DFT of %s with the %s window function...",
-                        signal->get_imgui_name(),
-                        FrequencySpectrum::get_window_function_name(selected_window_function).c_str()
-                );
-            else if (ImPlot::BeginPlot(spectrum->get_imgui_name())) {
+        for (const auto& signal :
+             active_project->share_signals() | std::views::filter([](const std::shared_ptr<Signal>& candidate) {
+                 return candidate->is_uniformly_sampled();
+             })) {
 
-                ImPlot::SetupAxes("Frequency (Hz)", "Magnitude");
-                ImPlot::SetupAxisScale(ImAxis_X1, use_log_scale ? ImPlotScale_Log10 : ImPlotScale_Linear);
-                ImPlot::SetupAxisLinks(ImAxis_X1, &bounding_box.X.Min, &bounding_box.X.Max);
-                ImPlot::SetupAxisLinks(ImAxis_Y1, &bounding_box.Y.Min, &bounding_box.Y.Max);
+            if (const auto spectrum = get_spectra(signal, selected_window_function); spectrum != nullptr) {
+                // Case 1: we got a spectrum immediately.
+                if (ImPlot::BeginPlot(spectrum->get_imgui_name())) {
+                    ImPlot::SetupAxes("Frequency (Hz)", "Magnitude");
+                    ImPlot::SetupAxisScale(ImAxis_X1, use_log_scale ? ImPlotScale_Log10 : ImPlotScale_Linear);
+                    ImPlot::SetupAxisLinks(ImAxis_X1, &bounding_box.X.Min, &bounding_box.X.Max);
+                    ImPlot::SetupAxisLinks(ImAxis_Y1, &bounding_box.Y.Min, &bounding_box.Y.Max);
 
-                int plottable_bin_count = static_cast<int>(spectrum->get_bin_count());
-                CallbackData callback_data = {.spectrum = spectrum, .index_offset = 0};
+                    int plottable_bin_count = static_cast<int>(spectrum->get_bin_count());
+                    CallbackData callback_data = {.spectrum = spectrum, .index_offset = 0};
 
-                if (plottable_bin_count > 0 && use_log_scale) {
-                    // If we're plotting on the log scale, discount the DC component if it exists.
-                    --plottable_bin_count;
-                    callback_data.index_offset = 1;
+                    if (plottable_bin_count > 0 && use_log_scale) {
+                        // If we're plotting on the log scale, discount the DC component if it exists.
+                        --plottable_bin_count;
+                        callback_data.index_offset = 1;
+                    }
+
+                    ImPlot::PlotLineG(
+                            "",
+                            &SignalDFTPanel::get_indexed_frequency_bin,
+                            &callback_data,
+                            plottable_bin_count,
+                            plotting_spec_2d
+                    );
+
+                    ImPlot::EndPlot();
                 }
+            } else {
+                // Case 2: we didn't get one immediately. Either it's pending, or it failed.
+                const auto status =
+                        spectra_cache[signal->get_id()].status[std::to_underlying(selected_window_function)];
 
-                ImPlot::PlotLineG(
-                        "",
-                        &SignalDFTPanel::get_indexed_frequency_bin,
-                        &callback_data,
-                        plottable_bin_count,
-                        plotting_spec_2d
-                );
+                if (status == CacheEntryState::Pending)
+                    ImGui::Text(
+                            "Loading DFT of %s with the %s window function...",
+                            signal->get_imgui_name(),
+                            FrequencySpectrum::get_window_function_name(selected_window_function).c_str()
+                    );
+                else if (status == CacheEntryState::Failed) {
+                    const auto function_name = FrequencySpectrum::get_window_function_name(selected_window_function);
+                    LOG_F_ERROR(
+                            "The front-end is reporting that {} DFT with {} failed.",
+                            signal->get_name(),
+                            function_name
+                    );
 
-                ImPlot::EndPlot();
+                    ImGui::Text(
+                            "Failed to load DFT of %s with the %s function. This is a bug.",
+                            signal->get_imgui_name(),
+                            function_name.c_str()
+                    );
+                }
             }
+        }
 
         ImPlot::EndAlignedPlots();
         ImPlot::PopStyleColor();
@@ -227,7 +253,6 @@ const FrequencySpectrum* SignalDFTPanel::get_spectra(
     assert(signal != nullptr);
 
     const auto signal_id = signal->get_id();
-
     auto [group_it, inserted] = spectra_cache.try_emplace(signal_id);
 
     auto& entry = group_it->second;
@@ -236,8 +261,8 @@ const FrequencySpectrum* SignalDFTPanel::get_spectra(
     if (entry.spectra[idx] != nullptr)
         return entry.spectra[idx].get();
 
-    if (!entry.is_pending[idx]) {
-        entry.is_pending[idx] = true;
+    if (entry.status[idx] != CacheEntryState::Pending) {
+        entry.status[idx] = CacheEntryState::Pending;
         parent_worker.submit(std::make_unique<DFTTask>(std::move(signal), window_function));
     }
 

@@ -84,15 +84,17 @@ public:
      * Indicate to the renderer that the following frames should always be rendered, regardless of whether there are any
      * new events to process.
      *
-     * The forced frame count stacks (as in a source) until the renderer drains it to zero (as in a sink).
+     * The forced frame count stacks (as in a source) until the renderer drains it to zero (as in a sink). By default,
+     * we force four frames since most Dear ImGui components can fully render a four-frame cycle.
      *
      * @param count The number of frames to force.
      */
-    void increment_forced_frames(unsigned int count = 1) noexcept;
+    void increment_forced_frames(unsigned int count = 4) noexcept;
 
     void handle(LoadProjectResult& result) override;
     void handle(DownsampleResult& result) override;
     void handle(DFTResult& result) override;
+    void handle(const ErrorResult& result) override;
 
 private:
     static constexpr auto operation_timeout = std::numeric_limits<std::uint64_t>::max();

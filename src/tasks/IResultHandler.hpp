@@ -13,6 +13,7 @@
 namespace echomap
 {
 
+class ErrorResult;
 class LoadProjectResult;
 class DownsampleResult;
 class DFTResult;
@@ -36,6 +37,12 @@ public:
     }
 
     virtual void handle(DFTResult& result)
+    {
+        std::ignore = result;
+    }
+
+    // TODO: remove default implementation - make subscribers acknowledge errors.
+    virtual void handle(const ErrorResult& result)
     {
         std::ignore = result;
     }
