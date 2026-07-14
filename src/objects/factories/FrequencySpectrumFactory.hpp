@@ -24,16 +24,39 @@ class Signal;
 class FrequencySpectrumFactory
 {
 public:
+    enum class WindowFunction
+    {
+        Identity,
+        Hann,
+        Hamming
+    };
+
     /**
      * Construct a FrequencySpectrum of the given uniformly sampled Signal.
      *
      * @param signal The uniformly sampled Signal of which to take the DFT.
+     * @param window_function The window function to apply onto the input time-series; defaults to the identity
+     *  function.
      * @return An owning container of the created FrequencySpectrum.
      *
      * @throws std::runtime_error The given Signal was not uniformly sampled; hence, a DFT is not applicable.
      * @throws std::runtime_error FFTW failed to initialise.
      */
-    [[nodiscard]] static std::unique_ptr<FrequencySpectrum> create_frequency_spectrum(const Signal& signal);
+    [[nodiscard]] static std::unique_ptr<FrequencySpectrum> create_frequency_spectrum(
+            const Signal& signal,
+            WindowFunction window_function = WindowFunction::Hamming
+    );
+
+private:
+    static float hann_window(
+            std::size_t index,
+            std::size_t size
+    ) noexcept;
+
+    static float hamming_window(
+            std::size_t index,
+            std::size_t size
+    ) noexcept;
 };
 
 } // namespace echomap

@@ -94,6 +94,8 @@ add_executable(EchoMap
         src/tasks/lightweight/AddChannelMappingTask.hpp
         src/tasks/lightweight/ModifySensorPositionTask.hpp
         src/tasks/lightweight/ModifySensorColourTask.hpp
+        src/objects/factories/FFTWBuffers.cpp
+        src/objects/factories/FFTWBuffers.hpp
 )
 
 target_link_libraries(EchoMap PRIVATE
