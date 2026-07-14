@@ -18,14 +18,16 @@ namespace echomap
 
 DFTTask::DFTTask(
         std::shared_ptr<Signal> signal,
-        const FrequencySpectrum::WindowFunction window_function
+        const FrequencySpectrum::WindowFunction window_function,
+        const std::size_t transform_size
 ) :
     ITask(std::format(
             "DFTTask: {}",
             signal->get_name()
     )),
     signal(std::move(signal)),
-    window_function(window_function)
+    window_function(window_function),
+    transform_size(transform_size)
 {
     assert(this->signal != nullptr);
 }
@@ -34,7 +36,8 @@ std::unique_ptr<IResult> DFTTask::execute_work()
 {
     return std::make_unique<DFTResult>(
             signal->get_id(),
-            FrequencySpectrumFactory::create_frequency_spectrum(*signal, window_function)
+            FrequencySpectrumFactory::create_frequency_spectrum(*signal, window_function, transform_size),
+            transform_size
     );
 }
 

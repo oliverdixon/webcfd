@@ -32,6 +32,7 @@ public:
      *
      * @param signal The uniformly sampled Signal of which to take the DFT.
      * @param window_function The window function to apply onto the input time-series.
+     * @param transform_size The number of samples in the transform window.
      *
      * @return An owning container of the created FrequencySpectrum.
      *
@@ -40,7 +41,8 @@ public:
      */
     [[nodiscard]] static std::unique_ptr<FrequencySpectrum> create_frequency_spectrum(
             const Signal& signal,
-            FrequencySpectrum::WindowFunction window_function
+            FrequencySpectrum::WindowFunction window_function,
+            std::size_t transform_size
     );
 
 private:
@@ -53,7 +55,7 @@ private:
      *
      * @return The scaling divisor constant used for computing the magnitude.
      *
-     * @pre The size of the given input range matches the transform size of the FFTWBuffers object.
+     * @pre The size of the given input range is at least the transform size specified by the FFTWBuffers object.
      */
     static float prepare_input(
             const FFTWBuffers& buffers,

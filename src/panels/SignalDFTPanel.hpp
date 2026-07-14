@@ -55,23 +55,29 @@ private:
     void draw_options_section() noexcept;
     void draw_preview_section() noexcept;
 
-    void update_bounding_box(const FrequencySpectrum& spectrum) noexcept;
-    void update_bounding_box() noexcept;
+    void reset_available_transform_sizes();
+    void update_spectrum_bounds(const FrequencySpectrum& spectrum) noexcept;
+    void update_spectrum_bounds() noexcept;
+    void update_available_sizes(std::size_t maximum_sample_count);
+    void reset_viewport_bounds() noexcept;
 
     const FrequencySpectrum* get_spectra(
             std::shared_ptr<Signal> signal,
-            FrequencySpectrum::WindowFunction window_function
+            FrequencySpectrum::WindowFunction window_function,
+            std::size_t transform_size
     );
 
     /**
-     * The maximum bounding box of a DFT plot.
+     * The minimal bounding box required to fully contain the DFT spectrum plot.
      */
-    ImPlotRect bounding_box{
+    ImPlotRect spectrum_bounds{
             std::numeric_limits<double>::max(),
             std::numeric_limits<double>::lowest(),
             std::numeric_limits<double>::max(),
             std::numeric_limits<double>::lowest(),
     };
+
+    ImPlotRect viewport_bounds; /**< The user-controlled bounding box of the DFT plots. */
 
     const std::string panel_name = "Signal DFT Preview";
 
@@ -86,30 +92,55 @@ private:
             FrequencySpectrum::WindowFunction::Hamming
     };
 
-    enum class CacheEntryState
+    /**
+     * A three-way key into the FrequencySpectrum cache.
+     */
+    struct CacheKey
     {
-        NotRequested,
-        Success,
-        Pending,
-        Failed
-    };
+        Signal::id_type source_id;
+        FrequencySpectrum::WindowFunction window_function;
+        std::size_t transform_size;
 
-    struct SpectrumCacheEntry
-    {
-        std::array<std::unique_ptr<FrequencySpectrum>, all_window_functions.size()> spectra;
-
-        // TODO: never put into the failed state.  We need to subscribe to errors from the Worker.
-        std::array<CacheEntryState, all_window_functions.size()> status{};
+        bool operator==(const CacheKey&) const = default;
     };
 
     /**
-     * The spectra cache maps time-series Signal IDs to the corresponding group of DFT spectra.
+     * A keyed value within the FrequencySpectrum cache, either denoting a pending, failed, or present DFT.
      */
-    std::unordered_map<Signal::id_type, SpectrumCacheEntry> spectra_cache;
+    struct CacheValue
+    {
+        enum class State
+        {
+            NotRequested,
+            Success,
+            Pending,
+            Failed
+        } status{State::NotRequested};
 
-    std::array<std::string, all_window_functions.size()> window_function_names;
-    FrequencySpectrum::WindowFunction selected_window_function = all_window_functions.front();
-    bool use_log_scale = false;
+        std::unique_ptr<FrequencySpectrum> spectrum;
+    };
+
+    /**
+     * The hash functor for CacheKey.
+     */
+    struct CacheKeyHash
+    {
+        [[nodiscard]] std::size_t operator()(const CacheKey& key) const noexcept;
+
+    private:
+        static std::size_t combine(
+                std::size_t seed,
+                std::size_t value
+        ) noexcept;
+    };
+
+    std::unordered_map<CacheKey, CacheValue, CacheKeyHash> spectra_cache; /**< Cached DFT spectra. */
+    std::array<std::string, all_window_functions.size()> window_function_names; /**< Human-readable names of windows. */
+    FrequencySpectrum::WindowFunction selected_window = all_window_functions.front(); /**< Selected window function. */
+    bool use_log_scale = false; /**< Should the DFT be plotted with a linear or base-10 logarithmic freq. axis? */
+    static constexpr int default_size_log = 7;         /**< Base-2 log of the minimum transform size. */
+    std::vector<std::string> available_sizes;          /**< Strings of all available transform sizes. */
+    unsigned int selected_size_log = default_size_log; /**< Base-2 log of selected transform size. */
 };
 
 } // namespace echomap

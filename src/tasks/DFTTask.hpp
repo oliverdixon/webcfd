@@ -38,16 +38,22 @@ public:
      *
      * @param signal The shared-ownership Signal to analyse.
      * @param window_function The window function to preprocess the input data.
+     * @param transform_size The number of samples to include in the transform.
      *
      * @pre The given Signal must detain a non-nullptr Signal.
      */
-    explicit DFTTask(std::shared_ptr<Signal> signal, FrequencySpectrum::WindowFunction window_function);
+    explicit DFTTask(
+            std::shared_ptr<Signal> signal,
+            FrequencySpectrum::WindowFunction window_function,
+            std::size_t transform_size
+    );
 
 private:
     std::unique_ptr<IResult> execute_work() override;
 
     std::shared_ptr<Signal> signal;
     const FrequencySpectrum::WindowFunction window_function;
+    const std::size_t transform_size;
 };
 
 } // namespace echomap
