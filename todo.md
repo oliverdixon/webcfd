@@ -5,12 +5,7 @@
 * Use the ImGui DockBuilder API to configure a sane default panel configuration:
   https://github.com/ocornut/imgui/wiki/Docking#programmatically-setting-up-docking-layout-dockbuider-api
 
-* The following should run on a computation thread:
-  * Downsampling;
-  * FFT;
-  * ... ?
-
-* Use FFTW3 to compute and optionally display Fourier transforms of source and downsampled signals.
+* Use a proper publisher-subscriber model for asynchronous results and tasks.
 
 * Use heuristics to offload FFT work to the GPU via WebGPU for large transforms where the benefits outweigh the costs
   of memory transaction overhead.

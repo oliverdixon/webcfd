@@ -29,6 +29,7 @@
 #include "panels/ProjectPanel.hpp"
 #include "panels/SensorGeometryPanel.hpp"
 #include "panels/SignalWaveformPanel.hpp"
+#include "panels/SignalDFTPanel.hpp"
 
 #if defined(__EMSCRIPTEN__) and !defined(__EMSCRIPTEN_PTHREADS__)
 #warning "The Emscripten application will be single-threaded."
@@ -79,6 +80,7 @@ EchoMap::EchoMap() :
     panels.push_back(std::make_unique<SignalWaveformPanel>(worker));
     panels.push_back(std::make_unique<SensorGeometryPanel>());
     panels.push_back(std::make_unique<ChannelMappingPanel>());
+    panels.push_back(std::make_unique<SignalDFTPanel>(worker));
 
     // TODO remove: test async project load.
     worker.submit(std::make_unique<LoadProjectTask>("../resources/ExampleProject.json"));

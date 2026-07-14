@@ -40,20 +40,20 @@ void SignalWaveformPanel::draw() noexcept
             ImPlot::PushStyleColor(ImPlotCol_FrameBg, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
 
             for (const auto& signal : active_project->share_signals())
-                if (const auto spectrum = get_spectra(signal); spectrum == nullptr)
+                if (const auto downsampled = get_downsampled_signal(signal); downsampled == nullptr)
                     ImGui::Text("Could not downsample %s due to system error.", signal->get_imgui_name());
-                else if (ImPlot::BeginPlot(spectrum->get_imgui_name())) {
+                else if (ImPlot::BeginPlot(downsampled->get_imgui_name())) {
 
-                    ImPlot::SetupAxes("Frequency (Hz)", "Magnitude");
-                    ImPlot::SetupAxisLinks(ImAxis_X1, &waveform_bounding_box.X.Min, &waveform_bounding_box.X.Max);
-                    ImPlot::SetupAxisLinks(ImAxis_Y1, &waveform_bounding_box.Y.Min, &waveform_bounding_box.Y.Max);
+                    ImPlot::SetupAxes("Time (seconds)", "Amplitude");
+                    ImPlot::SetupAxisLinks(ImAxis_X1, &bounding_box.X.Min, &bounding_box.X.Max);
+                    ImPlot::SetupAxisLinks(ImAxis_Y1, &bounding_box.Y.Min, &bounding_box.Y.Max);
 
-                    FSCallback callback_data = {.spectrum = spectrum};
+                    CallbackData callback_data = {.signal = downsampled};
                     ImPlot::PlotLineG(
                             "",
-                            &SignalWaveformPanel::get_indexed_frequency_bin,
+                            &SignalWaveformPanel::get_indexed_signal_point,
                             &callback_data,
-                            static_cast<int>(spectrum->bins.size()),
+                            static_cast<int>(downsampled->get_sample_count()),
                             plotting_spec_2d
                     );
 
@@ -107,68 +107,30 @@ ImPlotPoint SignalWaveformPanel::get_indexed_signal_point(
         void* const user_data
 ) noexcept
 {
-    const auto signal = static_cast<SignalCallback*>(user_data)->signal;
+    const auto signal = static_cast<CallbackData*>(user_data)->signal;
     return {signal->get_time_at_index(index), signal->begin()[index]};
-}
-
-ImPlotPoint SignalWaveformPanel::get_indexed_frequency_bin(
-        const int index,
-        void* const user_data
-) noexcept
-{
-    const auto spectrum = static_cast<FSCallback*>(user_data)->spectrum;
-    return {spectrum->bins[index].frequency, spectrum->bins[index].magnitude};
 }
 
 void SignalWaveformPanel::update_bounding_box(
         const Signal& signal
-)
+) noexcept
 {
     if (signal.get_sample_count() > 0) {
-        if (const auto local_min = signal.get_time_at_index(0); local_min < waveform_bounding_box.X.Min)
-            waveform_bounding_box.X.Min = local_min;
+        if (const auto local_min = signal.get_time_at_index(0); local_min < bounding_box.X.Min)
+            bounding_box.X.Min = local_min;
 
         if (const auto local_max = signal.get_time_at_index(signal.get_sample_count() - 1);
-            local_max > waveform_bounding_box.X.Max)
-            waveform_bounding_box.X.Max = local_max;
+            local_max > bounding_box.X.Max)
+            bounding_box.X.Max = local_max;
     }
 }
 
-void SignalWaveformPanel::update_bounding_box(
-        const FrequencySpectrum& spectrum
-)
+void SignalWaveformPanel::update_bounding_box() noexcept
 {
-    if (const auto& bins = spectrum.bins; !bins.empty()) {
-        if (const auto local_min_x = bins.front().frequency; local_min_x < waveform_bounding_box.X.Min)
-            waveform_bounding_box.X.Min = local_min_x;
-
-        if (const auto local_max_x = bins.back().frequency; local_max_x > waveform_bounding_box.X.Max)
-            waveform_bounding_box.X.Max = local_max_x;
-
-        auto local_min_y = bins.front().magnitude;
-        for (const auto bin : bins)
-            if (bin.magnitude < local_min_y)
-                local_min_y = bin.magnitude;
-
-        if (local_min_y < waveform_bounding_box.Y.Min)
-            waveform_bounding_box.Y.Min = local_min_y;
-
-        auto local_max_y = bins.front().magnitude;
-        for (const auto bin : bins)
-            if (bin.magnitude > local_max_y)
-                local_max_y = bin.magnitude;
-
-        if (local_max_y > waveform_bounding_box.Y.Max)
-            waveform_bounding_box.Y.Max = local_max_y;
-    }
-}
-
-void SignalWaveformPanel::update_bounding_box()
-{
-    waveform_bounding_box.X.Min = std::numeric_limits<double>::max();
-    waveform_bounding_box.X.Max = std::numeric_limits<double>::lowest();
-    waveform_bounding_box.Y.Min = -1.0;
-    waveform_bounding_box.Y.Max = 1.0;
+    bounding_box.X.Min = std::numeric_limits<double>::max();
+    bounding_box.X.Max = std::numeric_limits<double>::lowest();
+    bounding_box.Y.Min = -1.0;
+    bounding_box.Y.Max = 1.0;
 }
 
 const Signal* SignalWaveformPanel::get_downsampled_signal(
@@ -193,22 +155,6 @@ const Signal* SignalWaveformPanel::get_downsampled_signal(
     }
 
     return downsampled_it->second.get();
-}
-
-const FrequencySpectrum* SignalWaveformPanel::get_spectra(
-        std::shared_ptr<Signal> signal // TODO will need to share ownership with scheduler.
-)
-{
-    assert(signal != nullptr);
-    auto spectra_it = spectra_cache.find(signal->get_id());
-
-    if (spectra_it == spectra_cache.end())
-        spectra_it =
-                spectra_cache.emplace(signal->get_id(), FrequencySpectrumFactory::create_frequency_spectrum(*signal))
-                        .first;
-
-    update_bounding_box(*spectra_it->second);
-    return spectra_it->second.get();
 }
 
 } // namespace echomap

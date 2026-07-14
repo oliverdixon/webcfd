@@ -10,7 +10,6 @@
 
 #include <implot.h>
 
-#include "../objects/FrequencySpectrum.hpp"
 #include "../objects/Signal.hpp"
 #include "IPanel.hpp"
 
@@ -40,14 +39,9 @@ public:
 private:
     static constexpr float default_downsample_factor = 50.0f;
 
-    struct SignalCallback
+    struct CallbackData
     {
         const Signal * signal;
-    };
-
-    struct FSCallback
-    {
-        const FrequencySpectrum* spectrum;
     };
 
     static ImPlotPoint get_indexed_signal_point(
@@ -55,14 +49,8 @@ private:
             void* user_data
     ) noexcept;
 
-    static ImPlotPoint get_indexed_frequency_bin(
-            int index,
-            void* user_data
-    ) noexcept;
-
-    void update_bounding_box(const Signal& signal);
-    void update_bounding_box(const FrequencySpectrum& spectrum);
-    void update_bounding_box();
+    void update_bounding_box(const Signal& signal) noexcept;
+    void update_bounding_box() noexcept;
 
     /**
      * Retrieves a downsampled Signal from the cache. If the downsampled variant is not present, it is computed and
@@ -74,8 +62,6 @@ private:
      * @pre The given Signal container must detain a valid Signal object.
      */
     const Signal* get_downsampled_signal(std::shared_ptr<Signal> signal);
-
-    const FrequencySpectrum* get_spectra(std::shared_ptr<Signal> signal);
 
     /**
      * The duplicated Signal objects, downsampled for visualisation.
@@ -93,15 +79,13 @@ private:
      */
     std::unordered_map<Signal::id_type, std::unique_ptr<Signal>> downsample_cache;
 
-    std::unordered_map<Signal::id_type, std::unique_ptr<FrequencySpectrum>> spectra_cache; // TODO not here...
-
     /**
-     * The maximum bounding box of a LTTB-downsampled wave form plot.
+     * The maximum bounding box of an LTTB-downsampled wave form plot.
      *
      * The Y axis (amplitude) is fixed, since our PCM-normalised values, given as a constraint from the Signal samples,
      * are within the range [-1, 1]. The X range is variable and should be updated as new Signal objects are received.
      */
-    ImPlotRect waveform_bounding_box{
+    ImPlotRect bounding_box{
             std::numeric_limits<double>::max(),
             std::numeric_limits<double>::lowest(),
             -1.0,
