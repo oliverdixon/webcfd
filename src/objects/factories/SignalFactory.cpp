@@ -15,9 +15,9 @@
 #include <cmath>
 #include <ranges>
 
-#include "../Logger.hpp"
-#include "../errors/ConfigurationError.hpp"
-#include "Signal.hpp"
+#include "../../Logger.hpp"
+#include "../../errors/ConfigurationError.hpp"
+#include "../Signal.hpp"
 
 namespace echomap
 {

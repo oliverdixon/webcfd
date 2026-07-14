@@ -14,7 +14,7 @@
 #include <span>
 #include <vector>
 
-#include "Signal.hpp"
+#include "../Signal.hpp"
 
 namespace echomap
 {

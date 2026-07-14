@@ -7,6 +7,8 @@
 
 #include "IPanel.hpp"
 
+#include <string>
+
 namespace echomap
 {
 

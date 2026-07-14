@@ -5,7 +5,7 @@
 
 #include "../Project.hpp"
 #include "../Signal.hpp"
-#include "../SignalFactory.hpp"
+#include "../factories/SignalFactory.hpp"
 
 /**
  * Free helper functions for simdjson customisation points.

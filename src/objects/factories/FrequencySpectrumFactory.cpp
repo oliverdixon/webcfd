@@ -13,8 +13,8 @@
 
 #include <cmath>
 
-#include "FrequencySpectrum.hpp"
-#include "Signal.hpp"
+#include "../FrequencySpectrum.hpp"
+#include "../Signal.hpp"
 
 namespace echomap
 {
@@ -29,12 +29,15 @@ std::unique_ptr<FrequencySpectrum> FrequencySpectrumFactory::create_frequency_sp
     const auto amplitudes = signal.amplitudes();
     const auto sample_count = amplitudes.size();
     const auto bin_count = sample_count / 2 + 1;
-    std::vector<fftwf_complex> coefficients(bin_count);
+
+    const auto coefficients = static_cast<fftwf_complex*>(fftwf_malloc(sizeof(fftwf_complex) * bin_count));
+    if (coefficients == nullptr)
+        throw std::runtime_error("Failed to create FFTW coefficients buffer.");
 
     const fftwf_plan plan = fftwf_plan_dft_r2c_1d( // NOLINT(*-misplaced-const) - Not misplaced.
             static_cast<int>(sample_count),
             const_cast<float*>(amplitudes.data()),
-            coefficients.data(),
+            coefficients,
             FFTW_ESTIMATE
     );
 
@@ -63,6 +66,7 @@ std::unique_ptr<FrequencySpectrum> FrequencySpectrumFactory::create_frequency_sp
         spectrum->bins.emplace_back(frequency, magnitude, phase);
     }
 
+    fftwf_free(coefficients);
     return std::move(spectrum);
 }
 

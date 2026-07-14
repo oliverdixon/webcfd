@@ -11,7 +11,7 @@
 #include <cmath>
 
 #include "../Logger.hpp"
-#include "SignalFactory.hpp"
+#include "factories/SignalFactory.hpp"
 
 namespace echomap
 {
