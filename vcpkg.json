@@ -50,6 +50,13 @@
     {
       "name": "implot3d",
       "version>=": "0.4-oliverdixon"
+    },
+    {
+      "name": "fftw3",
+      "version>=": "3.3.11",
+      "features": [
+        "threads"
+      ]
     }
   ]
 }

@@ -10,6 +10,7 @@
 
 #include <implot.h>
 
+#include "../objects/FrequencySpectrum.hpp"
 #include "../objects/Signal.hpp"
 #include "IPanel.hpp"
 
@@ -39,15 +40,29 @@ public:
 private:
     static constexpr float default_downsample_factor = 50.0f;
 
-    struct CallbackData
+    struct SignalCallback
     {
         const Signal * signal;
+    };
+
+    struct FSCallback
+    {
+        const FrequencySpectrum* spectrum;
     };
 
     static ImPlotPoint get_indexed_signal_point(
             int index,
             void* user_data
     ) noexcept;
+
+    static ImPlotPoint get_indexed_frequency_bin(
+            int index,
+            void* user_data
+    ) noexcept;
+
+    void update_bounding_box(const Signal& signal);
+    void update_bounding_box(const FrequencySpectrum& spectrum);
+    void update_bounding_box();
 
     /**
      * Retrieves a downsampled Signal from the cache. If the downsampled variant is not present, it is computed and
@@ -59,6 +74,8 @@ private:
      * @pre The given Signal container must detain a valid Signal object.
      */
     const Signal* get_downsampled_signal(std::shared_ptr<Signal> signal);
+
+    const FrequencySpectrum* get_spectra(std::shared_ptr<Signal> signal);
 
     /**
      * The duplicated Signal objects, downsampled for visualisation.
@@ -75,6 +92,8 @@ private:
      * </p>
      */
     std::unordered_map<Signal::id_type, std::unique_ptr<Signal>> downsample_cache;
+
+    std::unordered_map<Signal::id_type, std::unique_ptr<FrequencySpectrum>> spectra_cache; // TODO not here...
 
     /**
      * The maximum bounding box of a LTTB-downsampled wave form plot.

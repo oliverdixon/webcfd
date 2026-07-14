@@ -107,6 +107,7 @@ public:
     }
 
     [[nodiscard]] Sample::AmplitudeT operator[](std::size_t index) const noexcept;
+    [[nodiscard]] std::span<const Sample::AmplitudeT> amplitudes() const noexcept;
 
     [[nodiscard]] bool is_uniformly_sampled() const noexcept;
 

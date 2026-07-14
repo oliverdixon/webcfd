@@ -74,6 +74,11 @@ Signal::Sample::AmplitudeT Signal::operator[](
     return samples[index];
 }
 
+std::span<const Signal::Sample::AmplitudeT> Signal::amplitudes() const noexcept
+{
+    return samples;
+}
+
 bool Signal::is_uniformly_sampled() const noexcept
 {
     return !time_offsets.has_value();

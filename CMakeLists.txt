@@ -13,6 +13,7 @@ find_package(ImGui REQUIRED)
 find_package(simdjson REQUIRED)
 find_package(ImPlot REQUIRED)
 find_package(ImPlot3D REQUIRED)
+find_package(FFTW3 CONFIG REQUIRED COMPONENTS fftw3f)
 
 if(EMSCRIPTEN AND TARGET dawn_glfw)
     target_compile_definitions(dawn_glfw PRIVATE EMSCRIPTEN=1)
@@ -80,6 +81,10 @@ add_executable(EchoMap
         src/tasks/DownsampleTask.hpp
         src/tasks/DownsampleResult.cpp
         src/tasks/DownsampleResult.hpp
+        src/objects/FrequencySpectrum.cpp
+        src/objects/FrequencySpectrum.hpp
+        src/objects/FrequencySpectrumFactory.cpp
+        src/objects/FrequencySpectrumFactory.hpp
 )
 
 target_link_libraries(EchoMap PRIVATE
@@ -87,6 +92,7 @@ target_link_libraries(EchoMap PRIVATE
         implot::implot
         implot3d::implot3d
         simdjson::simdjson
+        fftw3f
 )
 
 # Update generated C++ to embed WGSL sources.
