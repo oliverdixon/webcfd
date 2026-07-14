@@ -79,7 +79,7 @@ const char* ErrorModal::get_imgui_name() const noexcept
 }
 
 void ErrorModal::set_active_project(
-        Project* const new_active_project
+        const Project* new_active_project
 ) noexcept
 {
     std::ignore = new_active_project;

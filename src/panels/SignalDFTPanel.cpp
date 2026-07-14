@@ -21,7 +21,7 @@ namespace echomap
 
 SignalDFTPanel::SignalDFTPanel(
         Worker& parent_worker,
-        Project* const initial_project
+        const Project* const initial_project
 ) :
     parent_worker(parent_worker),
     active_project(initial_project)
@@ -71,7 +71,7 @@ const char* SignalDFTPanel::get_imgui_name() const noexcept
 }
 
 void SignalDFTPanel::set_active_project(
-        Project* new_active_project
+        const Project* new_active_project
 ) noexcept
 {
     active_project = new_active_project;

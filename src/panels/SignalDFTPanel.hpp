@@ -27,14 +27,14 @@ class SignalDFTPanel : public IPanel
 public:
     explicit SignalDFTPanel(
             Worker& parent_worker,
-            Project* initial_project = nullptr
+            const Project* initial_project = nullptr
     );
 
     void draw() noexcept override;
 
     const char* get_imgui_name() const noexcept override;
 
-    void set_active_project(Project* new_active_project) noexcept override;
+    void set_active_project(const Project* new_active_project) noexcept override;
 
     void handle(DFTResult& result) override;
 
@@ -70,7 +70,7 @@ private:
 
     ImPlotSpec plotting_spec_2d;
     Worker& parent_worker;
-    Project* active_project = nullptr;
+    const Project* active_project = nullptr;
 };
 
 } // namespace echomap

@@ -101,6 +101,15 @@ public:
         return queue.empty();
     }
 
+    /**
+     * Empties the queue.
+     */
+    void clear()
+    {
+        std::lock_guard lock(mutex);
+        queue.clear();
+    }
+
 private:
     std::mutex mutex;
     std::condition_variable_any cv;

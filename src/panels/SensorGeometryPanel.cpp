@@ -7,6 +7,7 @@
 
 #include "SensorGeometryPanel.hpp"
 
+#include "../EchoMap.hpp"
 #include "../Logger.hpp"
 #include "../objects/Project.hpp"
 
@@ -14,9 +15,11 @@ namespace echomap
 {
 
 SensorGeometryPanel::SensorGeometryPanel(
-        Project* const initial_project
+        EchoMap& app,
+        const Project* const initial_project
 ) :
-    active_project(initial_project)
+    active_project(initial_project),
+    app(app)
 {
 }
 
@@ -43,7 +46,7 @@ void SensorGeometryPanel::draw() noexcept
 }
 
 void SensorGeometryPanel::set_active_project(
-        Project* const new_active_project
+        const Project* new_active_project
 ) noexcept
 {
     active_project = new_active_project;
@@ -91,26 +94,24 @@ void SensorGeometryPanel::draw_geometry_summary() noexcept
 
         std::size_t row_idx = 0;
 
-        for (auto& sensor : active_project->mutate_sensors()) {
+        for (auto& sensor : active_project->observe_sensors()) {
             ImGui::PushID(static_cast<int>(sensor.get_id()));
 
             ImGui::TableNextRow();
             ImGui::TableNextColumn();
 
             const ImVec4 colour = ImGui::ColorConvertU32ToFloat4(sensor_colours[row_idx]);
-            float rgb[4] = {colour.x, colour.y, colour.z, colour.w};
-
-            if (ImGui::ColorEdit4("##colour", rgb, ImGuiColorEditFlags_NoInputs)) {
-                sensor.colour.r = colour.x;
-                sensor.colour.g = colour.y;
-                sensor.colour.b = colour.z;
-                sensor.colour.a = colour.w;
+            float new_colour[4] = {colour.x, colour.y, colour.z, colour.w};
+            if (ImGui::ColorEdit4("##colour", new_colour, ImGuiColorEditFlags_NoInputs)) {
+                app.submit_lightweight_task(ModifySensorColourTask(sensor.get_id(), {
+                    new_colour[0], new_colour[1], new_colour[2], new_colour[3]
+                }));
 
                 sensor_colours[row_idx] = IM_COL32(
-                        static_cast<int>(rgb[0] * 255.0f),
-                        static_cast<int>(rgb[1] * 255.0f),
-                        static_cast<int>(rgb[2] * 255.0f),
-                        static_cast<int>(rgb[3] * 255.0f)
+                        static_cast<int>(new_colour[0] * 255.0f),
+                        static_cast<int>(new_colour[1] * 255.0f),
+                        static_cast<int>(new_colour[2] * 255.0f),
+                        static_cast<int>(new_colour[3] * 255.0f)
                 );
             }
 
@@ -118,21 +119,26 @@ void SensorGeometryPanel::draw_geometry_summary() noexcept
             ImGui::SetNextItemWidth(-std::numeric_limits<float>::min());
             ImGui::Text("%s", sensor.get_imgui_name());
 
-            ImGui::TableNextColumn();
-            ImGui::SetNextItemWidth(-std::numeric_limits<float>::min());
-            ImGui::InputFloat("##x", &sensor.position.x, 0.01f, 1.0f);
+            Sensor::Position new_position = sensor.position;
+            bool position_changed = false;
 
             ImGui::TableNextColumn();
             ImGui::SetNextItemWidth(-std::numeric_limits<float>::min());
-            ImGui::InputFloat("##y", &sensor.position.y, 0.01f, 1.0f);
+            position_changed = ImGui::InputFloat("##x", &new_position.x, 0.01f, 1.0f);
 
             ImGui::TableNextColumn();
             ImGui::SetNextItemWidth(-std::numeric_limits<float>::min());
-            ImGui::InputFloat("##z", &sensor.position.z, 0.01f, 1.0f);
+            position_changed = ImGui::InputFloat("##y", &new_position.y, 0.01f, 1.0f) || position_changed;
+
+            ImGui::TableNextColumn();
+            ImGui::SetNextItemWidth(-std::numeric_limits<float>::min());
+            position_changed = ImGui::InputFloat("##z", &new_position.z, 0.01f, 1.0f) || position_changed;
 
             ImGui::PopID();
-
             ++row_idx;
+
+            if (position_changed)
+                app.submit_lightweight_task(ModifySensorPositionTask(sensor.get_id(), std::move(new_position)));
         }
 
         ImGui::EndTable();

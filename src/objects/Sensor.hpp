@@ -37,7 +37,7 @@ public:
 
 
     void set_colour(Colour new_colour) noexcept;
-    void set_colour(float r, float g, float b, float a) noexcept;
+    void set_position(Position new_position) noexcept;
 };
 
 } // namespace echomap

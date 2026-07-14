@@ -47,17 +47,11 @@ void Sensor::set_colour(
     colour = new_colour;
 }
 
-void Sensor::set_colour(
-        const float r,
-        const float g,
-        const float b,
-        const float a
+void Sensor::set_position(
+        const Position new_position
 ) noexcept
 {
-    colour.r = r;
-    colour.g = g;
-    colour.b = b;
-    colour.a = a;
+    position = new_position;
 }
 
 } // namespace echomap

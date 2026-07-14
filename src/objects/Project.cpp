@@ -110,6 +110,17 @@ ImPlot3DPoint Project::get_sensor_point(
     return { x, y, z };
 }
 
+Sensor& Project::get_mutable_sensor(
+        const id_type sensor_id
+)
+{
+    const auto sensor_it = sensors.find(sensor_id);
+    if (sensor_it == sensors.end())
+        throw std::runtime_error(std::format("No Sensor with ID {} belongs to {}.", sensor_id, get_name()));
+
+    return *sensor_it->second;
+}
+
 std::pair<
         const Signal&,
         const Sensor&>

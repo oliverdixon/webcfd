@@ -14,18 +14,18 @@ namespace echomap
 class ProjectPanel final : public IPanel
 {
 public:
-    explicit ProjectPanel(Project * initial_project = nullptr);
+    explicit ProjectPanel(const Project* initial_project = nullptr);
 
     void draw() noexcept override;
 
     [[nodiscard]] const char* get_imgui_name() const noexcept override;
 
-    void set_active_project(Project * new_active_project) noexcept override;
+    void set_active_project(const Project* new_active_project) noexcept override;
 
 private:
     const std::string panel_name = "Project Explorer";
 
-    Project * active_project = nullptr;
+    const Project* active_project = nullptr;
 };
 
 } // namespace echomap

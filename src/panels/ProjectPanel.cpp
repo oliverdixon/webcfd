@@ -10,7 +10,7 @@ namespace echomap
 {
 
 ProjectPanel::ProjectPanel(
-        Project * const initial_project
+        const Project* const initial_project
 ) :
     active_project(initial_project)
 {
@@ -48,7 +48,7 @@ const char* ProjectPanel::get_imgui_name() const noexcept
 }
 
 void ProjectPanel::set_active_project(
-        Project* const new_active_project
+        const Project* new_active_project
 ) noexcept
 {
     active_project = new_active_project;

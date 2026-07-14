@@ -50,7 +50,7 @@ public:
 
     [[nodiscard]] const char* get_imgui_name() const noexcept override;
 
-    void set_active_project(Project* new_active_project) noexcept override;
+    void set_active_project(const Project* new_active_project) noexcept override;
 
 private:
     bool is_raised = false;

@@ -26,13 +26,16 @@ class Worker;
 class SignalWaveformPanel final : public IPanel
 {
 public:
-    explicit SignalWaveformPanel(Worker& parent_worker, Project* initial_project = nullptr);
+    explicit SignalWaveformPanel(
+            Worker& parent_worker,
+            const Project* initial_project = nullptr
+    );
 
     [[nodiscard]] const char* get_imgui_name() const noexcept override;
 
     void draw() noexcept override;
 
-    void set_active_project(Project* new_active_project) noexcept override;
+    void set_active_project(const Project* new_active_project) noexcept override;
 
     void handle(DownsampleResult& result) override;
 
@@ -96,7 +99,7 @@ private:
 
     ImPlotSpec plotting_spec_2d;
     Worker& parent_worker;
-    Project* active_project = nullptr;
+    const Project* active_project = nullptr;
 };
 
 } // namespace echomap

@@ -46,6 +46,12 @@ std::unique_ptr<IResult> Worker::try_get_result()
     return nullptr;
 }
 
+void Worker::clear()
+{
+    task_queue.clear();
+    result_queue.clear();
+}
+
 void Worker::execute(
         const std::stop_token& stop_token
 ) noexcept

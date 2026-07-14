@@ -9,7 +9,7 @@
 #define ECHOMAP_PANEL_HPP
 
 #include <webgpu/webgpu_cpp.h>
- // ReSharper disable once CppUnusedIncludeDirective - False positive. Required for flags.
+// ReSharper disable once CppUnusedIncludeDirective - False positive. Required for flags.
 #include <implot.h>
 
 #include "../tasks/IResultHandler.hpp"
@@ -62,18 +62,13 @@ public:
      * This functionally intentionally does not provide a default. All panels must acknowledge a new active project,
      * even if implemented as a no-op.
      *
-     * @param new_active_project A mutable pointer to the new active Project.
-     *
-     * @todo Panels should be able to get by with a constant pointer. The application should use an event-driven
-     *       architecture, such that panels do not modify the Project directly, but post change requests to a queue
-     *       managed by the central EchoMap instance. This would also facilitiate moving to a multi-threaded
-     *       architecture, since the render actions would have less data dependency on the Project state.
+     * @param new_active_project An observing pointer to the new active Project.
      */
-    virtual void set_active_project(Project* new_active_project) noexcept = 0;
+    virtual void set_active_project(const Project* new_active_project) noexcept = 0;
 
 protected:
-    static constexpr auto table_flags = ImGuiTableFlags_SizingStretchProp | ImGuiTableFlags_Borders |
-        ImGuiTableFlags_RowBg;
+    static constexpr auto table_flags =
+            ImGuiTableFlags_SizingStretchProp | ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg;
 };
 
 } // namespace echomap

@@ -14,6 +14,9 @@
 
 #include "tasks/IResultHandler.hpp"
 #include "tasks/Worker.hpp"
+#include "tasks/lightweight/AddChannelMappingTask.hpp"
+#include "tasks/lightweight/ModifySensorColourTask.hpp"
+#include "tasks/lightweight/ModifySensorPositionTask.hpp"
 
 namespace echomap
 {
@@ -28,6 +31,8 @@ class Project;
 class EchoMap : IResultHandler
 {
 public:
+    using LightweightTask = std::variant<AddChannelMappingTask, ModifySensorColourTask, ModifySensorPositionTask>;
+
     /**
      * Initialise a EchoMap application instance.
      *
@@ -61,6 +66,13 @@ public:
 
     [[nodiscard]] std::unique_ptr<Project> take_project(bool update_ui) noexcept;
     void put_project(std::unique_ptr<Project> new_project) noexcept;
+
+    /**
+     * Submit a new lightweight task to the application queue.
+     *
+     * @param task The trivial task to schedule.
+     */
+    void submit_lightweight_task(LightweightTask task);
 
     void handle(LoadProjectResult& result) override;
     void handle(DownsampleResult& result) override;
@@ -179,6 +191,7 @@ private:
     std::vector<std::unique_ptr<IPanel>> panels;
 
     Worker worker;
+    std::vector<LightweightTask> lightweight_tasks;
 
     ImGuiID dockspace_id;
     bool dockspace_configured = false;

@@ -8,7 +8,6 @@
 #include "SignalWaveformPanel.hpp"
 
 #include "../Logger.hpp"
-#include "../objects/FrequencySpectrumFactory.hpp"
 #include "../objects/Project.hpp"
 #include "../tasks/DownsampleResult.hpp"
 #include "../tasks/DownsampleTask.hpp"
@@ -19,7 +18,7 @@ namespace echomap
 
 SignalWaveformPanel::SignalWaveformPanel(
         Worker& parent_worker,
-        Project* const initial_project
+        const Project* const initial_project
 ) :
     parent_worker(parent_worker),
     active_project(initial_project)
@@ -69,7 +68,7 @@ void SignalWaveformPanel::draw() noexcept
 }
 
 void SignalWaveformPanel::set_active_project(
-        Project* const new_active_project
+        const Project* new_active_project
 ) noexcept
 {
     active_project = new_active_project;

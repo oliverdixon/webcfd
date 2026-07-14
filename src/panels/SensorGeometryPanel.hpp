@@ -17,6 +17,7 @@
 namespace echomap
 {
 
+class EchoMap;
 class Project;
 
 /**
@@ -25,13 +26,16 @@ class Project;
 class SensorGeometryPanel final : public IPanel
 {
 public:
-    explicit SensorGeometryPanel(Project* initial_project = nullptr);
+    explicit SensorGeometryPanel(
+            EchoMap& app,
+            const Project* initial_project = nullptr
+    );
 
     [[nodiscard]] const char* get_imgui_name() const noexcept override;
 
     void draw() noexcept override;
 
-    void set_active_project(Project* new_active_project) noexcept override;
+    void set_active_project(const Project* new_active_project) noexcept override;
 
 private:
     void recache_sensor_colours() noexcept;
@@ -42,7 +46,8 @@ private:
 
     std::vector<ImU32> sensor_colours;
     ImPlot3DSpec plotting_spec_3d;
-    Project * active_project = nullptr;
+    const Project* active_project = nullptr;
+    EchoMap& app;
 };
 
 } // namespace echomap

@@ -135,20 +135,6 @@ public:
     }
 
     /**
-     * Provides a transformed view for stored Sensor objects in the Project.
-     *
-     * @return A view containing mutating references to all stored Sensor objects.
-     */
-    [[nodiscard]] auto mutate_sensors() noexcept
-    {
-        return sensors | std::views::values |
-               std::views::transform([](const std::unique_ptr<Sensor>& container) -> Sensor& {
-                   assert(container);
-                   return *container;
-               });
-    }
-
-    /**
      * Checks if any channel mappings exist in the Project?
      *
      * @return Are there any Signal-Sensor mappings defined?
@@ -171,6 +157,16 @@ public:
             int idx,
             const void* project_instance
     ) noexcept;
+
+    /**
+     * Retrieve a mutable reference to the Sensor with the given ID.
+     *
+     * @param sensor_id The numerical ID of the Sensor to retrieve.
+     * @return A mutable reference to the Sensor with the specified ID.
+     *
+     * @throws std::runtime_error A Sensor with the specified ID is not owned by the Project.
+     */
+    [[nodiscard]] Sensor& get_mutable_sensor(id_type sensor_id);
 
 private:
     /**

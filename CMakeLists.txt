@@ -91,6 +91,9 @@ add_executable(EchoMap
         src/tasks/DFTTask.hpp
         src/tasks/DFTResult.cpp
         src/tasks/DFTResult.hpp
+        src/tasks/lightweight/AddChannelMappingTask.hpp
+        src/tasks/lightweight/ModifySensorPositionTask.hpp
+        src/tasks/lightweight/ModifySensorColourTask.hpp
 )
 
 target_link_libraries(EchoMap PRIVATE

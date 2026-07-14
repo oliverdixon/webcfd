@@ -71,6 +71,11 @@ public:
      */
     std::unique_ptr<IResult> try_get_result();
 
+    /**
+     * Clears any scheduled jobs or pending results.
+     */
+    void clear();
+
 private:
     /**
      * Executor running on the computation thread to receive work from the task queue and synchronously execute.

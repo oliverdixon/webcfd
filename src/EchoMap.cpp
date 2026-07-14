@@ -35,6 +35,23 @@
 #warning "The Emscripten application will be single-threaded."
 #endif
 
+namespace
+{
+
+template <class T>
+inline constexpr bool lightweight_task_v = std::is_trivially_copyable_v<T> && std::is_standard_layout_v<T>;
+
+template <class T> struct all_lightweight_task : std::false_type
+{};
+
+template <class... Ts>
+struct all_lightweight_task<std::variant<Ts...>> : std::bool_constant<(lightweight_task_v<Ts> && ...)>
+{};
+
+template <class T> inline constexpr bool all_lightweight_task_v = all_lightweight_task<std::remove_cvref_t<T>>::value;
+
+} // namespace
+
 namespace echomap
 {
 
@@ -46,6 +63,8 @@ EchoMap::EchoMap() :
     }},
     dockspace_id(ImHashStr("MainDockSpace"))
 {
+    static_assert(all_lightweight_task_v<LightweightTask>);
+
     static constexpr auto timed_wait_any = wgpu::InstanceFeatureName::TimedWaitAny;
     constexpr wgpu::InstanceDescriptor instance_desc{.requiredFeatureCount = 1, .requiredFeatures = &timed_wait_any};
 
@@ -78,8 +97,8 @@ EchoMap::EchoMap() :
     panels.push_back(std::make_unique<MenuPanel>());
     panels.push_back(std::make_unique<ProjectPanel>());
     panels.push_back(std::make_unique<SignalWaveformPanel>(worker));
-    panels.push_back(std::make_unique<SensorGeometryPanel>());
-    panels.push_back(std::make_unique<ChannelMappingPanel>());
+    panels.push_back(std::make_unique<SensorGeometryPanel>(*this));
+    panels.push_back(std::make_unique<ChannelMappingPanel>(*this));
     panels.push_back(std::make_unique<SignalDFTPanel>(worker));
 
     // TODO remove: test async project load.
@@ -408,6 +427,34 @@ bool EchoMap::handle_window_resize() noexcept
 
 void EchoMap::process_worker_results()
 {
+    while (!lightweight_tasks.empty()) {
+        LOG_F_DEBUG(
+                "Consuming lightweight task with hint {} at position {}.",
+                static_cast<void*>(&lightweight_tasks.back()),
+                lightweight_tasks.size() - 1
+        );
+
+        // TODO try..catch to display ErrorModal in here.
+        std::visit(
+                [this]<typename T>(T&& task) {
+                    using TaskT = std::decay_t<T>;
+
+                    if constexpr (std::is_same_v<TaskT, AddChannelMappingTask>) {
+                        if (project != nullptr)
+                            project->add_association(task.signal_id, task.sensor_id);
+                    } else if constexpr (std::is_same_v<TaskT, ModifySensorColourTask>) {
+                        if (project != nullptr)
+                            project->get_mutable_sensor(task.sensor_id).set_colour(std::move(task.colour));
+                    } else if constexpr (std::is_same_v<TaskT, ModifySensorPositionTask>) {
+                        if (project != nullptr)
+                            project->get_mutable_sensor(task.sensor_id).set_position(std::move(task.position));
+                    }
+                },
+                lightweight_tasks.back()
+        );
+        lightweight_tasks.pop_back();
+    }
+
     while (const auto result = worker.try_get_result())
         try {
             result->despatch(*this);
@@ -436,11 +483,44 @@ void EchoMap::put_project(
         std::unique_ptr<Project> new_project
 ) noexcept
 {
-    const auto old_project_ptr = project.get();
-    project = std::move(new_project);
+    if (project != new_project) {
+        /*
+         * We know that the memory addresses differ (i.e. project.get() != new_project.get()). Therefore, there is an
+         * effective difference if and only if:
+         *
+         *  1. The old project is nullptr, thus the new project is non-vacuous;
+         *  2. The old project is non-null, thus the new project is vacuous;
+         *  3. Both the old and new projects are non-null, so we can compare their object IDs.
+         */
+        const auto effectively_different =
+                project == nullptr || new_project == nullptr || project->get_id() != new_project->get_id();
 
-    if (project.get() != old_project_ptr)
-        update_panel_project();
+        project = std::move(new_project);
+
+        if (effectively_different) {
+            // Invalidate project-dependent state.
+            lightweight_tasks.clear();
+            worker.clear();
+            update_panel_project();
+        }
+    }
+}
+
+void EchoMap::submit_lightweight_task(
+        LightweightTask task
+)
+{
+    lightweight_tasks.emplace_back(std::move(task));
+
+    /*
+     * The address is just a "hint" (as opposed to an ID) because the queue might be re-allocated. It's a best-guess
+     * effort to quickly discriminate on lightweight tasks without adding bloat to their structures.
+     */
+    LOG_F_DEBUG(
+            "Scheduling lightweight task with hint {} at position {}.",
+            static_cast<void*>(&lightweight_tasks.back()),
+            lightweight_tasks.size() - 1
+    );
 }
 
 void EchoMap::handle(
