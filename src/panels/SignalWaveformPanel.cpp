@@ -9,10 +9,10 @@
 
 #include "../Logger.hpp"
 #include "../objects/Project.hpp"
-#include "../tasks/DownsampleResult.hpp"
-#include "../tasks/DownsampleTask.hpp"
-#include "../tasks/Worker.hpp"
-#include "../tasks/WorkerResultDespatcher.hpp"
+#include "../signals/Worker.hpp"
+#include "../signals/WorkerResultDespatcher.hpp"
+#include "../signals/results/DownsampleResult.hpp"
+#include "../signals/tasks/DownsampleTask.hpp"
 
 namespace echomap
 {

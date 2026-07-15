@@ -10,8 +10,8 @@
 #ifndef ECHOMAP_DFTRESULT_HPP
 #define ECHOMAP_DFTRESULT_HPP
 
-#include "../objects/FrequencySpectrum.hpp"
-#include "../objects/Signal.hpp"
+#include "../../objects/FrequencySpectrum.hpp"
+#include "../../objects/Signal.hpp"
 
 namespace echomap
 {

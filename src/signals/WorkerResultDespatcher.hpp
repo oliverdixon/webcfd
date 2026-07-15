@@ -10,14 +10,18 @@
 #ifndef ECHOMAP_WORKERRESULTDESPATCHER_HPP
 #define ECHOMAP_WORKERRESULTDESPATCHER_HPP
 
-#include "ITask.hpp"
 #include "ResultChannel.hpp"
+#include "tasks/ITask.hpp"
 
 namespace echomap
 {
 
 /**
  * Manages channels for WorkerResult message routing.
+ *
+ * A receiver of WorkerResult objects publishes messages through the WorkerResultDespatcher, which routes it to the
+ * correct ResultChannel. The ResultChannel forwards the WorkerResult to all subscribers and transfers ownership of the
+ * object to the nominated consumer.
  */
 class WorkerResultDespatcher
 {

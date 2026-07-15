@@ -6,8 +6,8 @@
 
 #include <imgui.h>
 
-#include "../tasks/LoadProjectResult.hpp"
-#include "../tasks/WorkerResultDespatcher.hpp"
+#include "../signals/WorkerResultDespatcher.hpp"
+#include "../signals/results/LoadProjectResult.hpp"
 
 namespace echomap
 {

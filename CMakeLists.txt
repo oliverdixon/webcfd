@@ -66,39 +66,39 @@ add_executable(EchoMap
         src/panels/SensorGeometryPanel.hpp
         src/panels/ChannelMappingPanel.cpp
         src/panels/ChannelMappingPanel.hpp
-        src/tasks/ThreadSafeQueue.hpp
-        src/tasks/ITask.hpp
-        src/tasks/LoadProjectTask.cpp
-        src/tasks/LoadProjectTask.hpp
-        src/tasks/Worker.cpp
-        src/tasks/Worker.hpp
-        src/tasks/ErrorResult.cpp
-        src/tasks/ErrorResult.hpp
-        src/tasks/LoadProjectResult.cpp
-        src/tasks/LoadProjectResult.hpp
-        src/tasks/DownsampleTask.cpp
-        src/tasks/DownsampleTask.hpp
-        src/tasks/DownsampleResult.cpp
-        src/tasks/DownsampleResult.hpp
+        src/signals/ThreadSafeQueue.hpp
+        src/signals/tasks/ITask.hpp
+        src/signals/tasks/LoadProjectTask.cpp
+        src/signals/tasks/LoadProjectTask.hpp
+        src/signals/Worker.cpp
+        src/signals/Worker.hpp
+        src/signals/results/ErrorResult.cpp
+        src/signals/results/ErrorResult.hpp
+        src/signals/results/LoadProjectResult.cpp
+        src/signals/results/LoadProjectResult.hpp
+        src/signals/tasks/DownsampleTask.cpp
+        src/signals/tasks/DownsampleTask.hpp
+        src/signals/results/DownsampleResult.cpp
+        src/signals/results/DownsampleResult.hpp
         src/objects/FrequencySpectrum.cpp
         src/objects/FrequencySpectrum.hpp
         src/objects/factories/FrequencySpectrumFactory.cpp
         src/objects/factories/FrequencySpectrumFactory.hpp
         src/panels/SignalDFTPanel.cpp
         src/panels/SignalDFTPanel.hpp
-        src/tasks/DFTTask.cpp
-        src/tasks/DFTTask.hpp
-        src/tasks/DFTResult.cpp
-        src/tasks/DFTResult.hpp
-        src/tasks/lightweight/AddChannelMappingTask.hpp
-        src/tasks/lightweight/ModifySensorPositionTask.hpp
-        src/tasks/lightweight/ModifySensorColourTask.hpp
+        src/signals/tasks/DFTTask.cpp
+        src/signals/tasks/DFTTask.hpp
+        src/signals/results/DFTResult.cpp
+        src/signals/results/DFTResult.hpp
+        src/signals/lightweight/AddChannelMappingTask.hpp
+        src/signals/lightweight/ModifySensorPositionTask.hpp
+        src/signals/lightweight/ModifySensorColourTask.hpp
         src/objects/factories/FFTWBuffers.cpp
         src/objects/factories/FFTWBuffers.hpp
-        src/tasks/ITask.cpp
-        src/tasks/WorkerResultDespatcher.cpp
-        src/tasks/WorkerResultDespatcher.hpp
-        src/tasks/ResultChannel.hpp
+        src/signals/tasks/ITask.cpp
+        src/signals/WorkerResultDespatcher.cpp
+        src/signals/WorkerResultDespatcher.hpp
+        src/signals/ResultChannel.hpp
 )
 
 target_link_libraries(EchoMap PRIVATE

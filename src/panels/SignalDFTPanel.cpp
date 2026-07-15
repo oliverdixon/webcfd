@@ -15,9 +15,9 @@
 #include "../Logger.hpp"
 #include "../objects/FrequencySpectrum.hpp"
 #include "../objects/Project.hpp"
-#include "../tasks/DFTResult.hpp"
-#include "../tasks/DFTTask.hpp"
-#include "../tasks/Worker.hpp"
+#include "../signals/Worker.hpp"
+#include "../signals/results/DFTResult.hpp"
+#include "../signals/tasks/DFTTask.hpp"
 
 namespace echomap
 {

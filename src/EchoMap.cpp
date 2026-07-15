@@ -11,7 +11,7 @@
 #include <implot.h>
 #include <implot3d.h>
 
-#include "tasks/LoadProjectTask.hpp"
+#include "signals/tasks/LoadProjectTask.hpp"
 
 #ifdef __EMSCRIPTEN__
 #include <emscripten/emscripten.h>

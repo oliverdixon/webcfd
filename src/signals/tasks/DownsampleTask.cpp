@@ -9,8 +9,8 @@
 
 #include "DownsampleTask.hpp"
 
-#include "../objects/factories/SignalFactory.hpp"
-#include "DownsampleResult.hpp"
+#include "../../objects/factories/SignalFactory.hpp"
+#include "../results/DownsampleResult.hpp"
 
 namespace echomap
 {

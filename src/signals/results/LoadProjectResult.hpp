@@ -10,7 +10,7 @@
 
 #include <memory>
 
-#include "../objects/Project.hpp"
+#include "../../objects/Project.hpp"
 
 namespace echomap
 {

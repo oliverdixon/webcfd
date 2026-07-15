@@ -10,7 +10,7 @@
 
 #include <filesystem>
 
-#include "../objects/persistence/JSONDeserialiser.hpp"
+#include "../../objects/persistence/JSONDeserialiser.hpp"
 #include "ITask.hpp"
 
 namespace echomap

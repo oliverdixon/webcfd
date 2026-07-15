@@ -11,8 +11,8 @@
 #include <functional>
 #include <thread>
 
-#include "ITask.hpp"
 #include "ThreadSafeQueue.hpp"
+#include "tasks/ITask.hpp"
 
 namespace echomap
 {

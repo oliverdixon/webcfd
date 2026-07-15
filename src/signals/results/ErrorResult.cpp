@@ -9,8 +9,8 @@
 
 #include "ErrorResult.hpp"
 
-#include "../errors/LocatableError.hpp"
-#include "ITask.hpp"
+#include "../../errors/LocatableError.hpp"
+#include "../tasks/ITask.hpp"
 
 namespace echomap
 {

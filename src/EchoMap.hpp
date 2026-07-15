@@ -10,15 +10,15 @@
 
 #include <GLFW/glfw3.h>
 #include <imgui.h>
-#include <webgpu/webgpu_cpp.h>
 #include <sigc++/scoped_connection.h>
+#include <webgpu/webgpu_cpp.h>
 
 #include "panels/ErrorModal.hpp"
-#include "tasks/Worker.hpp"
-#include "tasks/WorkerResultDespatcher.hpp"
-#include "tasks/lightweight/AddChannelMappingTask.hpp"
-#include "tasks/lightweight/ModifySensorColourTask.hpp"
-#include "tasks/lightweight/ModifySensorPositionTask.hpp"
+#include "signals/Worker.hpp"
+#include "signals/WorkerResultDespatcher.hpp"
+#include "signals/lightweight/AddChannelMappingTask.hpp"
+#include "signals/lightweight/ModifySensorColourTask.hpp"
+#include "signals/lightweight/ModifySensorPositionTask.hpp"
 
 namespace echomap
 {

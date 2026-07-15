@@ -12,7 +12,7 @@
 
 #include <memory>
 
-#include "../objects/Signal.hpp"
+#include "../../objects/Signal.hpp"
 
 namespace echomap
 {

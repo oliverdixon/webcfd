@@ -11,12 +11,11 @@
 #include <stop_token>
 #include <variant>
 
-#include "../Logger.hpp"
-#include "../objects/Object.hpp"
-#include "DFTResult.hpp"
-#include "DownsampleResult.hpp"
-#include "ErrorResult.hpp"
-#include "LoadProjectResult.hpp"
+#include "../../objects/Object.hpp"
+#include "../results/DFTResult.hpp"
+#include "../results/DownsampleResult.hpp"
+#include "../results/ErrorResult.hpp"
+#include "../results/LoadProjectResult.hpp"
 
 namespace echomap
 {

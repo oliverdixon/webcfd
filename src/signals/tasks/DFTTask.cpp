@@ -9,9 +9,9 @@
 
 #include "DFTTask.hpp"
 
-#include "../objects/Signal.hpp"
-#include "../objects/factories/FrequencySpectrumFactory.hpp"
-#include "DFTResult.hpp"
+#include "../../objects/Signal.hpp"
+#include "../../objects/factories/FrequencySpectrumFactory.hpp"
+#include "../results/DFTResult.hpp"
 
 namespace echomap
 {

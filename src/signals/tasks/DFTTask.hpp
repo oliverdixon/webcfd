@@ -12,9 +12,8 @@
 
 #include <memory>
 
+#include "../../objects/FrequencySpectrum.hpp"
 #include "ITask.hpp"
-
-#include "../objects/FrequencySpectrum.hpp"
 
 namespace echomap
 {
