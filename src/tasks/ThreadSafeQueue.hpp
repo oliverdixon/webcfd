@@ -48,18 +48,19 @@ public:
      *
      * This function does not block.
      *
-     * @param out The destination slot for the dequeued value, mutated if and only if a value was dequeued.
+     * @return The dequeued value, or the empty optional if there were no results available.
      */
-    void try_consume(
-            std::optional<ValueT>& out
-    )
+    std::optional<ValueT> try_consume()
     {
         std::lock_guard lock(mutex);
 
         if (!queue.empty()) {
-            out.emplace(std::move(queue.front()));
+            auto value = std::move(queue.front());
             queue.pop_front();
+            return value;
         }
+
+        return std::nullopt;
     }
 
     /**
@@ -95,6 +96,7 @@ public:
      */
     [[nodiscard]] bool empty() const noexcept
     {
+        std::lock_guard lock(mutex);
         return queue.empty();
     }
 
@@ -108,7 +110,7 @@ public:
     }
 
 private:
-    std::mutex mutex;
+    mutable std::mutex mutex;
     std::condition_variable_any cv;
     std::deque<ValueT> queue;
 };

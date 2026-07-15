@@ -87,9 +87,8 @@ private:
     ThreadSafeQueue<std::unique_ptr<ITask>> task_queue;
     ThreadSafeQueue<WorkerResult> result_queue;
 
-    ResultCallback result_callback;               /**< Callable to inform clients of new results. */
-    std::jthread worker_thread;                   /**< RAII computation thread to handle ITask work pieces. */
-    std::optional<WorkerResult> ephemeral_result; /**< Persistent ephemeral for dequeued results. */
+    ResultCallback result_callback; /**< Callable to inform clients of new results. */
+    std::jthread worker_thread;     /**< RAII computation thread to handle ITask work pieces. */
 };
 
 } // namespace echomap
