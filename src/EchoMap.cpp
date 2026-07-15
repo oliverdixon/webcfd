@@ -102,6 +102,10 @@ EchoMap::EchoMap() :
 
     // TODO remove: test async project load.
     worker.submit(std::make_unique<LoadProjectTask>("../resources/ExampleProject.json"));
+
+    connections.add(despatcher.load_project_finished.connect([](const LoadProjectResult& result) {
+        std::println(std::cout, "loaded");
+    }));
 }
 
 void EchoMap::run_event_loop()
@@ -480,9 +484,9 @@ void EchoMap::process_lightweight_tasks()
 
 void EchoMap::process_worker_results()
 {
-    while (const auto result = worker.try_get_result())
+    while (auto result = worker.try_get_result())
         try {
-            // result->despatch(*this); // TODO libsigcpp
+            despatcher.publish(std::move(*result));
         } catch (const std::exception& exception) {
             Logger::log(Logger::Level::Error, exception.what(), std::source_location::current());
         }

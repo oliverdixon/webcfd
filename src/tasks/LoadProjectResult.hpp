@@ -20,7 +20,8 @@ class LoadProjectResult
 public:
     explicit LoadProjectResult(std::unique_ptr<Project> loaded_project);
 
-    [[nodiscard]] std::unique_ptr<Project> take_project() noexcept;
+    [[nodiscard]] std::unique_ptr<Project> take_project() && noexcept;
+    [[nodiscard]] const Project * observe_project() const noexcept;
 
 private:
     std::unique_ptr<Project> loaded_project;

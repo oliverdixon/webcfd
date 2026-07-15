@@ -13,7 +13,9 @@
 #include <webgpu/webgpu_cpp.h>
 
 #include "panels/ErrorModal.hpp"
+#include "tasks/ScopedConnections.hpp"
 #include "tasks/Worker.hpp"
+#include "tasks/WorkerResultDespatcher.hpp"
 #include "tasks/lightweight/AddChannelMappingTask.hpp"
 #include "tasks/lightweight/ModifySensorColourTask.hpp"
 #include "tasks/lightweight/ModifySensorPositionTask.hpp"
@@ -215,6 +217,8 @@ private:
     ErrorModal error_modal;
 
     Worker worker;
+    WorkerResultDespatcher despatcher;
+    ScopedConnections connections;
     std::vector<LightweightTask> lightweight_tasks;
 
     ImGuiID dockspace_id;

@@ -19,9 +19,14 @@ LoadProjectResult::LoadProjectResult(
 {
 }
 
-std::unique_ptr<Project> LoadProjectResult::take_project() noexcept
+std::unique_ptr<Project> LoadProjectResult::take_project() && noexcept
 {
     return std::move(loaded_project);
+}
+
+const Project* LoadProjectResult::observe_project() const noexcept
+{
+    return loaded_project.get();
 }
 
 } // namespace echomap

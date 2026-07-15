@@ -99,6 +99,8 @@ add_executable(EchoMap
         src/tasks/ScopedConnections.hpp
         src/tasks/ITask.cpp
         src/tasks/WorkerResult.hpp
+        src/tasks/WorkerResultDespatcher.cpp
+        src/tasks/WorkerResultDespatcher.hpp
 )
 
 target_link_libraries(EchoMap PRIVATE
