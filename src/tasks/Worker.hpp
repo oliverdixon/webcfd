@@ -13,7 +13,6 @@
 
 #include "ITask.hpp"
 #include "ThreadSafeQueue.hpp"
-#include "WorkerResult.hpp"
 
 namespace echomap
 {

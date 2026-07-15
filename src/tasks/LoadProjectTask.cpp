@@ -9,7 +9,6 @@
 
 #include "../objects/Project.hpp"
 #include "LoadProjectResult.hpp"
-#include "WorkerResult.hpp"
 
 namespace echomap
 {
@@ -26,7 +25,7 @@ LoadProjectTask::LoadProjectTask(
 
 WorkerResult LoadProjectTask::execute_work()
 {
-    return WorkerResult(LoadProjectResult(deserialiser.deserialise_project(project_file_path)));
+    return LoadProjectResult(deserialiser.deserialise_project(project_file_path));
 }
 
 } // namespace echomap

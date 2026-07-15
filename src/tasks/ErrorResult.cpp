@@ -10,6 +10,7 @@
 #include "ErrorResult.hpp"
 
 #include "../errors/LocatableError.hpp"
+#include "ITask.hpp"
 
 namespace echomap
 {

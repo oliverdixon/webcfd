@@ -98,7 +98,6 @@ add_executable(EchoMap
         src/tasks/ScopedConnections.cpp
         src/tasks/ScopedConnections.hpp
         src/tasks/ITask.cpp
-        src/tasks/WorkerResult.hpp
         src/tasks/WorkerResultDespatcher.cpp
         src/tasks/WorkerResultDespatcher.hpp
         src/tasks/ResultChannel.hpp

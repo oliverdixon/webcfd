@@ -10,12 +10,12 @@
 #ifndef ECHOMAP_WORKERRESULTDESPATCHER_HPP
 #define ECHOMAP_WORKERRESULTDESPATCHER_HPP
 
+#include "ITask.hpp"
 #include "ResultChannel.hpp"
 
 namespace echomap
 {
 
-struct WorkerResult;
 class ErrorResult;
 class LoadProjectResult;
 class DownsampleResult;

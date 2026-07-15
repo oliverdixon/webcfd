@@ -8,7 +8,6 @@
  */
 
 #include "ITask.hpp"
-#include "WorkerResult.hpp"
 
 namespace echomap
 {

@@ -15,10 +15,10 @@
 #include <string>
 #include <string_view>
 
-#include "../tasks/ITask.hpp"
-
 namespace echomap
 {
+
+class ITask;
 class LocatableError;
 
 /**
@@ -28,27 +28,27 @@ class ErrorResult
 {
 public:
     /**
-     * Create a new ErrorResult literally specifying the message, location, and optionally the responsible task.
+     * Create a new ErrorResult literally specifying the message, location, and the responsible task.
      *
      * @param message Human-readable description of the error.
      * @param location Most relevant source location of the error origin.
-     * @param responsible_task Optionally, the ITask (ownership transferred into the ErrorResult) responsible.
+     * @param responsible_task The ITask (ownership transferred into the ErrorResult) responsible.
      */
     explicit ErrorResult(
             std::string_view message,
             std::source_location location,
-            std::unique_ptr<ITask> responsible_task = nullptr
+            std::unique_ptr<ITask> responsible_task
     );
 
     /**
-     * Create a new ErrorResult from a LocatableError and optionally the responsible task.
+     * Create a new ErrorResult from a LocatableError and the responsible task.
      *
      * @param exception Exception thrown from the ITask.
-     * @param responsible_task Optionally, the ITask (ownership transferred into the ErrorResult) responsible.
+     * @param responsible_task The ITask (ownership transferred into the ErrorResult) responsible.
      */
     explicit ErrorResult(
             const LocatableError& exception,
-            std::unique_ptr<ITask> responsible_task = nullptr
+            std::unique_ptr<ITask> responsible_task
     );
 
     /**
@@ -71,7 +71,7 @@ public:
      * @return An observing pointer to the responsible ITask, or <code>nullptr</code> if the ErrorResult does not relate
      *  to a particular ITask.
      */
-    [[nodiscard]] const ITask * observe_responsible_task() const noexcept;
+    [[nodiscard]] const ITask* observe_responsible_task() const noexcept;
 
 private:
     std::string message;

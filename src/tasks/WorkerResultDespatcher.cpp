@@ -9,8 +9,6 @@
 
 #include "WorkerResultDespatcher.hpp"
 
-#include "WorkerResult.hpp"
-
 namespace echomap
 {
 
@@ -22,7 +20,7 @@ void WorkerResultDespatcher::publish(
             [this](auto& payload) {
                 publish_payload(std::move(payload));
             },
-            result.result
+            result
     );
 }
 

@@ -11,7 +11,6 @@
 
 #include "../objects/factories/SignalFactory.hpp"
 #include "DownsampleResult.hpp"
-#include "WorkerResult.hpp"
 
 namespace echomap
 {
@@ -29,7 +28,7 @@ DownsampleTask::DownsampleTask(
 
 WorkerResult DownsampleTask::execute_work()
 {
-    return WorkerResult(DownsampleResult(signal->get_id(), SignalFactory::downsample(*signal, factor)));
+    return DownsampleResult(signal->get_id(), SignalFactory::downsample(*signal, factor));
 }
 
 } // namespace echomap

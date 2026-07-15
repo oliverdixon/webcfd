@@ -9,14 +9,19 @@
 #define ECHOMAP_ITASK_HPP
 
 #include <stop_token>
+#include <variant>
 
 #include "../Logger.hpp"
 #include "../objects/Object.hpp"
+#include "DFTResult.hpp"
+#include "DownsampleResult.hpp"
+#include "ErrorResult.hpp"
+#include "LoadProjectResult.hpp"
 
 namespace echomap
 {
 
-struct WorkerResult;
+using WorkerResult = std::variant<ErrorResult, DFTResult, DownsampleResult, LoadProjectResult>;
 
 /**
  * An ITask represents an invocable piece of work that produces an IResult.

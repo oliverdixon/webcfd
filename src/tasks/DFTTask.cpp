@@ -12,7 +12,6 @@
 #include "../objects/Signal.hpp"
 #include "../objects/factories/FrequencySpectrumFactory.hpp"
 #include "DFTResult.hpp"
-#include "WorkerResult.hpp"
 
 namespace echomap
 {
@@ -35,11 +34,11 @@ DFTTask::DFTTask(
 
 WorkerResult DFTTask::execute_work()
 {
-    return WorkerResult(DFTResult(
+    return DFTResult(
             signal->get_id(),
             FrequencySpectrumFactory::create_frequency_spectrum(*signal, window_function, transform_size),
             transform_size
-    ));
+    );
 }
 
 } // namespace echomap
