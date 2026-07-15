@@ -8,17 +8,13 @@
 #include <string>
 #include <string_view>
 
-#include "IResult.hpp"
-
 namespace echomap
 {
 
-class ErrorResult : public IResult
+class ErrorResult
 {
 public:
     explicit ErrorResult(std::string_view message);
-
-    void despatch(IResultHandler& handler) override;
 
     [[nodiscard]] std::string_view observe_message() const noexcept;
 

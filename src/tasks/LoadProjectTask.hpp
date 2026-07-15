@@ -41,7 +41,7 @@ private:
      * @throws std::runtime_error If the Project could not be fully loaded and validated.
      * @see JSONDeserialiser::deserialise_project
      */
-    std::unique_ptr<IResult> execute_work() override;
+    WorkerResult execute_work() override;
 
     /**
      * Shared instance of the deserialiser.

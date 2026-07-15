@@ -9,6 +9,7 @@
 
 #include "../objects/Project.hpp"
 #include "LoadProjectResult.hpp"
+#include "WorkerResult.hpp"
 
 namespace echomap
 {
@@ -23,9 +24,9 @@ LoadProjectTask::LoadProjectTask(
 {
 }
 
-std::unique_ptr<IResult> LoadProjectTask::execute_work()
+WorkerResult LoadProjectTask::execute_work()
 {
-    return std::make_unique<LoadProjectResult>(deserialiser.deserialise_project(project_file_path));
+    return WorkerResult(LoadProjectResult(deserialiser.deserialise_project(project_file_path)));
 }
 
 } // namespace echomap

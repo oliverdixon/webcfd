@@ -49,20 +49,17 @@ public:
      * This function does not block.
      *
      * @param out The destination slot for the dequeued value, mutated if and only if a value was dequeued.
-     * @return Was a value dequeued?
      */
-    bool try_consume(
-            ValueT& out
+    void try_consume(
+            std::optional<ValueT>& out
     )
     {
         std::lock_guard lock(mutex);
 
-        if (queue.empty())
-            return false;
-
-        out = std::move(queue.front());
-        queue.pop_front();
-        return true;
+        if (!queue.empty()) {
+            out.emplace(std::move(queue.front()));
+            queue.pop_front();
+        }
     }
 
     /**

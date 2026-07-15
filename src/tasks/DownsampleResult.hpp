@@ -13,7 +13,6 @@
 #include <memory>
 
 #include "../objects/Signal.hpp"
-#include "IResult.hpp"
 
 namespace echomap
 {
@@ -21,15 +20,13 @@ namespace echomap
 /**
  * Represents an IResult for a downsampled Signal produced by a DownsampleTask job.
  */
-class DownsampleResult : public IResult
+class DownsampleResult
 {
 public:
     explicit DownsampleResult(
             Signal::id_type source_id,
             std::unique_ptr<Signal> downsampled
     );
-
-    void despatch(IResultHandler& handler) override;
 
     [[nodiscard]] std::unique_ptr<Signal> take_downsampled() noexcept;
     [[nodiscard]] Signal::id_type get_source_id() const noexcept;

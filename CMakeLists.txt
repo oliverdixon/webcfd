@@ -72,12 +72,10 @@ add_executable(EchoMap
         src/tasks/LoadProjectTask.hpp
         src/tasks/Worker.cpp
         src/tasks/Worker.hpp
-        src/tasks/IResult.hpp
         src/tasks/ErrorResult.cpp
         src/tasks/ErrorResult.hpp
         src/tasks/LoadProjectResult.cpp
         src/tasks/LoadProjectResult.hpp
-        src/tasks/IResultHandler.hpp
         src/tasks/DownsampleTask.cpp
         src/tasks/DownsampleTask.hpp
         src/tasks/DownsampleResult.cpp
@@ -97,6 +95,10 @@ add_executable(EchoMap
         src/tasks/lightweight/ModifySensorColourTask.hpp
         src/objects/factories/FFTWBuffers.cpp
         src/objects/factories/FFTWBuffers.hpp
+        src/tasks/ScopedConnections.cpp
+        src/tasks/ScopedConnections.hpp
+        src/tasks/ITask.cpp
+        src/tasks/WorkerResult.hpp
 )
 
 target_link_libraries(EchoMap PRIVATE

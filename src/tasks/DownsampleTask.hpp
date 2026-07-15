@@ -47,7 +47,7 @@ public:
     );
 
 private:
-    std::unique_ptr<IResult> execute_work() override;
+    WorkerResult execute_work() override;
 
     std::shared_ptr<Signal> signal;
     const float factor;

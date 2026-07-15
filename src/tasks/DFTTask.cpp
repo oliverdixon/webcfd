@@ -12,6 +12,7 @@
 #include "../objects/Signal.hpp"
 #include "../objects/factories/FrequencySpectrumFactory.hpp"
 #include "DFTResult.hpp"
+#include "WorkerResult.hpp"
 
 namespace echomap
 {
@@ -32,13 +33,13 @@ DFTTask::DFTTask(
     assert(this->signal != nullptr);
 }
 
-std::unique_ptr<IResult> DFTTask::execute_work()
+WorkerResult DFTTask::execute_work()
 {
-    return std::make_unique<DFTResult>(
+    return WorkerResult(DFTResult(
             signal->get_id(),
             FrequencySpectrumFactory::create_frequency_spectrum(*signal, window_function, transform_size),
             transform_size
-    );
+    ));
 }
 
 } // namespace echomap

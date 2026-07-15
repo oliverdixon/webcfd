@@ -11,7 +11,7 @@
 namespace echomap
 {
 
-template <> constexpr std::string Object<Project>::class_name = "Project";
+template <> constexpr std::string_view Object<Project>::class_name = "Project";
 
 Project::Project(
         const std::string_view project_name

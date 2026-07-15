@@ -17,6 +17,7 @@
 namespace echomap
 {
 
+class DFTResult;
 class EchoMap;
 class Worker;
 
@@ -38,7 +39,7 @@ public:
 
     void set_active_project(const Project* new_active_project) noexcept override;
 
-    void handle(DFTResult& result) override;
+    void handle(DFTResult& result);
 
 private:
     struct CallbackData

@@ -11,6 +11,7 @@
 
 #include "../objects/factories/SignalFactory.hpp"
 #include "DownsampleResult.hpp"
+#include "WorkerResult.hpp"
 
 namespace echomap
 {
@@ -26,9 +27,9 @@ DownsampleTask::DownsampleTask(
     assert(this->signal != nullptr);
 }
 
-std::unique_ptr<IResult> DownsampleTask::execute_work()
+WorkerResult DownsampleTask::execute_work()
 {
-    return std::make_unique<DownsampleResult>(signal->get_id(), SignalFactory::downsample(*signal, factor));
+    return WorkerResult(DownsampleResult(signal->get_id(), SignalFactory::downsample(*signal, factor)));
 }
 
 } // namespace echomap

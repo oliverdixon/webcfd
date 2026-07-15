@@ -12,7 +12,6 @@
 
 #include "../objects/FrequencySpectrum.hpp"
 #include "../objects/Signal.hpp"
-#include "IResult.hpp"
 
 namespace echomap
 {
@@ -20,7 +19,7 @@ namespace echomap
 /**
  * Denotes a completed DFT computation from a DFTTask.
  */
-class DFTResult : public IResult
+class DFTResult
 {
 public:
     explicit DFTResult(
@@ -28,8 +27,6 @@ public:
             std::unique_ptr<FrequencySpectrum> spectrum,
             std::size_t transform_size
     );
-
-    void despatch(IResultHandler& handler) override;
 
     [[nodiscard]] std::unique_ptr<FrequencySpectrum> take_spectrum() noexcept;
     [[nodiscard]] Signal::id_type get_source_id() const noexcept;

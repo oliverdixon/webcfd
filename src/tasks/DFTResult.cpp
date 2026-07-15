@@ -9,8 +9,6 @@
 
 #include "DFTResult.hpp"
 
-#include "IResultHandler.hpp"
-
 namespace echomap
 {
 
@@ -19,22 +17,11 @@ DFTResult::DFTResult(
         std::unique_ptr<FrequencySpectrum> spectrum,
         const std::size_t transform_size
 ) :
-    IResult(std::format(
-            "DFTResult: {}",
-            spectrum->get_name()
-    )),
     source_id(source_id),
     spectrum(std::move(spectrum)),
     transform_size(transform_size)
 {
     assert(this->spectrum != nullptr);
-}
-
-void DFTResult::despatch(
-        IResultHandler& handler
-)
-{
-    handler.handle(*this);
 }
 
 std::unique_ptr<FrequencySpectrum> DFTResult::take_spectrum() noexcept

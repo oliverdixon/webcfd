@@ -10,18 +10,15 @@
 
 #include <memory>
 
-#include "IResult.hpp"
 #include "../objects/Project.hpp"
 
 namespace echomap
 {
 
-class LoadProjectResult : public IResult
+class LoadProjectResult
 {
 public:
     explicit LoadProjectResult(std::unique_ptr<Project> loaded_project);
-
-    void despatch(IResultHandler& handler) override;
 
     [[nodiscard]] std::unique_ptr<Project> take_project() noexcept;
 

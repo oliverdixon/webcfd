@@ -7,7 +7,7 @@
 
 #include "LoadProjectResult.hpp"
 
-#include "../EchoMap.hpp"
+#include "../objects/Project.hpp"
 
 namespace echomap
 {
@@ -15,16 +15,8 @@ namespace echomap
 LoadProjectResult::LoadProjectResult(
         std::unique_ptr<Project> loaded_project
 ) :
-    IResult(std::format("LoadProjectResult: {}", loaded_project->get_name())),
     loaded_project(std::move(loaded_project))
 {
-}
-
-void LoadProjectResult::despatch(
-        IResultHandler& handler
-)
-{
-    handler.handle(*this);
 }
 
 std::unique_ptr<Project> LoadProjectResult::take_project() noexcept

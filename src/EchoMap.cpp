@@ -11,7 +11,6 @@
 #include <implot.h>
 #include <implot3d.h>
 
-#include "tasks/LoadProjectResult.hpp"
 #include "tasks/LoadProjectTask.hpp"
 
 #ifdef __EMSCRIPTEN__
@@ -483,7 +482,7 @@ void EchoMap::process_worker_results()
 {
     while (const auto result = worker.try_get_result())
         try {
-            result->despatch(*this);
+            // result->despatch(*this); // TODO libsigcpp
         } catch (const std::exception& exception) {
             Logger::log(Logger::Level::Error, exception.what(), std::source_location::current());
         }
@@ -554,43 +553,6 @@ void EchoMap::increment_forced_frames(
 ) noexcept
 {
     forced_frames += count;
-}
-
-void EchoMap::handle(
-        LoadProjectResult& result
-)
-{
-    put_project(result.take_project());
-
-    for (const auto& panel : panels)
-        panel->handle(result);
-}
-
-void EchoMap::handle(
-        DownsampleResult& result
-)
-{
-    for (const auto& panel : panels)
-        panel->handle(result);
-}
-
-void EchoMap::handle(
-        DFTResult& result
-)
-{
-    for (const auto& panel : panels)
-        panel->handle(result);
-}
-
-void EchoMap::handle(
-        const ErrorResult& result
-)
-{
-    error_modal.raise_error(result.observe_message());
-    increment_forced_frames(); // Force a frame to draw the modal.
-
-    for (const auto& panel : panels)
-        panel->handle(result);
 }
 
 } // namespace echomap

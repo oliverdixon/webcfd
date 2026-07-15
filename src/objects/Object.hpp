@@ -61,6 +61,7 @@ public:
         return name.c_str();
     }
 
+    // ReSharper disable once CppDFAConstantFunctionResult
     [[nodiscard]] static std::string_view get_class_name() noexcept
     {
         return class_name;
@@ -121,7 +122,7 @@ protected:
      */
     Object() :
         id(IDAllocator<Derived>::allocate()),
-        name(class_name + ' ' + std::to_string(id))
+        name(std::string(class_name) + ' ' + std::to_string(id))
     {
     }
 
@@ -134,7 +135,7 @@ protected:
             const std::string_view object_name
     ) :
         id(IDAllocator<Derived>::allocate()),
-        name(object_name.empty() ? class_name + ' ' + std::to_string(id) : object_name)
+        name(object_name.empty() ? std::string(class_name) + ' ' + std::to_string(id) : object_name)
     {
     }
 
@@ -186,16 +187,11 @@ private:
      *  Inheriting classes should override the class name by doing something equivalent to:
      *  <pre>
      *      template <>
-     *      constexpr std::string Object<Sensor>::class_name = "Sensor";
+     *      constexpr std::string_view Object<Sensor>::class_name = "Sensor";
      *  </pre>
      * </p>
-     * <p>
-     *  The current implementation is relying on non-standard std::string small-string library optimisations to place
-     *  string literals of 15 (16 inc. NULL) on the stack. Anything longer will perform heap allocation and hence
-     *  violate constexpr requirements. Should this be revised? Probably. Will it be? Probably not.
-     * </p>
      */
-    static constexpr std::string class_name = "Object";
+    static constexpr std::string_view class_name = "Object";
 
     const id_type id;           /**< Primary numerical ID */
     std::size_t copy_count = 0; /**< Number of times the object has been copied */

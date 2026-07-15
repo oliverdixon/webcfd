@@ -14,7 +14,7 @@
 namespace echomap
 {
 
-template <> constexpr std::string Object<FrequencySpectrum>::class_name = "FreqSpec";
+template <> constexpr std::string_view Object<FrequencySpectrum>::class_name = "FreqSpec";
 
 std::string FrequencySpectrum::get_window_function_name(
         const WindowFunction function

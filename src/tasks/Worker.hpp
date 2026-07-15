@@ -11,9 +11,9 @@
 #include <functional>
 #include <thread>
 
-#include "IResult.hpp"
 #include "ITask.hpp"
 #include "ThreadSafeQueue.hpp"
+#include "WorkerResult.hpp"
 
 namespace echomap
 {
@@ -69,7 +69,7 @@ public:
      *
      * @return The IResult posted by the latest job, or <code>nullptr</code> if no IResult was available.
      */
-    std::unique_ptr<IResult> try_get_result();
+    std::optional<WorkerResult> try_get_result();
 
     /**
      * Clears any scheduled jobs or pending results.
@@ -85,10 +85,11 @@ private:
     void execute(const std::stop_token& stop_token) noexcept;
 
     ThreadSafeQueue<std::unique_ptr<ITask>> task_queue;
-    ThreadSafeQueue<std::unique_ptr<IResult>> result_queue;
+    ThreadSafeQueue<WorkerResult> result_queue;
 
-    ResultCallback result_callback; /**< Callable to inform clients of new results. */
-    std::jthread worker_thread;     /**< RAII computation thread to handle ITask work pieces. */
+    ResultCallback result_callback;               /**< Callable to inform clients of new results. */
+    std::jthread worker_thread;                   /**< RAII computation thread to handle ITask work pieces. */
+    std::optional<WorkerResult> ephemeral_result; /**< Persistent ephemeral for dequeued results. */
 };
 
 } // namespace echomap

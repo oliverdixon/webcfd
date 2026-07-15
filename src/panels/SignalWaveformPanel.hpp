@@ -16,6 +16,7 @@
 namespace echomap
 {
 
+class DownsampleResult;
 class Worker;
 
 /**
@@ -37,7 +38,7 @@ public:
 
     void set_active_project(const Project* new_active_project) noexcept override;
 
-    void handle(DownsampleResult& result) override;
+    void handle(DownsampleResult& result);
 
 private:
     static constexpr float default_downsample_factor = 50.0f;

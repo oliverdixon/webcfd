@@ -9,8 +9,6 @@
 
 #include "DownsampleResult.hpp"
 
-#include "IResultHandler.hpp"
-
 namespace echomap
 {
 
@@ -18,18 +16,10 @@ DownsampleResult::DownsampleResult(
         const Signal::id_type source_id,
         std::unique_ptr<Signal> downsampled
 ) :
-    IResult(std::format("DownsampleResult: {}", downsampled->get_name())),
     source_id(source_id),
     downsampled(std::move(downsampled))
 {
     assert(this->downsampled != nullptr);
-}
-
-void DownsampleResult::despatch(
-        IResultHandler& handler
-)
-{
-    handler.handle(*this);
 }
 
 std::unique_ptr<Signal> DownsampleResult::take_downsampled() noexcept

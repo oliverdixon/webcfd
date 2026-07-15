@@ -12,8 +12,6 @@
 // ReSharper disable once CppUnusedIncludeDirective - False positive. Required for flags.
 #include <implot.h>
 
-#include "../tasks/IResultHandler.hpp"
-
 namespace echomap
 {
 
@@ -24,13 +22,11 @@ class Project;
  *
  * Panels may render from a static context, typically through a configured ImGui context, or despatch work to the GPU
  * through a WebGPU CommandEncoder.
- *
- * @todo All panels shouldn't necessarily implement IResultHandler. We might want a more "precise" pub-sub model.
  */
-class IPanel : public IResultHandler
+class IPanel
 {
 public:
-    ~IPanel() override = default;
+    virtual ~IPanel() = default;
 
     /**
      * Draw the panel to the active rendering context.

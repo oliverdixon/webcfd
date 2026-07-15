@@ -13,7 +13,6 @@
 #include <webgpu/webgpu_cpp.h>
 
 #include "panels/ErrorModal.hpp"
-#include "tasks/IResultHandler.hpp"
 #include "tasks/Worker.hpp"
 #include "tasks/lightweight/AddChannelMappingTask.hpp"
 #include "tasks/lightweight/ModifySensorColourTask.hpp"
@@ -29,7 +28,7 @@ class Project;
  * The EchoMap maintains state for the application including WebGPU and Dear ImGui context, encapsulating initialisation,
  * game loop, interaction, and clean-up.
  */
-class EchoMap : IResultHandler
+class EchoMap
 {
 public:
     /**
@@ -59,7 +58,7 @@ public:
     /**
      * Clean up all persistent state registered by the application instance.
      */
-    ~EchoMap() noexcept override;
+    ~EchoMap() noexcept;
 
     /**
      * Indicate to the wave form controllers that a new file has been selected.
@@ -90,11 +89,6 @@ public:
      * @param count The number of frames to force.
      */
     void increment_forced_frames(unsigned int count = 4) noexcept;
-
-    void handle(LoadProjectResult& result) override;
-    void handle(DownsampleResult& result) override;
-    void handle(DFTResult& result) override;
-    void handle(const ErrorResult& result) override;
 
 private:
     static constexpr auto operation_timeout = std::numeric_limits<std::uint64_t>::max();
