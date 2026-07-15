@@ -58,7 +58,7 @@ private:
     void reset_available_transform_sizes();
     void update_spectrum_bounds(const FrequencySpectrum& spectrum) noexcept;
     void update_spectrum_bounds() noexcept;
-    void update_available_sizes(std::size_t maximum_sample_count);
+    void update_available_sizes(std::uint64_t maximum_sample_count);
     void reset_viewport_bounds() noexcept;
 
     const FrequencySpectrum* get_spectra(

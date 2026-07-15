@@ -9,6 +9,8 @@
 
 #include "SignalDFTPanel.hpp"
 
+#include <bit>
+
 #include "../EchoMap.hpp"
 #include "../Logger.hpp"
 #include "../objects/FrequencySpectrum.hpp"
@@ -44,7 +46,7 @@ void SignalDFTPanel::draw() noexcept
         else if (!active_project->get_signal_count())
             ImGui::Text("No signals are loaded.");
         else {
-            std::size_t max_sample_count = 0;
+            std::uint64_t max_sample_count = 0;
             for (const auto& signal : active_project->observe_signals())
                 max_sample_count = std::max(max_sample_count, signal.get_sample_count());
             update_available_sizes(max_sample_count);
@@ -127,7 +129,7 @@ void SignalDFTPanel::draw_options_section() noexcept
         ImGui::TableNextColumn();
 
         ImGui::SetNextItemWidth(-std::numeric_limits<float>::min());
-        if (auto combo_selected_idx = std::to_underlying(selected_window);
+        if (unsigned int combo_selected_idx = std::to_underlying(selected_window);
             ImGui::BeginCombo("##DFTOptionsWindowFunction", window_function_names[combo_selected_idx].c_str())) {
             for (unsigned int item_idx = 0; item_idx < window_function_names.size(); ++item_idx) {
                 const auto is_selected = item_idx == combo_selected_idx;
@@ -315,25 +317,25 @@ void SignalDFTPanel::update_spectrum_bounds() noexcept
 }
 
 void SignalDFTPanel::update_available_sizes(
-        const std::size_t maximum_sample_count
+        const std::uint64_t maximum_sample_count
 )
 {
     if (available_sizes.empty())
         reset_available_transform_sizes();
 
-    if (maximum_sample_count > std::size_t{1} << (available_sizes.size() + default_size_log - 1)) {
+    if (maximum_sample_count > std::uint64_t{1} << (available_sizes.size() + default_size_log - 1)) {
         /*
          * If the maximum sample count can support a large transform size than currently advertised, re-create the list.
          * (Yes, we could be smarter here and just append the tail.)
          */
-        constexpr std::size_t minimum_transform_size = std::size_t{1} << default_size_log;
+        constexpr std::uint64_t minimum_transform_size = std::uint64_t{1} << default_size_log;
         const std::size_t maximum_transform_size =
                 std::max(minimum_transform_size, std::bit_floor(maximum_sample_count));
 
         available_sizes.clear();
-        for (std::size_t size = minimum_transform_size; size <= maximum_transform_size; size <<= 1) {
+        for (std::uint64_t size = minimum_transform_size; size <= maximum_transform_size; size <<= 1) {
             available_sizes.push_back(std::to_string(size));
-            if (size > std::numeric_limits<std::size_t>::max() / 2)
+            if (size > std::numeric_limits<std::uint64_t>::max() / 2)
                 break;
         }
     }
