@@ -25,7 +25,7 @@ SignalWaveformPanel::SignalWaveformPanel(
     parent_worker(parent_worker),
     active_project(initial_project)
 {
-    connections.add(despatcher.load_project_finished_channel.observe([this](const LoadProjectResult& result) {
+    connections.push_back(despatcher.load_project_finished_channel.observe([this](const LoadProjectResult& result) {
         active_project = result.observe_project();
         downsample_cache.clear();
         update_bounding_box();

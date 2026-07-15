@@ -214,10 +214,10 @@ void EchoMap::setup_subscriptions()
         put_project(std::move(result).take_project());
     });
 
-    despatcher.error_channel.observe([this](const ErrorResult& error) {
+    connections.push_back(despatcher.error_channel.observe([this](const ErrorResult& error) {
         error_modal.raise_error(error.what());
         LOG_F_ERROR("Error modal raised due to error: {}", error.what());
-    });
+    }));
 }
 
 wgpu::Future EchoMap::request_adapter() noexcept

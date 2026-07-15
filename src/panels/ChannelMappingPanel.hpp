@@ -5,9 +5,10 @@
 #ifndef ECHOMAP_CHANNELMAPPINGPANEL_HPP
 #define ECHOMAP_CHANNELMAPPINGPANEL_HPP
 
+#include <sigc++/scoped_connection.h>
+
 #include <string>
 
-#include "../tasks/ScopedConnections.hpp"
 #include "IPanel.hpp"
 
 namespace echomap
@@ -48,7 +49,7 @@ private:
 
     EchoMap& app;
     const Project* active_project = nullptr;
-    ScopedConnections connections;
+    std::vector<sigc::scoped_connection> connections;
 };
 
 } // namespace echomap

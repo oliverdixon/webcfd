@@ -95,8 +95,6 @@ add_executable(EchoMap
         src/tasks/lightweight/ModifySensorColourTask.hpp
         src/objects/factories/FFTWBuffers.cpp
         src/objects/factories/FFTWBuffers.hpp
-        src/tasks/ScopedConnections.cpp
-        src/tasks/ScopedConnections.hpp
         src/tasks/ITask.cpp
         src/tasks/WorkerResultDespatcher.cpp
         src/tasks/WorkerResultDespatcher.hpp

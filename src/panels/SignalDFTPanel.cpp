@@ -32,7 +32,7 @@ SignalDFTPanel::SignalDFTPanel(
     active_project(initial_project),
     app(app)
 {
-    connections.add(despatcher.load_project_finished_channel.observe([this](const LoadProjectResult& result) {
+    connections.push_back(despatcher.load_project_finished_channel.observe([this](const LoadProjectResult& result) {
         active_project = result.observe_project();
         spectra_cache.clear();
         reset_available_transform_sizes();

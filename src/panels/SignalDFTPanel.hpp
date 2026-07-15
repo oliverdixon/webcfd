@@ -10,9 +10,10 @@
 #ifndef ECHOMAP_SIGNALDFTPANEL_HPP
 #define ECHOMAP_SIGNALDFTPANEL_HPP
 
+#include <sigc++/scoped_connection.h>
+
 #include "../objects/FrequencySpectrum.hpp"
 #include "../objects/Signal.hpp"
-#include "../tasks/ScopedConnections.hpp"
 #include "IPanel.hpp"
 
 namespace echomap
@@ -154,7 +155,7 @@ private:
     std::vector<std::string> available_sizes;          /**< Strings of all available transform sizes. */
     unsigned int selected_size_log = default_size_log; /**< Base-2 log of selected transform size. */
 
-    ScopedConnections connections;
+    std::vector<sigc::scoped_connection> connections;
 };
 
 } // namespace echomap

@@ -11,9 +11,9 @@
 #include <GLFW/glfw3.h>
 #include <imgui.h>
 #include <webgpu/webgpu_cpp.h>
+#include <sigc++/scoped_connection.h>
 
 #include "panels/ErrorModal.hpp"
-#include "tasks/ScopedConnections.hpp"
 #include "tasks/Worker.hpp"
 #include "tasks/WorkerResultDespatcher.hpp"
 #include "tasks/lightweight/AddChannelMappingTask.hpp"
@@ -218,9 +218,9 @@ private:
     std::vector<std::unique_ptr<IPanel>> panels;
     ErrorModal error_modal;
 
-    Worker worker;                          /**< Multi-threaded worker for scheduling heavy computation tasks. */
-    WorkerResultDespatcher despatcher;      /**< Despatcher to manage Worker result channels. */
-    ScopedConnections connections;          /**< RAII lifetime manager for signal connections. */
+    Worker worker;                     /**< Multi-threaded worker for scheduling heavy computation tasks. */
+    WorkerResultDespatcher despatcher; /**< Despatcher to manage Worker result channels. */
+    std::vector<sigc::scoped_connection> connections; /**< RAII lifetime manager for signal connections. */
     std::vector<LightweightTask> lwt_queue; /**< Queue for simple tasks that needn't go through the despatcher. */
 
     ImGuiID dockspace_id;
