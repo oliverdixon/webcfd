@@ -1,7 +1,9 @@
 CMakeUserPresets.json
 /bootstrap-user.sh
+/docs/*
+!/docs/open.sh
+!/docs/README.md
 
 cmake-build-*
 third-party/
-/docs/
 /audio/

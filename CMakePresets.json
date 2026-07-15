@@ -6,7 +6,8 @@
       "hidden": true,
       "generator": "Ninja",
       "cacheVariables": {
-        "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake"
+        "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
+        "ECHOMAP_BUILD_APPLICATION": true
       }
     },
     {
@@ -37,8 +38,7 @@
       "name": "release",
       "hidden": true,
       "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Release",
-        "ECHOMAP_BUILD_DOCUMENTATION": true
+        "CMAKE_BUILD_TYPE": "Release"
       }
     },
 
@@ -73,6 +73,15 @@
         "release"
       ],
       "binaryDir": "${sourceDir}/cmake-build-wasm-release"
+    },
+    {
+      "name": "documentation",
+      "generator": "Ninja",
+      "cacheVariables": {
+        "ECHOMAP_BUILD_APPLICATION": false,
+        "ECHOMAP_BUILD_DOCUMENTATION": true
+      },
+      "binaryDir": "${sourceDir}/docs/out"
     }
   ]
 }

@@ -30,7 +30,7 @@ terminal session in which CMake is invoked.
 
 ### Quick Start for Desktop Users
 
-```bash
+```shell
 $ source bootstrap.sh
 $ cmake --preset native-release
 $ cmake --build cmake-build-native-release
@@ -39,7 +39,7 @@ $ cmake-build-native-release/EchoMap
 
 ### Quick Start for Web Users
 
-```bash
+```shell
 $ source bootstrap.sh
 $ cmake --preset wasm-release
 $ cmake --build cmake-build-wasm-release
