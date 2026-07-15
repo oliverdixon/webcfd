@@ -181,3 +181,5 @@ else()
     find_package(glfw3 REQUIRED)
     target_link_libraries(EchoMap PRIVATE dawn::webgpu_dawn glfw)
 endif()
+
+include(cmake/GenerateDoxygen.cmake)

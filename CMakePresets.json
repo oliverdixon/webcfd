@@ -37,7 +37,8 @@
       "name": "release",
       "hidden": true,
       "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Release"
+        "CMAKE_BUILD_TYPE": "Release",
+        "ECHOMAP_BUILD_DOCUMENTATION": true
       }
     },
 
