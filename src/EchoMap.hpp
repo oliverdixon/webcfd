@@ -214,14 +214,14 @@ private:
     wgpu::SurfaceCapabilities surface_capabilities;
     GLFWwindow* window = nullptr;
 
-    std::unique_ptr<Project> project;
-    std::vector<std::unique_ptr<IPanel>> panels;
-    ErrorModal error_modal;
-
     Worker worker;                     /**< Multi-threaded worker for scheduling heavy computation tasks. */
     WorkerResultDespatcher despatcher; /**< Despatcher to manage Worker result channels. */
     std::vector<sigc::scoped_connection> connections; /**< RAII lifetime manager for signal connections. */
+
+    std::vector<std::unique_ptr<IPanel>> panels;      /**< Individual display components. */
+    ErrorModal error_modal;                           /**< Persistent panel to indicate errors over all other panels. */
     std::vector<LightweightTask> lwt_queue; /**< Queue for simple tasks that needn't go through the despatcher. */
+    std::unique_ptr<Project> project;       /**< Owning container for the active Project. */
 
     ImGuiID dockspace_id;
     bool dockspace_configured = false;

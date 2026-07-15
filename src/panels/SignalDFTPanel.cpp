@@ -81,13 +81,13 @@ void SignalDFTPanel::handle_completed_dft(
         DFTResult&& result
 )
 {
-    auto spectrum = std::move(result).take_spectrum();
-
     const CacheKey key{
             .source_id = result.get_source_id(),
-            .window_function = spectrum->preprocessor,
+            .window_function = result.observe_spectrum()->preprocessor,
             .transform_size = result.get_transform_size()
     };
+
+    auto spectrum = std::move(result).take_spectrum();
 
     if (const auto cache_slot_it = spectra_cache.find(key); cache_slot_it == spectra_cache.end())
         LOG_F_WARN("Dropping an unexpected result for the DFT of Signal {}.", spectrum->get_name());

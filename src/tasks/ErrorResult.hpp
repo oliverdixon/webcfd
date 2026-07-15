@@ -73,6 +73,8 @@ public:
      */
     [[nodiscard]] const ITask* observe_responsible_task() const noexcept;
 
+    ~ErrorResult();
+
     ErrorResult(ErrorResult&&) noexcept;
     ErrorResult& operator=(ErrorResult&&) noexcept;
 
