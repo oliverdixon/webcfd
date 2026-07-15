@@ -210,9 +210,11 @@ void EchoMap::configure_surface(
 
 void EchoMap::setup_subscriptions()
 {
-    despatcher.load_project_finished_channel.nominate_consumer([this](LoadProjectResult&& result) {
-        put_project(std::move(result).take_project());
-    });
+    connections.push_back(
+            despatcher.load_project_finished_channel.nominate_consumer([this](LoadProjectResult&& result) {
+                put_project(std::move(result).take_project());
+            })
+    );
 
     connections.push_back(despatcher.error_channel.observe([this](const ErrorResult& error) {
         error_modal.raise_error(error.what());

@@ -28,7 +28,8 @@ public:
             std::size_t transform_size
     );
 
-    [[nodiscard]] std::unique_ptr<FrequencySpectrum> take_spectrum() noexcept;
+    [[nodiscard]] std::unique_ptr<FrequencySpectrum> take_spectrum() && noexcept;
+    [[nodiscard]] const FrequencySpectrum* observe_spectrum() const noexcept;
     [[nodiscard]] Signal::id_type get_source_id() const noexcept;
     [[nodiscard]] std::size_t get_transform_size() const noexcept;
 

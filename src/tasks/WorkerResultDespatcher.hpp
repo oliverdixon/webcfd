@@ -16,22 +16,37 @@
 namespace echomap
 {
 
-class ErrorResult;
-class LoadProjectResult;
-class DownsampleResult;
-class DFTResult;
-
 /**
- *
+ * Manages channels for WorkerResult message routing.
  */
 class WorkerResultDespatcher
 {
 public:
+    /**
+     * Publish new WorkerResult message on the suitable channel.
+     *
+     * @param result The message to publish.
+     */
     void publish(WorkerResult&& result);
 
+    /**
+     * Channel to indicate completion of DFTTask.
+     */
     ResultChannel<DFTResult> dft_finished_channel;
+
+    /**
+     * Channel to indicate completion of DownsampleTask.
+     */
     ResultChannel<DownsampleResult> downsample_finished_channel;
+
+    /**
+     * Channel to indicate completion of LoadProjectTask.
+     */
     ResultChannel<LoadProjectResult> load_project_finished_channel;
+
+    /**
+     * Channel to indicate emission of ErrorResult.
+     */
     ResultChannel<const ErrorResult> error_channel;
 
 private:

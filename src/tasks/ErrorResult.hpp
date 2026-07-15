@@ -73,6 +73,12 @@ public:
      */
     [[nodiscard]] const ITask* observe_responsible_task() const noexcept;
 
+    ErrorResult(ErrorResult&&) noexcept;
+    ErrorResult& operator=(ErrorResult&&) noexcept;
+
+    ErrorResult(const ErrorResult&) = delete;
+    ErrorResult& operator=(const ErrorResult&) = delete;
+
 private:
     std::string message;
     std::source_location location;

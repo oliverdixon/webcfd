@@ -94,7 +94,7 @@ public:
      *
      * @return Is the queue empty?
      */
-    [[nodiscard]] bool empty() const noexcept
+    [[nodiscard]] bool empty() const
     {
         std::lock_guard lock(mutex);
         return queue.empty();

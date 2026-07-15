@@ -18,6 +18,14 @@ class WorkerResultDespatcher;
 class ProjectPanel final : public IPanel
 {
 public:
+    /**
+     * Create a new ProjectPanel to display Project metadata.
+     *
+     * The SensorGeometryPanel observes the LoadProjectResult message.
+     *
+     * @param despatcher The despatcher to expose the result buses.
+     * @param initial_project An optional initial Project for the IPanel to describe.
+     */
     explicit ProjectPanel(
             WorkerResultDespatcher& despatcher,
             const Project* initial_project = nullptr

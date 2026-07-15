@@ -51,4 +51,8 @@ const ITask* ErrorResult::observe_responsible_task() const noexcept
     return responsible_task.get();
 }
 
+ErrorResult::ErrorResult(ErrorResult&&) noexcept = default;
+
+ErrorResult& ErrorResult::operator=(ErrorResult&&) noexcept = default;
+
 } // namespace echomap

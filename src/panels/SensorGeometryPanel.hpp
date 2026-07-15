@@ -28,6 +28,15 @@ class WorkerResultDespatcher;
 class SensorGeometryPanel final : public IPanel
 {
 public:
+    /**
+     * Create a new SensorGeometryPanel to plot and control Sensor information.
+     *
+     * The SensorGeometryPanel observes the LoadProjectResult message.
+     *
+     * @param despatcher The despatcher to expose the result buses.
+     * @param app The parent application instance.
+     * @param initial_project An optional initial Project for the IPanel to display.
+     */
     explicit SensorGeometryPanel(
             WorkerResultDespatcher& despatcher,
             EchoMap& app,

@@ -31,7 +31,7 @@ void Worker::submit(
     task_queue.produce(std::move(task));
 }
 
-bool Worker::is_result_available() const noexcept
+bool Worker::is_result_available() const
 {
     return !result_queue.empty();
 }
@@ -61,17 +61,17 @@ void Worker::execute(
             try {
                 auto result = task->execute(stop_token);
                 LOG_F_DEBUG("Finished {}.", task->get_name());
-
                 result_queue.produce(std::move(result));
-                if (result_callback)
-                    result_callback();
             } catch (const std::exception& exception) {
-                result_queue.produce(ErrorResult(exception.what(), std::source_location::current(), std::move(task)));
                 LOG_F_ERROR("{} failed with message: {}.", task->get_name(), exception.what());
+                result_queue.produce(ErrorResult(exception.what(), std::source_location::current(), std::move(task)));
             } catch (...) {
-                result_queue.produce(ErrorResult("System error", std::source_location::current(), std::move(task)));
                 LOG_F_ERROR("{} failed with a system error. This is bug.", task->get_name());
+                result_queue.produce(ErrorResult("System error", std::source_location::current(), std::move(task)));
             }
+
+            if (result_callback)
+                result_callback();
         }
 }
 

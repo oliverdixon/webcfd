@@ -31,9 +31,9 @@ SignalWaveformPanel::SignalWaveformPanel(
         update_bounding_box();
     }));
 
-    despatcher.downsample_finished_channel.nominate_consumer(
+    connections.push_back(despatcher.downsample_finished_channel.nominate_consumer(
             sigc::mem_fun(*this, &SignalWaveformPanel::handle_downsampled_result)
-    );
+    ));
 }
 
 const char* SignalWaveformPanel::get_imgui_name() const noexcept
@@ -83,7 +83,7 @@ void SignalWaveformPanel::handle_downsampled_result(
 )
 {
     auto ds_slot_it = downsample_cache.find(result.get_source_id());
-    auto signal = result.take_downsampled();
+    auto signal = std::move(result).take_downsampled();
 
     if (ds_slot_it == downsample_cache.end()) {
         LOG_F_WARN("Received an unexpected result for the downsampled Signal {}.", signal->get_name());

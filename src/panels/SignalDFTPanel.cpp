@@ -40,7 +40,9 @@ SignalDFTPanel::SignalDFTPanel(
         reset_viewport_bounds();
     }));
 
-    despatcher.dft_finished_channel.nominate_consumer(sigc::mem_fun(*this, &SignalDFTPanel::handle_completed_dft));
+    connections.push_back(despatcher.dft_finished_channel.nominate_consumer(
+            sigc::mem_fun(*this, &SignalDFTPanel::handle_completed_dft)
+    ));
 
     for (std::size_t window_idx = 0; window_idx < all_window_functions.size(); ++window_idx)
         window_function_names[window_idx] =
@@ -79,7 +81,7 @@ void SignalDFTPanel::handle_completed_dft(
         DFTResult&& result
 )
 {
-    auto spectrum = result.take_spectrum();
+    auto spectrum = std::move(result).take_spectrum();
 
     const CacheKey key{
             .source_id = result.get_source_id(),

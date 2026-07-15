@@ -28,7 +28,8 @@ public:
             std::unique_ptr<Signal> downsampled
     );
 
-    [[nodiscard]] std::unique_ptr<Signal> take_downsampled() noexcept;
+    [[nodiscard]] std::unique_ptr<Signal> take_downsampled() && noexcept;
+    [[nodiscard]] const Signal* observe_downsampled() const noexcept;
     [[nodiscard]] Signal::id_type get_source_id() const noexcept;
 
 private:

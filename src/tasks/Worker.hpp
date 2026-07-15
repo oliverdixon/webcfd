@@ -59,7 +59,7 @@ public:
      *
      * @return Is there a new result available from the Worker?
      */
-    [[nodiscard]] bool is_result_available() const noexcept;
+    [[nodiscard]] bool is_result_available() const;
 
     /**
      * Attempt to retrieve the latest IResult object from the computation thread.

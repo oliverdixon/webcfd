@@ -24,9 +24,14 @@ DFTResult::DFTResult(
     assert(this->spectrum != nullptr);
 }
 
-std::unique_ptr<FrequencySpectrum> DFTResult::take_spectrum() noexcept
+std::unique_ptr<FrequencySpectrum> DFTResult::take_spectrum() && noexcept
 {
     return std::move(spectrum);
+}
+
+const FrequencySpectrum* DFTResult::observe_spectrum() const noexcept
+{
+    return spectrum.get();
 }
 
 Signal::id_type DFTResult::get_source_id() const noexcept

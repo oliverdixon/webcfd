@@ -22,9 +22,14 @@ DownsampleResult::DownsampleResult(
     assert(this->downsampled != nullptr);
 }
 
-std::unique_ptr<Signal> DownsampleResult::take_downsampled() noexcept
+std::unique_ptr<Signal> DownsampleResult::take_downsampled() && noexcept
 {
     return std::move(downsampled);
+}
+
+const Signal* DownsampleResult::observe_downsampled() const noexcept
+{
+    return downsampled.get();
 }
 
 Signal::id_type DownsampleResult::get_source_id() const noexcept

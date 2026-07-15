@@ -12,7 +12,10 @@
 
 #include <sigc++/signal.h>
 
-#include <optional>
+#include <exception>
+#include <stdexcept>
+#include <type_traits>
+#include <utility>
 
 namespace echomap
 {
@@ -34,12 +37,39 @@ public:
      * @return The connection between the slot and the signal.
      */
     template <class SlotT>
-    sigc::connection observe(
+    [[nodiscard]] sigc::connection observe(
             SlotT&& slot
     )
     {
-        return signal.connect(std::forward<SlotT>(slot));
+        return observers.connect(std::forward<SlotT>(slot));
     }
+
+    /**
+     * Nominate the consumer slot for the channel.
+     *
+     * @tparam SlotT The slot type signature, accepting <code>ResultT&&</code>.
+     * @param slot The slot to consume the result following broadcast to observers.
+     *
+     * @throws std::runtime_error The channel already had a nominated consumer.
+     * @warning This function may only be called once for each channel; otherwise, an exception will be thrown.
+     */
+    template <class SlotT>
+        requires(!std::is_const_v<ResultT>)
+    [[nodiscard]] sigc::connection nominate_consumer(
+            SlotT&& slot
+    )
+    {
+        if (!consumer.empty())
+            throw std::logic_error("Result channel already has a nominated consumer.");
+
+        return consumer.connect(std::forward<SlotT>(slot));
+    }
+
+private:
+    friend class WorkerResultDespatcher;
+
+    using ObserverSignalT = sigc::signal<void(const ResultT&)>;
+    using ConsumerSignalT = sigc::signal<void(ResultT&&)>;
 
     /**
      * Publish a consumable result onto the channel for all observers, followed by the single consumer.
@@ -60,8 +90,8 @@ public:
         }
 
         // If there is a nominated consumer, send it out.
-        if (consumer.has_value())
-            (*consumer)(std::move(result));
+        if (!consumer.empty())
+            consumer.emit(std::move(result));
 
         if (observer_exception)
             std::rethrow_exception(observer_exception);
@@ -76,36 +106,11 @@ public:
             const ResultT& result
     )
     {
-        signal.emit(result);
+        observers.emit(result);
     }
 
-    /**
-     * Nominate the consumer slot for the channel.
-     *
-     * @tparam SlotT The slot type signature, accepting <code>ResultT&&</code>.
-     * @param slot The slot to consume the result following broadcast to observers.
-     *
-     * @throws std::runtime_error The channel already had a nominated consumer.
-     * @warning This function may only be called once for each channel; otherwise, an exception will be thrown.
-     */
-    template <class SlotT>
-        requires(!std::is_const_v<ResultT>)
-    void nominate_consumer(
-            SlotT&& slot
-    )
-    {
-        if (consumer.has_value())
-            throw std::logic_error("Result channel already has a nominated consumer.");
-
-        consumer.emplace(std::forward<SlotT>(slot));
-    }
-
-private:
-    using ObserverSignalT = sigc::signal<void(const ResultT&)>;
-    using ConsumerSignalT = sigc::slot<void(ResultT&&)>;
-
-    ObserverSignalT signal;
-    std::optional<ConsumerSignalT> consumer;
+    ObserverSignalT observers;
+    ConsumerSignalT consumer;
 };
 
 } // namespace echomap

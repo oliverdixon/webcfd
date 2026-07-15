@@ -25,6 +25,15 @@ class WorkerResultDespatcher;
 class ChannelMappingPanel final : public IPanel
 {
 public:
+    /**
+     * Create a new ChannelMappingPanel to describe and configure Signal-Sensor mappings.
+     *
+     * The ChannelMappingPanel observes the LoadProjectResult message.
+     *
+     * @param despatcher The despatcher to expose the result buses.
+     * @param app The parent application instance.
+     * @param initial_project An optional initial Project for the IPanel to display.
+     */
     explicit ChannelMappingPanel(
             WorkerResultDespatcher& despatcher,
             EchoMap& app,
