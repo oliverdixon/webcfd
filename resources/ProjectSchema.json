@@ -1,6 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "EchoMap",
+  "description": "EchoMap project file describing signal sources, sensor positions, and mappings between signals and sensors.",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -12,10 +13,12 @@
   ],
   "properties": {
     "schema_version": {
+      "description": "Version of the EchoMap project schema used by this file.",
       "type": "integer",
       "const": 1
     },
     "metadata": {
+      "description": "Human-readable information about the project.",
       "type": "object",
       "additionalProperties": false,
       "required": [
@@ -23,26 +26,32 @@
       ],
       "properties": {
         "name": {
+          "description": "Display name of the EchoMap project.",
           "type": "string",
           "minLength": 1
         },
-        "description": {
+        "summary": {
+          "description": "Optional free-form description of the project.",
           "type": "string"
         },
         "author": {
+          "description": "Optional identifier of the Project author.",
           "type": "string"
         },
         "created_at": {
+          "description": "Optional timestamp indicating creation time.",
           "type": "string",
           "format": "date-time"
         },
         "modified_at": {
+          "description": "Optional timestamp indicating last-modified time..",
           "type": "string",
           "format": "date-time"
         }
       }
     },
     "signals": {
+      "description": "Signals available in the project. Each signal represents a single audio channel or embedded sample sequence.",
       "type": "array",
       "items": {
         "$ref": "#/$defs/signal"
@@ -50,6 +59,7 @@
       "uniqueItems": true
     },
     "sensors": {
+      "description": "Physical or virtual sensors used by the project.",
       "type": "array",
       "items": {
         "$ref": "#/$defs/sensor"
@@ -57,6 +67,7 @@
       "uniqueItems": true
     },
     "mappings": {
+      "description": "Associations between signals and sensors.",
       "type": "array",
       "items": {
         "$ref": "#/$defs/mapping"
@@ -66,6 +77,7 @@
   },
   "$defs": {
     "signal": {
+      "description": "A named signal and its source definition.",
       "type": "object",
       "additionalProperties": false,
       "required": [
@@ -74,10 +86,12 @@
       ],
       "properties": {
         "name": {
+          "description": "Unique human-readable name of the signal.",
           "type": "string",
           "minLength": 1
         },
         "source": {
+          "description": "Description of where the signal data comes from.",
           "oneOf": [
             {
               "$ref": "#/$defs/embeddedUniform"
@@ -93,6 +107,7 @@
       }
     },
     "embeddedUniform": {
+      "description": "Signal data embedded directly in the project file with uniformly spaced samples.",
       "type": "object",
       "additionalProperties": false,
       "required": [
@@ -104,20 +119,25 @@
       ],
       "properties": {
         "kind": {
+          "description": "Identifies this source as embedded uniformly sampled signal data.",
           "const": "embeddedUniform"
         },
         "sample_count": {
+          "description": "Number of samples in the signal.",
           "type": "integer",
           "minimum": 0
         },
         "time_offset": {
+          "description": "Time, in seconds, of the first sample relative to the project time origin.",
           "type": "number"
         },
         "sample_rate": {
+          "description": "Sampling rate of the signal in samples per second.",
           "type": "integer",
           "minimum": 0
         },
         "samples": {
+          "description": "Amplitude values for each uniformly spaced sample.",
           "type": "array",
           "items": {
             "type": "number"
@@ -126,6 +146,7 @@
       }
     },
     "embeddedVariable": {
+      "description": "Signal data embedded directly in the project file with explicitly timed samples.",
       "type": "object",
       "additionalProperties": false,
       "required": [
@@ -135,22 +156,28 @@
       ],
       "properties": {
         "kind": {
+          "description": "Identifies this source as embedded variably timed signal data.",
           "const": "embeddedVariable"
         },
         "sample_count": {
+          "description": "Number of samples in the signal.",
           "type": "integer",
           "minimum": 0
         },
         "time_offset": {
+          "description": "Optional time offset, in seconds, applied to the embedded sample times.",
           "type": "number"
         },
         "sample_rate": {
+          "description": "Optional nominal sample rate in samples per second.",
           "type": "integer",
           "minimum": 0
         },
         "samples": {
+          "description": "Explicitly timed signal samples.",
           "type": "array",
           "items": {
+            "description": "A single signal sample with an explicit time and amplitude.",
             "type": "object",
             "additionalProperties": false,
             "required": [
@@ -159,9 +186,11 @@
             ],
             "properties": {
               "time": {
+                "description": "Time of the sample in seconds.",
                 "type": "number"
               },
               "amplitude": {
+                "description": "Amplitude value of the sample.",
                 "type": "number"
               }
             }
@@ -170,6 +199,7 @@
       }
     },
     "filesystem": {
+      "description": "Signal data loaded from an external audio file on the filesystem.",
       "type": "object",
       "additionalProperties": false,
       "required": [
@@ -179,19 +209,23 @@
       ],
       "properties": {
         "kind": {
+          "description": "Identifies this source as an external filesystem-backed signal.",
           "const": "filesystem"
         },
         "path": {
+          "description": "Path to the audio file containing the signal data.",
           "type": "string",
           "minLength": 1
         },
         "channel": {
+          "description": "Zero-based channel index within the referenced audio file.",
           "type": "integer",
           "minimum": 0
         }
       }
     },
     "sensor": {
+      "description": "A named sensor with a 3D position and display colour.",
       "type": "object",
       "additionalProperties": false,
       "required": [
@@ -201,18 +235,22 @@
       ],
       "properties": {
         "name": {
+          "description": "Unique human-readable name of the sensor.",
           "type": "string",
           "minLength": 1
         },
         "position": {
+          "description": "Position of the sensor in 3D project space.",
           "$ref": "#/$defs/vec3"
         },
         "colour": {
+          "description": "Display colour used when rendering the sensor.",
           "$ref": "#/$defs/rgba"
         }
       }
     },
     "vec3": {
+      "description": "Three-dimensional vector.",
       "type": "object",
       "additionalProperties": false,
       "required": [
@@ -222,17 +260,21 @@
       ],
       "properties": {
         "x": {
+          "description": "X coordinate.",
           "type": "number"
         },
         "y": {
+          "description": "Y coordinate.",
           "type": "number"
         },
         "z": {
+          "description": "Z coordinate.",
           "type": "number"
         }
       }
     },
     "rgba": {
+      "description": "RGBA colour with each component normalised to the range [0, 1].",
       "type": "object",
       "additionalProperties": false,
       "required": [
@@ -243,21 +285,25 @@
       ],
       "properties": {
         "r": {
+          "description": "Red colour component.",
           "type": "number",
           "minimum": 0,
           "maximum": 1
         },
         "g": {
+          "description": "Green colour component.",
           "type": "number",
           "minimum": 0,
           "maximum": 1
         },
         "b": {
+          "description": "Blue colour component.",
           "type": "number",
           "minimum": 0,
           "maximum": 1
         },
         "a": {
+          "description": "Alpha opacity component.",
           "type": "number",
           "minimum": 0,
           "maximum": 1
@@ -265,6 +311,7 @@
       }
     },
     "mapping": {
+      "description": "A named association between a single signal and sensor.",
       "type": "object",
       "additionalProperties": false,
       "required": [
@@ -273,10 +320,12 @@
       ],
       "properties": {
         "signal": {
+          "description": "Name of the signal participating in the mapping.",
           "type": "string",
           "minLength": 1
         },
         "sensor": {
+          "description": "Name of the sensor participating in the mapping.",
           "type": "string",
           "minLength": 1
         }

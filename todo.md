@@ -17,8 +17,6 @@
 
 * Add detailed description to README.
 
-* Add human-readable descriptions to the JSON schema(s).
-
 * Investigate use of SQLite as an alternative storage format.
   * Used by Audacity (`aup3`) for similar data.
   * There is a well-regarded C++ library: https://github.com/fnc12/sqlite_orm (also on vcpkg)
