@@ -14,6 +14,41 @@
 namespace echomap
 {
 
+template <> constexpr std::string_view WindowFunctions::get_window_name<WindowFunctions::Constant>()
+{
+    return "Constant\0";
+}
+
+template <> constexpr std::string_view WindowFunctions::get_window_name<WindowFunctions::Hann>()
+{
+    return "Hann\0";
+}
+
+template <> constexpr std::string_view WindowFunctions::get_window_name<WindowFunctions::Hamming>()
+{
+    return "Hamming\0";
+}
+
+template <> constexpr std::string_view WindowFunctions::get_window_name<WindowFunctions::Bartlett>()
+{
+    return "Bartlett\0";
+}
+
+template <> constexpr std::string_view WindowFunctions::get_window_name<WindowFunctions::Blackman>()
+{
+    return "Blackman\0";
+}
+
+template <> constexpr std::string_view WindowFunctions::get_window_name<WindowFunctions::BlackmanHarris>()
+{
+    return "Blackman-Harris\0";
+}
+
+template <> constexpr std::string_view WindowFunctions::get_window_name<WindowFunctions::Welch>()
+{
+    return "Welch\0";
+}
+
 float WindowFunctions::Hann::operator()(
         const std::size_t index,
         const std::size_t size

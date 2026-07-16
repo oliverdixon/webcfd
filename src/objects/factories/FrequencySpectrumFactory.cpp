@@ -32,7 +32,9 @@ std::unique_ptr<FrequencySpectrum> FrequencySpectrumFactory::create_frequency_sp
     const auto display_name = std::format(
             "{} ({} DFT @ {})",
             signal.get_name(),
-            "TODO REMOVED", transform_size);
+            WindowFunctions::get_window_name<WindowFunctions::Constant>(),
+            transform_size
+    );
 
     if (transform_size == 0)
         return std::unique_ptr<FrequencySpectrum>(new FrequencySpectrum(window_function, display_name));

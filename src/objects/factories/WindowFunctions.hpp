@@ -282,7 +282,27 @@ public:
     };
 
     using AllFunctions = std::variant<Constant, Hann, Hamming>;
+
+    /**
+     * Retrieve a human-readable name for the templated window function.
+     *
+     * @return A NULL-terminated static non-owning view of the name.
+     */
+    template <WindowFunction> static constexpr std::string_view get_window_name()
+    {
+        // ReSharper disable once CppStaticAssertFailure
+        static_assert(false, "Missing window function name.");
+        return {};
+    }
 };
+
+template <> constexpr std::string_view WindowFunctions::get_window_name<WindowFunctions::Constant>();
+template <> constexpr std::string_view WindowFunctions::get_window_name<WindowFunctions::Hann>();
+template <> constexpr std::string_view WindowFunctions::get_window_name<WindowFunctions::Hamming>();
+template <> constexpr std::string_view WindowFunctions::get_window_name<WindowFunctions::Bartlett>();
+template <> constexpr std::string_view WindowFunctions::get_window_name<WindowFunctions::Blackman>();
+template <> constexpr std::string_view WindowFunctions::get_window_name<WindowFunctions::BlackmanHarris>();
+template <> constexpr std::string_view WindowFunctions::get_window_name<WindowFunctions::Welch>();
 
 } // namespace echomap
 
