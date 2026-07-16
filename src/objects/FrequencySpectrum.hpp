@@ -13,6 +13,7 @@
 #include <vector>
 
 #include "Object.hpp"
+#include "factories/WindowFunctions.hpp"
 
 namespace echomap
 {
@@ -32,7 +33,7 @@ public:
     struct Bin
     {
         float frequency; /**< The frequency quantised by the Bin, in Hz. */
-        float magnitude; /**< The magnitude of the frequency, in dBFS (decibels relative to full scale). */
+        float magnitude; /**< The magnitude of the frequency, in dBfs (decibels relative to full scale). */
         float phase;     /**< The complex phase of the DFT value, in radians. */
     };
 
@@ -40,25 +41,7 @@ private:
     std::vector<Bin> bins;
 
 public:
-    /**
-     * Selector for pre-processing window functions.
-     */
-    enum class WindowFunction
-    {
-        Identity, /**< Do nothing. */
-        Hann,     /**< Hann raised-cosine window. */
-        Hamming,  /**< Hamming raised-cosine window. */
-    };
-
-    const WindowFunction preprocessor;
-
-    /**
-     * Produce a human-readable string for the given WindowFunction.
-     *
-     * @param function The WindowFunction of interest.
-     * @return A short string providing a name for the given WindowFunction, e.g. "Hamming".
-     */
-    static std::string get_window_function_name(WindowFunction function) noexcept;
+    WindowFunctions::Function preprocessor;
 
     [[nodiscard]] decltype(bins)::const_iterator begin() const;
     [[nodiscard]] decltype(bins)::const_iterator end() const;
@@ -76,7 +59,7 @@ private:
     friend FrequencySpectrumFactory;
 
     explicit FrequencySpectrum(
-            WindowFunction preprocessor,
+            WindowFunctions::Function preprocessor,
             std::string_view name
     );
 

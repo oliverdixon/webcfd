@@ -16,22 +16,6 @@ namespace echomap
 
 template <> constexpr std::string_view Object<FrequencySpectrum>::class_name = "FreqSpec";
 
-std::string FrequencySpectrum::get_window_function_name(
-        const WindowFunction function
-) noexcept
-{
-    switch (function) {
-    case WindowFunction::Hamming:
-        return "Hamming";
-    case WindowFunction::Hann:
-        return "Hann";
-    case WindowFunction::Identity:
-        return "Identity";
-    }
-
-    std::unreachable();
-}
-
 decltype(FrequencySpectrum::bins)::const_iterator FrequencySpectrum::begin() const
 {
     return bins.begin();
@@ -78,7 +62,7 @@ float FrequencySpectrum::get_maximum_magnitude() const noexcept
 }
 
 FrequencySpectrum::FrequencySpectrum(
-        const WindowFunction preprocessor,
+        const WindowFunctions::Function preprocessor,
         const std::string_view name
 ) :
     Object(name),

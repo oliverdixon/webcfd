@@ -7,10 +7,13 @@
  * @date 2026-07-14
  */
 
-#include <cassert>
-#include <stdexcept>
 
 #include "FFTWBuffers.hpp"
+
+#include <fftw3.h>
+
+#include <cassert>
+#include <stdexcept>
 
 namespace echomap
 {

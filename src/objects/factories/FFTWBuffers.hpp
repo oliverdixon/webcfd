@@ -10,8 +10,6 @@
 #ifndef ECHOMAP_FFTWBUFFERS_HPP
 #define ECHOMAP_FFTWBUFFERS_HPP
 
-#include <fftw3.h>
-
 #include <cstddef>
 #include <optional>
 #include <span>
@@ -27,10 +25,12 @@ namespace echomap
  */
 class FFTWBuffers
 {
+    using fftwf_complex_fwd = float[2];
+
 public:
-    fftwf_complex* const coefficients; /**< Complex coefficients (output of real-to-complex FFT). */
-    float* const input;                /**< Real-valued inputs, either managed by us or aliased by the user. */
-    const std::size_t input_size;      /**< Size of the input vector. */
+    fftwf_complex_fwd* const coefficients; /**< Complex coefficients (output of real-to-complex FFT). */
+    float* input;                          /**< Real-valued inputs, either managed by us or aliased by the user. */
+    std::size_t input_size;                /**< Size of the input vector. */
 
     /**
      * Setup contextual buffers for FFTW.
@@ -55,7 +55,7 @@ public:
     ~FFTWBuffers() noexcept;
 
 private:
-    const bool is_input_managed; /**< Are we responsible for the input buffer? */
+    bool is_input_managed; /**< Are we responsible for the input buffer? */
 };
 
 } // namespace echomap
