@@ -4,6 +4,7 @@ InheritParentConfig: false
 
 Checks: >-
   -*,
+  
   clang-analyzer-*,
   bugprone-*,
   cert-*,
@@ -14,9 +15,17 @@ Checks: >-
   performance-*,
   portability-*,
   readability-*,
+  
   -modernize-use-trailing-return-type,
-  -readability-avoid-const-params-in-decls,
-  -readability-uppercase-literal-suffix
+  -readability-braces-around-statements,
+  -readability-uppercase-literal-suffix,
+  -readability-magic-numbers,
+  -cppcoreguidelines-avoid-magic-numbers,
+  -readability-math-missing-parentheses,
+  -cppcoreguidelines-pro-bounds-constant-array-index,
+  -cppcoreguidelines-pro-bounds-avoid-unchecked-container-access,
+  -readability-inconsistent-ifelse-braces,
+  -cppcoreguidelines-pro-type-vararg
 
 # Diagnose project headers, but not dependencies, generated files or build trees.
 HeaderFilterRegex: '.*'
@@ -43,6 +52,11 @@ CheckOptions:
   readability-implicit-bool-conversion.AllowPointerConditions: 'false'
   readability-implicit-bool-conversion.AllowLogicalOperatorConversion: 'true'
   readability-implicit-bool-conversion.UseUpperCaseLiteralSuffix: 'false'
+
+  cppcoreguidelines-avoid-do-while.IgnoreMacros: 'true'
+
+  # Do not warn for simple POD structs.
+  misc-non-private-member-variables-in-classes.IgnoreClassesWithAllMemberVariablesBeingPublic: 'true'
 
   #
   # Complexity limits
