@@ -299,7 +299,7 @@ void SignalDFTPanel::reset_viewport_bounds() noexcept
 
 const FrequencySpectrum* SignalDFTPanel::get_spectra(
         std::shared_ptr<Signal> signal,
-        const WindowFunctions::Function window_function,
+        const WindowFunctions::AllFunctions window_function,
         const std::size_t transform_size
 )
 {
@@ -323,12 +323,20 @@ const FrequencySpectrum* SignalDFTPanel::get_spectra(
     return nullptr;
 }
 
+bool SignalDFTPanel::CacheKey::operator==(
+        const CacheKey& key
+) const
+{
+    return key.source_id == source_id && key.transform_size == transform_size &&
+           key.window_function.index() == window_function.index();
+}
+
 std::size_t SignalDFTPanel::CacheKeyHash::operator()(
         const CacheKey& key
 ) const noexcept
 {
     std::size_t seed = std::hash<Signal::id_type>{}(key.source_id);
-    seed = combine(seed, std::hash<int>{}(std::to_underlying(key.window_function)));
+    seed = combine(seed, std::hash<std::size_t>{}(key.window_function.index()));
     return combine(seed, std::hash<std::size_t>{}(key.transform_size));
 }
 

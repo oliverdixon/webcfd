@@ -43,7 +43,7 @@ public:
      */
     explicit DFTTask(
             std::shared_ptr<Signal> signal,
-            WindowFunctions::Function window_function,
+            WindowFunctions::AllFunctions window_function,
             std::size_t transform_size
     );
 
@@ -51,7 +51,7 @@ private:
     WorkerResult execute_work() override;
 
     std::shared_ptr<Signal> signal;
-    const WindowFunctions::Function window_function;
+    const WindowFunctions::AllFunctions window_function;
     const std::size_t transform_size;
 };
 

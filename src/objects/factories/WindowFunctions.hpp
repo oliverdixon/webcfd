@@ -13,10 +13,15 @@
 #include <cstddef>
 #include <cstdint>
 #include <ranges>
-#include <string>
 
 namespace echomap
 {
+
+template <class T>
+concept WindowFunction =
+        std::default_initializable<std::remove_cvref_t<T>> && requires(std::size_t index, std::size_t size) {
+            { std::remove_cvref_t<T>{}(index, size) } -> std::convertible_to<float>;
+        };
 
 /**
  * Aggregation of callable DSP window functions.
@@ -26,21 +31,28 @@ namespace echomap
 class WindowFunctions
 {
 public:
-    /**
-     * Selector for pre-processing window functions.
-     */
-    enum class Function : std::int8_t
+    template <
+            class WindowT,
+            class BuffersT,
+            class InputT>
+    static float apply_window(
+            BuffersT& buffers,
+            const InputT& input
+    )
     {
-        Constant,
-        Hann,
-        Hamming,
-        Bartlett,
-        Blackman,
-        BlackmanHarris,
-        Welch,
-    };
+        using Window = std::remove_cvref_t<WindowT>;
+        static_assert(WindowFunction<Window>, "WindowT does not satisfy WindowFunction.");
 
-    static const char* get_window_function_name_imgui(Function function) noexcept;
+        float scale_divisor = 0.0f;
+
+        for (std::size_t index = 0; index < buffers.input_size; ++index) {
+            const float window_value = Window{}(index, buffers.input_size);
+            scale_divisor += window_value;
+            buffers.input[index] = input[index] * window_value;
+        }
+
+        return scale_divisor;
+    }
 
     /**
      * The Constant invocable window function.
@@ -269,16 +281,7 @@ public:
         ) noexcept;
     };
 
-    template <class Window>
-    static auto make_window(
-            const std::size_t size,
-            Window window
-    )
-    {
-        return std::views::iota(std::size_t{0}, size) | std::views::transform([size, window](const std::size_t index) {
-                   return window(index, size);
-               });
-    }
+    using AllFunctions = std::variant<Constant, Hann, Hamming>;
 };
 
 } // namespace echomap

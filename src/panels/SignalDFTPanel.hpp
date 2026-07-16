@@ -76,7 +76,7 @@ private:
 
     const FrequencySpectrum* get_spectra(
             std::shared_ptr<Signal> signal,
-            WindowFunctions::Function window_function,
+            WindowFunctions::AllFunctions window_function,
             std::size_t transform_size
     );
 
@@ -104,10 +104,10 @@ private:
     struct CacheKey
     {
         Signal::id_type source_id;
-        WindowFunctions::Function window_function;
+        WindowFunctions::AllFunctions window_function;
         std::size_t transform_size;
 
-        bool operator==(const CacheKey&) const = default;
+        bool operator==(const CacheKey& key) const;
     };
 
     /**

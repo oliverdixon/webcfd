@@ -41,7 +41,7 @@ public:
      */
     [[nodiscard]] static std::unique_ptr<FrequencySpectrum> create_frequency_spectrum(
             const Signal& signal,
-            WindowFunctions::Function window_function,
+            WindowFunctions::AllFunctions window_function,
             std::size_t transform_size
     );
 
@@ -59,7 +59,7 @@ private:
      */
     static float prepare_input(
             const FFTWBuffers& buffers,
-            WindowFunctions::Function window_function,
+            WindowFunctions::AllFunctions window_function,
             std::span<const Signal::Sample::AmplitudeT> input
     );
 

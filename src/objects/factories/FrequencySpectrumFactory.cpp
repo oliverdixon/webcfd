@@ -22,7 +22,7 @@ namespace echomap
 
 std::unique_ptr<FrequencySpectrum> FrequencySpectrumFactory::create_frequency_spectrum(
         const Signal& signal,
-        const WindowFunctions::Function window_function,
+        const WindowFunctions::AllFunctions window_function,
         const std::size_t transform_size
 )
 {
@@ -32,18 +32,16 @@ std::unique_ptr<FrequencySpectrum> FrequencySpectrumFactory::create_frequency_sp
     const auto display_name = std::format(
             "{} ({} DFT @ {})",
             signal.get_name(),
-            WindowFunctions::get_window_function_name_imgui(window_function),
-            transform_size
-    );
+            "TODO REMOVED", transform_size);
 
     if (transform_size == 0)
         return std::unique_ptr<FrequencySpectrum>(new FrequencySpectrum(window_function, display_name));
 
-    // Create FFTW buffers, making a separate input buffer if and only if we're using a non-identity input transform.
+    // Create FFTW buffers, making a separate input buffer if and only if we're using a non-constant input transform.
     const FFTWBuffers context(
             transform_size,
-            window_function == WindowFunctions::Function::Constant ? std::make_optional(signal.amplitudes())
-                                                                   : std::nullopt
+            std::holds_alternative<WindowFunctions::Constant>(window_function) ? std::make_optional(signal.amplitudes())
+                                                                               : std::nullopt
     );
 
     // Pre-process input as advised by the window function.
@@ -86,32 +84,18 @@ std::unique_ptr<FrequencySpectrum> FrequencySpectrumFactory::create_frequency_sp
 
 float FrequencySpectrumFactory::prepare_input(
         const FFTWBuffers& buffers,
-        const WindowFunctions::Function window_function,
+        const WindowFunctions::AllFunctions window_function,
         const std::span<const Signal::Sample::AmplitudeT> input
 )
 {
     assert(input.size() >= buffers.input_size);
 
-    switch (window_function) {
-    case WindowFunctions::Function::Constant:
-        return static_cast<float>(buffers.input_size);
-
-    case WindowFunctions::Function::Hann: {
-        float scale_divisor = 0.0f;
-        std::uint64_t sample_idx = 0;
-        for (const auto window_val : WindowFunctions::make_window(buffers.input_size, WindowFunctions::Hann{})) {
-            scale_divisor += window_val;
-            buffers.input[sample_idx] = input[sample_idx++] * window_val;
-        }
-
-        return scale_divisor;
-    }
-
-    default:
-        std::unreachable();
-    }
-
-    std::unreachable();
+    return std::visit(
+            [&buffers, &input]<WindowFunction WindowT>(WindowT) {
+                return WindowFunctions::apply_window<WindowT>(buffers, input);
+            },
+            window_function
+    );
 }
 
 Signal::Sample::AmplitudeT FrequencySpectrumFactory::amplitude_to_dbfs(

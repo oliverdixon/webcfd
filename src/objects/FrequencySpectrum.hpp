@@ -41,7 +41,7 @@ private:
     std::vector<Bin> bins;
 
 public:
-    WindowFunctions::Function preprocessor;
+    WindowFunctions::AllFunctions preprocessor;
 
     [[nodiscard]] decltype(bins)::const_iterator begin() const;
     [[nodiscard]] decltype(bins)::const_iterator end() const;
@@ -59,7 +59,7 @@ private:
     friend FrequencySpectrumFactory;
 
     explicit FrequencySpectrum(
-            WindowFunctions::Function preprocessor,
+            WindowFunctions::AllFunctions preprocessor,
             std::string_view name
     );
 

@@ -62,7 +62,7 @@ float FrequencySpectrum::get_maximum_magnitude() const noexcept
 }
 
 FrequencySpectrum::FrequencySpectrum(
-        const WindowFunctions::Function preprocessor,
+        const WindowFunctions::AllFunctions preprocessor,
         const std::string_view name
 ) :
     Object(name),

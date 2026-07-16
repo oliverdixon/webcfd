@@ -18,7 +18,7 @@ namespace echomap
 
 DFTTask::DFTTask(
         std::shared_ptr<Signal> signal,
-        const WindowFunctions::Function window_function,
+        const WindowFunctions::AllFunctions window_function,
         const std::size_t transform_size
 ) :
     ITask(std::format(
