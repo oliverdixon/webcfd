@@ -42,7 +42,10 @@ if (ECHOMAP_BUILD_APPLICATION)
         # Emscripten. Auxiliary web-side files are copied into the output directory when changed.
         set(web_sources_root "${CMAKE_CURRENT_SOURCE_DIR}/src/web/")
         set(web_shell "${web_sources_root}/shell.html")
-        set(web_extra "${web_sources_root}/shell.css")
+        set(web_extra
+                "${web_sources_root}/shell.css"
+                "${web_sources_root}/module.js"
+        )
 
         target_sources(EchoMap PRIVATE
                 "${web_shell}"
