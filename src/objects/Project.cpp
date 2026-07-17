@@ -53,7 +53,7 @@ void Project::add_association(
     if (!sensors.contains(sensor.get_id()))
         throw std::runtime_error(std::format("{} does not exist in the project.", sensor.get_name()));
 
-    if (!channel_mapping.emplace(signal.get_id(), sensor.get_id()).second)
+    if (!requested_channel_mapping.emplace(signal.get_id(), sensor.get_id()).second)
         throw std::runtime_error(
                 std::format(
                         "Could not associate {} with {}: a component is already mapped.",
@@ -68,30 +68,7 @@ void Project::add_association(
         const Sensor::id_type sensor_id
 )
 {
-    const auto signal_it = signals.find(signal_id);
-    if (signal_it == signals.end())
-        throw std::runtime_error(std::format("Signal with ID {} does not exist in the Project.", signal_id));
-
-    const auto sensor_it = sensors.find(sensor_id);
-    if (sensor_it == sensors.end())
-        throw std::runtime_error(std::format("Sensor with ID {} does not exist in the Project.", sensor_id));
-
-    if (!channel_mapping.emplace(signal_id, sensor_id).second) {
-        /*
-         * Solely to improve the quality of the exception message, we'll try to look up the display names since we know
-         * they refer to objects owned by the project (otherwise the previous exceptions would've fired), except in the
-         * generate case that the managed pointers do not detain an actual object.
-         */
-        if (signal_it->second != nullptr && sensor_it->second != nullptr)
-            throw std::runtime_error(
-                    std::format(
-                            "Could not associate {} with {}: a component is already mapped.",
-                            signal_it->second->get_name(),
-                            sensor_it->second->get_name()
-                    )
-            );
-
-        // Well, we tried!
+    if (!requested_channel_mapping.emplace(signal_id, sensor_id).second)
         throw std::runtime_error(
                 std::format(
                         "Could not associate Signal with ID {} to Sensor with ID {}: a component is already mapped.",
@@ -99,7 +76,6 @@ void Project::add_association(
                         sensor_id
                 )
         );
-    }
 }
 
 std::size_t Project::get_signal_count() const noexcept
@@ -112,17 +88,12 @@ std::size_t Project::get_sensors_count() const noexcept
     return sensors.size();
 }
 
-std::size_t Project::get_associations_count() const noexcept
-{
-    return channel_mapping.size();
-}
-
 ImPlot3DPoint Project::get_sensor_point(
         const int idx,
         const void* const project_instance
 ) noexcept
 {
-    const auto project_ptr = static_cast<const Project *>(project_instance);
+    const auto* const project_ptr = static_cast<const Project*>(project_instance);
     const auto [x, y, z] = project_ptr->sensors.values()[idx]->position;
 
     return { x, y, z };
@@ -139,9 +110,9 @@ Sensor& Project::get_mutable_sensor(
     return *sensor_it->second;
 }
 
-std::pair<
+std::optional<std::pair<
         const Signal&,
-        const Sensor&>
+        const Sensor&>>
 Project::resolve_pair(
         const Signal::id_type signal_id,
         const Sensor::id_type sensor_id
@@ -154,20 +125,16 @@ Project::resolve_pair(
 
     const auto signal_it = signals.find(signal_id);
     if (signal_it == signals.end())
-        throw std::runtime_error(
-                std::format("{} with ID {} does not exist in the project.", Object<Signal>::get_class_name(), signal_id)
-        );
+        return {};
 
     const auto sensor_it = sensors.find(sensor_id);
     if (sensor_it == sensors.end())
-        throw std::runtime_error(
-                std::format("{} with ID {} does not exist in the project.", Object<Sensor>::get_class_name(), sensor_id)
-        );
+        return {};
 
-    assert(signal_it->second);
-    assert(sensor_it->second);
+    assert(signal_it->second != nullptr);
+    assert(sensor_it->second != nullptr);
 
-    return {*signal_it->second, *sensor_it->second};
+    return {{*signal_it->second, *sensor_it->second}};
 }
 
 } // namespace echomap

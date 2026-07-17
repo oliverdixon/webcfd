@@ -51,6 +51,8 @@ public:
     /**
      * Creates a new association between a Signal and Sensor.
      *
+     * This creates an immediately confirmed mapping: the Signal and Sensor provided must already belong to the Project.
+     *
      * @param signal The associated Signal
      * @param sensor The associated Sensor
      *
@@ -66,11 +68,14 @@ public:
     /**
      * Creates a new association between a Signal and Sensor.
      *
+     * This requests a mapping: the Signal and Sensor of the given IDs may or may not already belong to the Project. If
+     * they do not belong to the Project at the time of insertion, the association will only become observable on the
+     * public Project API once both components are loaded; i.e., the prerequisites of
+     * @ref add_association(const Signal&, const Sensor&) are met.
+     *
      * @param signal_id The ID of the associated Signal
      * @param sensor_id The ID of the associated Sensor
      *
-     * @throws std::runtime_error A Signal with the given ID was not known to the Project.
-     * @throws std::runtime_error A Sensor with the given ID not known to the Project.
      * @throws std::runtime_error A component (the Signal or the Sensor) is already mapped.
      */
     void add_association(
@@ -135,21 +140,20 @@ public:
     }
 
     /**
-     * Checks if any channel mappings exist in the Project?
-     *
-     * @return Are there any Signal-Sensor mappings defined?
-     */
-    [[nodiscard]] size_t get_associations_count() const noexcept;
-
-    /**
      * Provides a transformed view for defined channel mappings.
      *
      * @return A view containing observing references to all pairs of stored Signal-Sensor assocations.
      */
-    [[nodiscard]] auto observe_associations() const noexcept
+    [[nodiscard]] auto observe_associations() const
     {
-        return channel_mapping | std::views::transform([this](const auto& association) {
+        return requested_channel_mapping | std::views::transform([this](const auto& association) {
                    return resolve_pair(association.first, association.second);
+               }) |
+               std::views::filter([](const auto& optional) {
+                   return optional.has_value();
+               }) |
+               std::views::transform([](const auto& optional) {
+                   return *optional;
                });
     }
 
@@ -184,15 +188,27 @@ private:
      * @throws std::runtime_error A Signal with the given ID is not owned by the Project.
      * @throws std::runtime_error A Sensor with the given ID is not owned by the Project.
      */
-    std::pair<
+    std::optional<std::pair<
             const Signal&,
-            const Sensor&>
+            const Sensor&>>
     resolve_pair(
             Signal::id_type signal_id,
             Sensor::id_type sensor_id
     ) const;
 
-    BidirectionalUnorderedMapping<Signal::id_type, Sensor::id_type> channel_mapping;
+    /**
+     * Mapping between Signal objects and Sensor objects (identified by their numerical IDs).
+     *
+     * The structure stores all "requested" mappings, a non-strict subset of which are "confirmed". A mapping request is
+     * caused by an external caller, such as a factory, invoking @ref add_association(Signal::id_type, Sensor::id_type),
+     * which does not require that the corresponding Signal or Sensor is owned by the Project at the time of the
+     * request.
+     *
+     * Mappings become confirmed once both the relevant Signal and Sensor have been loaded and are owned by the Project.
+     *
+     * Only confirmed mappings may be observed on the public API.
+     */
+    BidirectionalUnorderedMapping<Signal::id_type, Sensor::id_type> requested_channel_mapping;
 };
 
 } // namespace echomap
