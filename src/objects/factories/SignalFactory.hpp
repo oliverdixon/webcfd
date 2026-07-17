@@ -68,7 +68,7 @@ public:
     static void load_wave_file(
             const char* file_path,
             // ReSharper disable once CppConstParameterInDeclaration - Superfluous const required for Doxygen matching.
-            const std::span<SignalFactory* const> channel_factories
+            const std::span<SignalFactory* const> channel_factories // NOLINT(*-avoid-const-params-in-decls)
     );
 
     /**
@@ -116,7 +116,7 @@ private:
      *
      * @param drwav_info The initialised and loaded dr_wav control structure.
      * @param file_path The location of the WAV on the local file system.
-     * @param channels Destination of the Signal channels.
+     * @param signal_ptrs Destination of the Signal channels.
      *
      * @pre There are sufficient Signal objects in the destination range to store channels in the wave file.
      * @see load_wave_file(const char*, mutable_signal_range auto&&) for semantics of the destination channels
@@ -125,7 +125,7 @@ private:
     static void load_wave_file_into_channels(
             drwav& drwav_info,
             std::string_view file_path,
-            std::span<Signal* const> channels
+            std::span<Signal* const> signal_ptrs
     );
 
     /**

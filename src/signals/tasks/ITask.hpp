@@ -16,11 +16,12 @@
 #include "../results/DownsampleResult.hpp"
 #include "../results/ErrorResult.hpp"
 #include "../results/LoadProjectResult.hpp"
+#include "../results/LoadSignalFileResult.hpp"
 
 namespace echomap
 {
 
-using WorkerResult = std::variant<ErrorResult, DFTResult, DownsampleResult, LoadProjectResult>;
+using WorkerResult = std::variant<ErrorResult, DFTResult, DownsampleResult, LoadProjectResult, LoadSignalFileResult>;
 
 /**
  * An ITask represents an invocable piece of work that produces a WorkerResult.

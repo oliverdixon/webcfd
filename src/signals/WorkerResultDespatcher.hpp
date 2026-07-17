@@ -49,6 +49,11 @@ public:
     ResultChannel<LoadProjectResult> load_project_finished_channel;
 
     /**
+     * Channel to indicate completion of LoadSignalFileTask.
+     */
+    ResultChannel<LoadSignalFileResult> load_signal_file_channel;
+
+    /**
      * Channel to indicate emission of ErrorResult.
      */
     ResultChannel<const ErrorResult> error_channel;
@@ -57,6 +62,7 @@ private:
     void publish_payload(DFTResult&& payload);
     void publish_payload(DownsampleResult&& payload);
     void publish_payload(LoadProjectResult&& payload);
+    void publish_payload(LoadSignalFileResult&& payload);
     void publish_payload(const ErrorResult& payload);
 };
 

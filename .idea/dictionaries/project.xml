@@ -2,13 +2,16 @@
   <dictionary name="project">
     <words>
       <w>Blackman</w>
+      <w>Deserialiser</w>
       <w>Despatcher</w>
       <w>Hann</w>
       <w>c'tor</w>
       <w>cbegin</w>
       <w>cend</w>
+      <w>deserialise</w>
       <w>despatcher</w>
       <w>drlibs</w>
+      <w>drwav</w>
       <w>emscripten</w>
       <w>fftwf</w>
       <w>hann</w>

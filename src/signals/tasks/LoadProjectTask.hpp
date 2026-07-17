@@ -22,7 +22,7 @@ namespace echomap
  * @warning The LoadProjectTask is not thread-safe due to persisting global state of the parser for re-use across
  *  Project loads. It should be called only a single thread.
  *
- * @see SignalFactory::load_wave_file(const char*)
+ * @see JSONDeserialiser::deserialise_project(std::string_view)
  */
 class LoadProjectTask : public ITask
 {

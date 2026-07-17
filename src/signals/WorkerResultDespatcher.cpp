@@ -17,10 +17,10 @@ void WorkerResultDespatcher::publish(
 )
 {
     std::visit(
-            [this](auto& payload) {
+            [this]<typename T0>(T0 payload) {
                 publish_payload(std::move(payload));
             },
-            result
+            std::move(result)
     );
 }
 
@@ -43,6 +43,13 @@ void WorkerResultDespatcher::publish_payload(
 )
 {
     load_project_finished_channel.publish(std::move(payload));
+}
+
+void WorkerResultDespatcher::publish_payload(
+        LoadSignalFileResult&& payload
+)
+{
+    load_signal_file_channel.publish(std::move(payload));
 }
 
 void WorkerResultDespatcher::publish_payload(

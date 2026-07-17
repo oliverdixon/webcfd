@@ -33,7 +33,7 @@ std::vector<std::unique_ptr<Signal>> SignalFactory::load_wave_file(
 )
 {
     drwav drwav_info;
-    if (!drwav_init_file(&drwav_info, file_path, nullptr))
+    if (drwav_init_file(&drwav_info, file_path, nullptr) == 0u)
         throw ConfigurationError("Cannot open WAV file at " + std::string(file_path));
 
     const auto typed_path = std::filesystem::path(file_path);
@@ -74,7 +74,7 @@ void SignalFactory::load_wave_file(
 )
 {
     drwav drwav_info;
-    if (!drwav_init_file(&drwav_info, file_path, nullptr))
+    if (drwav_init_file(&drwav_info, file_path, nullptr) == 0u)
         throw ConfigurationError("Cannot open WAV file at " + std::string(file_path));
 
     assert(channel_factories.size() >= drwav_info.channels);
@@ -88,7 +88,7 @@ void SignalFactory::load_wave_file(
          */
         std::vector<Signal*> channels;
         channels.reserve(channel_factories.size());
-        for (const auto factory : channel_factories)
+        for (auto* const factory : channel_factories)
             channels.push_back(factory->target == nullptr ? nullptr : factory->target.get());
         load_wave_file_into_channels(drwav_info, file_path, channels);
     } catch (const std::runtime_error&) {
@@ -130,7 +130,7 @@ std::unique_ptr<Signal> SignalFactory::downsample(
 std::unique_ptr<Signal> SignalFactory::take_signal() noexcept
 {
     auto signal = std::move(target);
-    target = std::unique_ptr<Signal>(new Signal());
+    target = std::unique_ptr<Signal>(new Signal()); // NOLINT(*-unhandled-exception-at-new)
     return signal;
 }
 
@@ -215,12 +215,12 @@ void SignalFactory::set_source(
 void SignalFactory::load_wave_file_into_channels(
         drwav& drwav_info,
         const std::string_view file_path,
-        std::span<Signal* const> channels
+        std::span<Signal* const> signal_ptrs
 )
 {
-    assert(drwav_info.channels <= std::ranges::size(channels));
+    assert(drwav_info.channels <= std::ranges::size(signal_ptrs));
 
-    for (const auto channel : channels)
+    for (auto* const channel : signal_ptrs)
         if (channel != nullptr) {
             channel->reserve_samples(drwav_info.totalPCMFrameCount);
             channel->set_sample_rate(drwav_info.sampleRate);
@@ -244,7 +244,7 @@ void SignalFactory::load_wave_file_into_channels(
 
         for (drwav_uint64 frame_idx = 0; frame_idx < frame_count; ++frame_idx)
             for (drwav_uint16 channel_idx = 0; channel_idx < drwav_info.channels; ++channel_idx) {
-                if (auto* const destination = std::ranges::begin(channels)[channel_idx]; destination != nullptr)
+                if (auto* const destination = std::ranges::begin(signal_ptrs)[channel_idx]; destination != nullptr)
                     /*
                      * The audio data is uniformly spaced, so we can infer the time values by taking the current frame
                      * offset for the chunk (total frames - remaining frames) and adding the current frame index.
@@ -258,7 +258,7 @@ void SignalFactory::load_wave_file_into_channels(
     if (remaining_frames != 0)
         throw ConfigurationError("Cannot read entire WAV file at " + std::string(file_path) + ". Is it corrupted?");
 
-    for (const auto channel : channels)
+    for (auto* const channel : signal_ptrs)
         LOG_F_DEBUG(
                 "Loaded signal \"{}\" with {} samples at {} Hz, starting at {} s.",
                 channel->get_name(),

@@ -89,6 +89,10 @@ add_library(DummyTarget INTERFACE EXCLUDE_FROM_ALL
         src/objects/factories/WindowFunctions.cpp
         src/VariantHelpers.hpp
         src/web/EmscriptenExtra.hpp
+        src/signals/tasks/LoadSignalFileTask.cpp
+        src/signals/tasks/LoadSignalFileTask.hpp
+        src/signals/results/LoadSignalFileResult.cpp
+        src/signals/results/LoadSignalFileResult.hpp
 )
 
 get_target_property(ECHOMAP_SOURCES DummyTarget SOURCES)
