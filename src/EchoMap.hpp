@@ -14,6 +14,7 @@
 #include <webgpu/webgpu_cpp.h>
 
 #include "panels/ErrorModal.hpp"
+#include "panels/IndividualUploadModal.hpp"
 #include "signals/Worker.hpp"
 #include "signals/WorkerResultDespatcher.hpp"
 #include "signals/lightweight/AddChannelMappingTask.hpp"
@@ -220,6 +221,7 @@ private:
 
     std::vector<std::unique_ptr<IPanel>> panels;      /**< Individual display components. */
     ErrorModal error_modal;                           /**< Persistent panel to indicate errors over all other panels. */
+    std::optional<IndividualUploadModal> upload_modal; // TODO
     std::vector<LightweightTask> lwt_queue; /**< Queue for simple tasks that needn't go through the despatcher. */
     std::unique_ptr<Project> project;       /**< Owning container for the active Project. */
 

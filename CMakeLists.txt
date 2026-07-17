@@ -93,6 +93,8 @@ add_library(DummyTarget INTERFACE EXCLUDE_FROM_ALL
         src/signals/tasks/LoadSignalFileTask.hpp
         src/signals/results/LoadSignalFileResult.cpp
         src/signals/results/LoadSignalFileResult.hpp
+        src/panels/IndividualUploadModal.cpp
+        src/panels/IndividualUploadModal.hpp
 )
 
 get_target_property(ECHOMAP_SOURCES DummyTarget SOURCES)

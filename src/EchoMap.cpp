@@ -354,6 +354,9 @@ void EchoMap::render() noexcept
     for (const auto& panel : panels)
         panel->draw();
 
+    if (upload_modal.has_value())
+        upload_modal->draw();
+
     error_modal.draw();
     ImGui::Render();
 
@@ -525,7 +528,23 @@ void EchoMap::put_project(
         std::unique_ptr<Project> new_project
 ) noexcept
 {
-    project = std::move(new_project);
+    if (project != new_project) {
+        /*
+         * We know that the memory addresses differ (i.e. project.get() != new_project.get()). Therefore, there is an
+         * effective difference if and only if:
+         *
+         *  1. The old project is nullptr, thus the new project is non-vacuous;
+         *  2. The old project is non-null, thus the new project is vacuous;
+         *  3. Both the old and new projects are non-null, so we can compare their object IDs.
+         */
+        const auto effectively_different =
+                project == nullptr || new_project == nullptr || project->get_id() != new_project->get_id();
+
+        project = std::move(new_project);
+
+        if (effectively_different && project != nullptr)
+            upload_modal = IndividualUploadModal(project.get()); // TODO just for testing
+    }
 }
 
 void EchoMap::submit_lightweight_task(
