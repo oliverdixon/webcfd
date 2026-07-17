@@ -20,6 +20,16 @@
 #include "../signals/results/DFTResult.hpp"
 #include "../signals/tasks/DFTTask.hpp"
 
+namespace
+{
+
+using namespace echomap;
+
+constexpr auto window_function_names =
+        variant_helpers::variant_name_array<WindowFunctions::AllFunctions, WindowFunctions::NameGetter>;
+
+} // namespace
+
 namespace echomap
 {
 
@@ -148,9 +158,6 @@ void SignalDFTPanel::draw_configuration_window_function() noexcept
 
     ImGui::SetNextItemWidth(-std::numeric_limits<float>::min());
 
-    static constexpr auto window_function_names =
-            variant_helpers::variant_name_array<WindowFunctions::AllFunctions, WindowFunctions::NameGetter>;
-
     if (auto selected_idx = selected_window.index();
         /*
          * Disabled string_view::data warnings: we know that the views were constructed from string literals, hence
@@ -249,7 +256,51 @@ void SignalDFTPanel::draw_preview_section() noexcept
     if (ImPlot::BeginAlignedPlots("##DFTAlignedGroup")) {
         ImPlot::PushStyleColor(ImPlotCol_FrameBg, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
 
-        // TODO REMOVED
+        for (const auto& signal :
+             active_project->share_signals() | std::views::filter([](const std::shared_ptr<Signal>& candidate) {
+                 return candidate->is_uniformly_sampled();
+             })) {
+
+            if (const auto* const spectrum = get_spectra(signal, selected_window, std::size_t{1} << selected_size_log);
+                spectrum != nullptr) {
+
+                // Case 1: we got a spectrum immediately.
+                if (ImPlot::BeginPlot(spectrum->get_imgui_name())) {
+                    ImPlot::SetupAxes("Frequency (Hz)", "Magnitude (dBFS)");
+                    ImPlot::SetupAxisScale(ImAxis_X1, use_log_scale ? ImPlotScale_Log10 : ImPlotScale_Linear);
+                    ImPlot::SetupAxisLinks(ImAxis_X1, &viewport_bounds.X.Min, &viewport_bounds.X.Max);
+                    ImPlot::SetupAxisLinks(ImAxis_Y1, &viewport_bounds.Y.Min, &viewport_bounds.Y.Max);
+
+                    int plottable_bin_count = static_cast<int>(spectrum->get_bin_count());
+                    CallbackData callback_data = {.spectrum = spectrum, .index_offset = 0};
+
+                    if (plottable_bin_count > 0 && use_log_scale) {
+                        // If we're plotting on the log scale, discount the DC component if it exists.
+                        --plottable_bin_count;
+                        callback_data.index_offset = 1;
+                    }
+
+                    ImPlot::PlotLineG(
+                            "",
+                            &SignalDFTPanel::get_indexed_frequency_bin,
+                            &callback_data,
+                            plottable_bin_count,
+                            plotting_spec_2d
+                    );
+
+                    ImPlot::EndPlot();
+                }
+
+            } else
+                // Case 2: we didn't get one immediately. Either it's pending, or it failed.
+                // TODO: indicate failure here as well as loading.
+                ImGui::Text(
+                        "Loading DFT of %s with the %s window function...",
+                        signal->get_imgui_name(),
+                        // NOLINTNEXTLINE(*-suspicious-stringview-data-usage)
+                        window_function_names[selected_window.index()].data()
+                );
+        }
 
         ImPlot::EndAlignedPlots();
         ImPlot::PopStyleColor();
@@ -298,7 +349,10 @@ void SignalDFTPanel::update_spectrum_bounds() noexcept
 
     const auto selected_transform_size = std::size_t{1} << selected_size_log;
 
-    // TODO REMOVED
+    for (const auto& [key, value] : spectra_cache)
+        if (value.spectrum != nullptr && key.window_function.index() == selected_window.index() &&
+            key.transform_size == selected_transform_size)
+            update_spectrum_bounds(*value.spectrum);
 }
 
 void SignalDFTPanel::update_available_sizes(
