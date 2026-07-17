@@ -88,24 +88,37 @@ void SignalDFTPanel::handle_completed_dft(
         DFTResult&& result
 )
 {
+    auto spectrum = std::move(result).take_spectrum();
+
+    if (spectrum == nullptr) {
+        LOG_WARN("Dropping a null DFT result.");
+        return;
+    }
+
     const CacheKey key{
-            .source_id = result.get_source_id(),
-            .window_function = result.observe_spectrum()->preprocessor,
+        .source_id = result.get_source_id(),
+            .window_function = spectrum->preprocessor,
             .transform_size = result.get_transform_size(),
     };
 
-    auto spectrum = std::move(result).take_spectrum();
-
-    if (const auto cache_slot_it = spectra_cache.find(key); cache_slot_it == spectra_cache.end())
+    const auto cache_slot_it = spectra_cache.find(key);
+    if (cache_slot_it == spectra_cache.end()) {
         LOG_F_WARN("Dropping an unexpected result for the DFT of Signal {}.", spectrum->get_name());
-    else {
+        return;
+    }
+
+    cache_slot_it->second.status = CacheValue::State::Success;
+    cache_slot_it->second.spectrum = std::move(spectrum);
+
+    const bool result_is_currently_visible = key.window_function.index() == selected_window.index() &&
+                                             key.transform_size == (std::size_t{1} << selected_size_log);
+
+    if (result_is_currently_visible) {
         const auto had_no_visible_spectrum =
                 spectrum_bounds.X.Min > spectrum_bounds.X.Max || spectrum_bounds.Y.Min > spectrum_bounds.Y.Max;
 
-        cache_slot_it->second.status = CacheValue::State::Success;
-        cache_slot_it->second.spectrum = std::move(spectrum);
-
         update_spectrum_bounds(*cache_slot_it->second.spectrum);
+
         if (had_no_visible_spectrum)
             reset_viewport_bounds();
 
@@ -327,24 +340,26 @@ void SignalDFTPanel::update_spectrum_bounds(
         const FrequencySpectrum& spectrum
 ) noexcept
 {
-    // Update the bounding box.
     using BoundType = decltype(spectrum_bounds.X.Min);
 
-    if (spectrum.get_bin_count() == 0)
+    const auto bin_count = static_cast<std::ptrdiff_t>(spectrum.get_bin_count());
+    if (bin_count == 0)
         return;
 
-    if (use_log_scale) {
-        if (spectrum.get_bin_count() > 1) {
-            if (const auto x_min = static_cast<BoundType>(std::next(spectrum.cbegin())->frequency); x_min > 0.0)
-                spectrum_bounds.X.Min = std::min(x_min, spectrum_bounds.X.Min);
-        }
-    } else
-        spectrum_bounds.X.Min =
-                std::min(static_cast<BoundType>(spectrum.get_minimum_frequency()), spectrum_bounds.X.Min);
+    const ptrdiff_t first_bin_idx = use_log_scale && bin_count > 1 ? 1 : 0;
+    if (first_bin_idx >= bin_count)
+        return;
 
-    spectrum_bounds.X.Max = std::max(static_cast<BoundType>(spectrum.get_maximum_frequency()), spectrum_bounds.X.Max);
-    spectrum_bounds.Y.Min = std::min(static_cast<BoundType>(spectrum.get_minimum_magnitude()), spectrum_bounds.Y.Min);
-    spectrum_bounds.Y.Max = std::max(static_cast<BoundType>(spectrum.get_maximum_magnitude()), spectrum_bounds.Y.Max);
+    spectrum_bounds.X.Min =
+            std::min(static_cast<BoundType>(spectrum.cbegin()[first_bin_idx].frequency), spectrum_bounds.X.Min);
+    spectrum_bounds.X.Max =
+            std::max(static_cast<BoundType>(spectrum.cbegin()[bin_count - 1].frequency), spectrum_bounds.X.Max);
+
+    for (auto bin_idx = first_bin_idx; bin_idx < bin_count; ++bin_idx) {
+        const auto magnitude = static_cast<BoundType>(spectrum.cbegin()[bin_idx].magnitude);
+        spectrum_bounds.Y.Min = std::min(magnitude, spectrum_bounds.Y.Min);
+        spectrum_bounds.Y.Max = std::max(magnitude, spectrum_bounds.Y.Max);
+    }
 }
 
 void SignalDFTPanel::update_spectrum_bounds() noexcept
