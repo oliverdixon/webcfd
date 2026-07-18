@@ -32,8 +32,8 @@ int main()
 
         // Native platforms can use the RAII facilities of EchoMap and StaticInstanceController.
 
-        echomap::EchoMap application_inst;
-        const echomap::StaticInstanceController instance_controller(application_inst);
+        echomap::EchoMap application;
+        const echomap::StaticInstanceController instance_controller(application);
         application.run_event_loop();
 
 #endif

@@ -30,6 +30,7 @@ class JSActionController : public ActionControllerBase<JSActionController>
     /**
      * Invokes the JS function for @ref ProjectFileAction.
      * @ingroup ProjectFileAction
+     * @implements ActionControllerBase::select_project_file
      */
     static void select_project_file_impl();
 
@@ -38,6 +39,7 @@ class JSActionController : public ActionControllerBase<JSActionController>
      *
      * @param path The C++ path of the selected file.
      * @ingroup ProjectFileAction
+     * @implements ActionControllerBase::notify_project_file
      */
     static void notify_project_file_impl(const std::filesystem::path& path);
 };

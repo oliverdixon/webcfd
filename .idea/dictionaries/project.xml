@@ -5,6 +5,8 @@
       <w>Deserialiser</w>
       <w>Despatcher</w>
       <w>Hann</w>
+      <w>NOLINTBEGIN</w>
+      <w>NOLINTEND</w>
       <w>c'tor</w>
       <w>cbegin</w>
       <w>cend</w>
