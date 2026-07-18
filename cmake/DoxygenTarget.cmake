@@ -55,7 +55,13 @@ if (ECHOMAP_BUILD_DOCUMENTATION)
             WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
             VERBATIM
             COMMAND "${CMAKE_COMMAND}" -E make_directory "${CMAKE_CURRENT_BINARY_DIR}"
-            COMMAND Doxygen::doxygen "${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile"
+            COMMAND /bin/bash -c
+                "PROJECT_NUMBER=\"$(printf '%s %s' \"$(date +%F)\" \"$(git rev-parse --short HEAD)\")\";\
+                    export PROJECT_NUMBER; \
+                    exec \"$1\" \"$2\""
+                "run-doxygen"
+                "$<TARGET_FILE:Doxygen::doxygen>"
+                "${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile"
             USES_TERMINAL
     )
 
