@@ -1,5 +1,23 @@
 # TODO
 
+## Short Term
+
+1. Send messages to EchoMap class from the ActionControllers without exposing a public member function to service every
+   action callback. Use LWTs? (In which case the LWT std::visit monster will need to be refactored, but they can be
+   implemented as private member functions.)
+
+2. Restore wave file picker as a JS action.
+
+3. Support manual mapping of externally sourced signals for Wasm targets.
+
+4. Add project loader dialog as a native action.
+
+5. Add a wave file loader as a native action.
+
+6. Merge em-fixes back into master.
+
+## Medium/Long Term
+
 *In no particular order...*
 
 * Use the ImGui DockBuilder API to configure a sane default panel configuration:
