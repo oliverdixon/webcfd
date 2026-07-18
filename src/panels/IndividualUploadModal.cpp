@@ -10,7 +10,6 @@
 #include "IndividualUploadModal.hpp"
 
 #include "../objects/Project.hpp"
-#include "../web/JSBridge.hpp"
 
 namespace echomap
 {
@@ -67,8 +66,10 @@ void IndividualUploadModal::draw() noexcept
                 ImGui::TableNextRow();
                 ImGui::TableNextColumn();
 
+#if 0 // TODO
                 if (ImGui::Button("Upload"))
                     web::JSBridge::open_wav_file_chooser_for_existing_signal(project->get_id(), signal.get_id());
+#endif
 
                 ImGui::TableNextColumn();
 

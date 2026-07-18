@@ -163,7 +163,7 @@ void EchoMap::update_wav_file_for_existing_signal(
 }
 
 void EchoMap::update_project(
-        const char* path
+        const std::filesystem::path& path
 )
 {
     worker.submit(std::make_unique<LoadProjectTask>(path, &worker));

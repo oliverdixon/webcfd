@@ -5,13 +5,10 @@
  * @date 2026-05-05
  */
 
-#include "Logger.hpp"
 #include "EchoMap.hpp"
+#include "Logger.hpp"
+#include "StaticInstanceController.hpp"
 #include "errors/ConfigurationError.hpp"
-
-#ifdef __EMSCRIPTEN__
-#include "web/JSBridge.hpp"
-#endif
 
 /**
  * EchoMap common entry point.
@@ -21,35 +18,29 @@
 int main()
 {
     try {
-        /*
-         * If we're targeting Web Assembly, dynamically allocate the application object and do not invoke the
-         * destructor. If we're targeting native, statically allocate and clean up correctly.
-         *
-         * This is fiddly but required behaviour due to the use of native Wasm exception handling; the Emscripten
-         * documentation notes that when an infinite loop is simulated, native EH cannot be used with objects that have
-         * destructors on the stack. Leaking the application state from a browser context is inconsequential; clean-up
-         * is performed by the Wasm runtime.
-         *
-         * https://emscripten.org/docs/api_reference/emscripten.h.html#c.emscripten_set_main_loop
-         */
 #ifdef __EMSCRIPTEN__
-        auto* const application = new echomap::EchoMap(); // NOLINT(*-owning-memory)
-        echomap::web::JSBridge::bind(application);
+
+        // Emscripten will manage our heap memory.
+
+        // NOLINTBEGIN(*-owning-memory, *-cplusplus.NewDeleteLeaks)
+        auto* const application = new echomap::EchoMap();
+        [[maybe_unused]] auto* const controller = new echomap::StaticInstanceController(*application);
         application->run_event_loop();
+        // NOLINTEND(*-owning-memory, *-cplusplus.NewDeleteLeaks)
+
 #else
-        echomap::EchoMap application;
+
+        // Native platforms can use the RAII facilities of EchoMap and StaticInstanceController.
+
+        echomap::EchoMap application_inst;
+        const echomap::StaticInstanceController instance_controller(application_inst);
         application.run_event_loop();
+
 #endif
     } catch (const echomap::ConfigurationError& error) {
-#ifdef __EMSCRIPTEN__
-        echomap::web::JSBridge::unbind();
-#endif
         echomap::Logger::log(echomap::Logger::Level::Error, error.what(), error.where());
         return 1;
     }
 
-#ifdef __EMSCRIPTEN__
-    echomap::web::JSBridge::unbind();
-#endif
     return 0;
 }

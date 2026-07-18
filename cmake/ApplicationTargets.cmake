@@ -72,7 +72,6 @@ if (ECHOMAP_BUILD_APPLICATION)
         # List of C-linkage functions to be exported for use with ccall in the JS Module.
         set(exported_functions
                 _main
-                _echomap_on_wav_file_picked_for_existing_signal
                 _echomap_on_project_file_picked
         )
 

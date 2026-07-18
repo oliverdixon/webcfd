@@ -76,7 +76,7 @@ public:
             const char* path
     );
 
-    void update_project(const char* path);
+    void update_project(const std::filesystem::path& path);
 
     void change_active_project(std::unique_ptr<Project> new_project) noexcept;
 
