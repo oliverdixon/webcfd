@@ -2,6 +2,8 @@
 
 *In no particular order...*
 
+* Rename LWTs to notifications.
+
 * Use the ImGui DockBuilder API to configure a sane default panel configuration:
   https://github.com/ocornut/imgui/wiki/Docking#programmatically-setting-up-docking-layout-dockbuider-api
 
