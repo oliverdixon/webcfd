@@ -52,7 +52,7 @@ void SignalWaveformPanel::draw() noexcept
             ImPlot::PushStyleColor(ImPlotCol_FrameBg, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
             bool drawn_any = false;
 
-            for (const auto& signal : active_project->share_loaded_signals()) {
+            for (const auto& signal : active_project->share_signals()) {
                 drawn_any = true;
 
                 if (const auto* const downsampled = get_downsampled_signal(signal); downsampled == nullptr)

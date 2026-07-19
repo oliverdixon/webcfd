@@ -64,6 +64,8 @@ public:
         std::size_t channel;        /**< The channel number of the Signal within the given file. */
         bool dirty = false;         /**< Does the Signal contain additional samples? */
         bool is_loaded = false;     /**< Has the Signal loaded all samples from the filesystem? */
+
+        [[nodiscard]] bool operator<(const Source& other) const;
     };
 
     /**
@@ -95,17 +97,6 @@ public:
      * @return The Source of the Signal, or an empty optional if the Signal is not externally sourced.
      */
     [[nodiscard]] const std::optional<Source>& observe_source() const noexcept;
-
-    /**
-     * Indicates whether the Signal is considered fully loaded.
-     *
-     * A Signal is considered fully loaded when it was either derived from an embedded signal, or derived from an
-     * external source which has been fully interrogated. A fully loaded Signal can be assumed to be ready for review
-     * and manipulation on the front-end.
-     *
-     * @return Is the Signal fully loaded?
-     */
-    [[nodiscard]] bool is_fully_loaded() const noexcept;
 
     [[nodiscard]] Sample::TimeT get_time_offset() const noexcept;
     [[nodiscard]] std::size_t get_sample_rate() const noexcept;

@@ -33,7 +33,7 @@ void ProjectPanel::draw() noexcept
         else {
             ImGui::SeparatorText(active_project->get_imgui_name());
             if (ImGui::CollapsingHeader("Signals", default_flags))
-                for (const auto& signal : active_project->observe_loaded_signals())
+                for (const auto& signal : active_project->observe_signals())
                     ImGui::TextUnformatted(signal.get_imgui_name());
 
             if (ImGui::CollapsingHeader("Sensors", default_flags))

@@ -9,6 +9,7 @@
 
 #include "IndividualUploadModal.hpp"
 
+#include "../Logger.hpp"
 #include "../objects/Project.hpp"
 
 namespace echomap
@@ -59,26 +60,32 @@ void IndividualUploadModal::draw() noexcept
             ImGui::TableSetupColumn("Given Path", ImGuiTableColumnFlags_WidthStretch);
             ImGui::TableHeadersRow();
 
-            for (const auto& signal :
-                 project->observe_signals() | std::views::filter(std::not_fn(&Signal::is_fully_loaded))) {
-                ImGui::PushID(static_cast<int>(signal.get_id()));
+            std::size_t row_entry = 0;
+            for (const auto& factory : project->unloaded_signals | std::views::values) {
+                if (factory == nullptr || !factory->observe_signal().observe_source().has_value()) {
+                    LOG_F_WARN("Received an empty factory on row {}. Is the project corrupted?", row_entry);
+                    continue;
+                }
 
+                ImGui::PushID(static_cast<int>(row_entry++));
                 ImGui::TableNextRow();
                 ImGui::TableNextColumn();
 
 #if 0 // TODO
                 if (ImGui::Button("Upload"))
-                    web::JSBridge::open_wav_file_chooser_for_existing_signal(project->get_id(), signal.get_id());
+                    web::JSBridge::open_wav_file_chooser_for_existing_signal(project->get_id(), factory.get_id());
 #endif
 
                 ImGui::TableNextColumn();
 
+                const auto& partial_signal = factory->observe_signal();
+
                 ImGui::SetNextItemWidth(-std::numeric_limits<float>::min());
-                ImGui::TextUnformatted(signal.get_imgui_name());
+                ImGui::TextUnformatted(partial_signal.get_imgui_name());
                 ImGui::TableNextColumn();
-                ImGui::TextUnformatted(signal.observe_source()->path.c_str());
+                ImGui::TextUnformatted(partial_signal.observe_source()->path.c_str());
                 ImGui::TableNextColumn();
-                ImGui::Text("%ld", signal.observe_source()->channel);
+                ImGui::Text("%ld", partial_signal.observe_source()->channel);
                 ImGui::TableNextColumn();
                 ImGui::Text("Not provided");
 

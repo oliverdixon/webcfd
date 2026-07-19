@@ -79,11 +79,13 @@ auto get_signals(
         return error;
 
 #ifdef __EMSCRIPTEN__
-    // Step 2 (Wasm).  Add the partially constructed signals to the project to be upload manually later.
+    // Step 2 (Wasm).  Add the partially completed factories to the project.
     for (auto factory : factories | std::views::as_rvalue) {
-        if (const auto& signal = factory->observe_signal(); !loaded.emplace(signal.get_name(), signal.get_id()).second)
+        const auto& signal = factory->observe_signal();
+        if (!loaded.emplace(signal.get_name(), signal.get_id()).second)
             throw std::runtime_error(std::format("Project contains duplicate signal {}.", signal.get_name()));
-        project.add_signal(std::move(factory)->take_signal());
+
+        project.unloaded_signals.emplace(signal.get_id(), std::move(factory));
     }
 #else
     /*

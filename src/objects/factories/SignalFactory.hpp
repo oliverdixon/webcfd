@@ -34,6 +34,9 @@ public:
      */
     SignalFactory();
 
+    [[nodiscard]] bool operator==(const SignalFactory& other) const;
+    [[nodiscard]] bool operator<(const SignalFactory& other) const;
+
     /**
      * Loads a WAV file from the file system.
      *

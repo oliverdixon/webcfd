@@ -73,7 +73,7 @@ void ChannelMappingPanel::draw_new_channel_mapping() noexcept
                     new_entry_cache.signal == nullptr ? "Select signal..." : new_entry_cache.signal->get_imgui_name(),
                     0
             )) {
-            for (const auto& signal : active_project->observe_loaded_signals()) {
+            for (const auto& signal : active_project->observe_signals()) {
                 const bool is_selected = new_entry_cache.signal == nullptr ? false : signal == *new_entry_cache.signal;
 
                 // Checks if something has changed (thus current value needs updating).

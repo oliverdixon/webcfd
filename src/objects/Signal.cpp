@@ -27,6 +27,16 @@ Signal::Signal(
 {
 }
 
+bool Signal::Source::operator<(
+        const Source& other
+) const
+{
+    if (channel < other.channel)
+        return true;
+
+    return path < other.path;
+}
+
 std::uint64_t Signal::get_sample_count() const noexcept
 {
     return samples.size();
@@ -35,11 +45,6 @@ std::uint64_t Signal::get_sample_count() const noexcept
 const std::optional<Signal::Source>& Signal::observe_source() const noexcept
 {
     return fs_source;
-}
-
-bool Signal::is_fully_loaded() const noexcept
-{
-    return !fs_source.has_value() || fs_source->is_loaded;
 }
 
 Signal::Sample::TimeT Signal::get_time_offset() const noexcept

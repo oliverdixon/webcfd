@@ -67,7 +67,7 @@ void SignalDFTPanel::draw() noexcept
             bool drawn_any = false;
             std::uint64_t max_sample_count = 0;
 
-            for (const auto& signal : active_project->observe_loaded_signals()) {
+            for (const auto& signal : active_project->observe_signals()) {
                 max_sample_count = std::max(max_sample_count, signal.get_sample_count());
                 drawn_any = true;
             }
@@ -275,7 +275,7 @@ void SignalDFTPanel::draw_preview_section() noexcept
         ImPlot::PushStyleColor(ImPlotCol_FrameBg, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
 
         for (const auto& signal :
-             active_project->share_loaded_signals() | std::views::filter([](const std::shared_ptr<Signal>& candidate) {
+             active_project->share_signals() | std::views::filter([](const std::shared_ptr<Signal>& candidate) {
                  return candidate->is_uniformly_sampled();
              }))
             draw_preview_of_signal(signal);

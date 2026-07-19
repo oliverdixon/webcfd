@@ -28,6 +28,38 @@ SignalFactory::SignalFactory() :
 {
 }
 
+bool SignalFactory::operator==(
+        const SignalFactory& other
+) const
+{
+    if (target.get() == other.target.get())
+        return true;
+
+    if (target == nullptr)
+        return false; // We're null; the other isn't.
+
+    if (other.target == nullptr)
+        return false; // The other is null; we're not.
+
+    // Safe to dereference; compare by IDs.
+    return *target == *other.target;
+}
+
+bool SignalFactory::operator<(
+        const SignalFactory& other
+) const
+{
+    if (target == nullptr || other.target == nullptr || !target->observe_source().has_value() ||
+        !other.target->observe_source().has_value())
+        return false;
+
+    // Safe to deference; attempt to compare by channel and then path.
+    const auto& us = *target->observe_source(); // NOLINT(*-identifier-length)
+    const auto& them = *target->observe_source();
+
+    return us < them;
+}
+
 std::vector<std::unique_ptr<Signal>> SignalFactory::load_wave_file(
         const char* const file_path
 )
