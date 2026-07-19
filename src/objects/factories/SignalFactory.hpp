@@ -113,11 +113,6 @@ public:
             std::size_t channel
     ) const;
 
-    /**
-     * @todo Document.
-     */
-    void update_source(const std::filesystem::path& real_path) const;
-
 private:
     /**
      * Loads the time-series sampled data into the given Signal objects.

@@ -62,7 +62,6 @@ public:
     {
         std::filesystem::path path; /**< The path (absolute or relative to CWD) of the source wave file. */
         std::size_t channel;        /**< The channel number of the Signal within the given file. */
-        std::optional<std::filesystem::path> real_path; /**< TODO */
         bool dirty = false;         /**< Does the Signal contain additional samples? */
         bool is_loaded = false;     /**< Has the Signal loaded all samples from the filesystem? */
 

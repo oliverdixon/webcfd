@@ -244,17 +244,6 @@ void SignalFactory::set_source(
     target->set_source(path, channel);
 }
 
-void SignalFactory::update_source(
-        const std::filesystem::path& real_path
-) const
-{
-    if (!target->fs_source.has_value())
-        throw std::runtime_error("Requested to update source, but no source exists.");
-
-    if (target->fs_source->path != real_path)
-        target->fs_source->real_path = real_path;
-}
-
 void SignalFactory::load_wave_file_into_channels(
         drwav& drwav_info,
         const std::string_view file_path,
