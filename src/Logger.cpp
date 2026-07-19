@@ -46,7 +46,8 @@ void Logger::log(
         emscripten_console_warn(line.c_str());
         break;
     case Level::Debug:
-        emscripten_console_trace(line.c_str());
+        // Do not use console.trace, since Chrome DevTools expands it.
+        emscripten_console_log(line.c_str());
         break;
     }
 #else

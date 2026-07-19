@@ -17,6 +17,8 @@
 namespace echomap
 {
 
+class EchoMap;
+
 /**
  * Provides a modal IPanel to map externally sourced Signal objects to separately uploaded files.
  *
@@ -26,7 +28,10 @@ namespace echomap
 class IndividualUploadModal : public IPanel
 {
 public:
-    explicit IndividualUploadModal(const Project* project);
+    explicit IndividualUploadModal(
+            EchoMap* app,
+            const Project* project
+    );
 
     void draw() noexcept override;
 
@@ -34,6 +39,7 @@ public:
 
 private:
     std::string panel_name;
+    EchoMap * app;
     const Project* project;
 };
 

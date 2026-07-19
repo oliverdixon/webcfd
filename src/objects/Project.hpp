@@ -28,10 +28,17 @@ class Project : public Object<Project>
 
 public:
     /**
-     * Maps SignalFactory objects to the IDs of the Signal objects which they are responsible for constructing.
+     * Provides a mapping between stated paths of externally sourced signals, and paths in the WebAssembly VFS.
+     *
+     * The key indicates the path of the referenced file. The value composes an optional mapping of the corresponding
+     * path in the VFS and a channel map of factories responsible for constructing the Signal of the file channel.
+     *
      * @todo make private
      */
-    std::map<Signal::id_type, std::unique_ptr<SignalFactory>> unloaded_signals;
+    std::map<
+            std::filesystem::path,
+            std::pair<std::optional<std::filesystem::path>, std::vector<std::unique_ptr<SignalFactory>>>>
+            unloaded_signals;
 
     /**
      * Creates a new named Project.

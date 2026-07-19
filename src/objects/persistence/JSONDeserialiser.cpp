@@ -82,10 +82,35 @@ auto get_signals(
     // Step 2 (Wasm).  Add the partially completed factories to the project.
     for (auto factory : factories | std::views::as_rvalue) {
         const auto& signal = factory->observe_signal();
+        const auto& source = signal.observe_source();
+        assert(source.has_value());
+
         if (!loaded.emplace(signal.get_name(), signal.get_id()).second)
             throw std::runtime_error(std::format("Project contains duplicate signal {}.", signal.get_name()));
 
-        project.unloaded_signals.emplace(signal.get_id(), std::move(factory));
+        // TODO this logic can go in Project when we make unloaded_signals private.
+
+        auto file_group_it = project.unloaded_signals.find(source->path);
+
+        if (file_group_it == project.unloaded_signals.end()) {
+            decltype(echomap::Project::unloaded_signals)::mapped_type pair{
+                    {},
+                    std::vector<std::unique_ptr<echomap::SignalFactory>>(source->channel)
+            };
+
+            const auto [it, success] = project.unloaded_signals.emplace(source->path, std::move(pair));
+            if (!success)
+                throw std::runtime_error("Could not register VFS channel mappings.");
+
+            file_group_it = it;
+        }
+
+        auto& group_factories = file_group_it->second.second;
+
+        if (group_factories.size() < source->channel)
+            group_factories.resize(source->channel);
+
+        group_factories[source->channel - 1] = std::move(factory);
     }
 #else
     /*

@@ -9,6 +9,7 @@
 
 #include "IndividualUploadModal.hpp"
 
+#include "../EchoMap.hpp"
 #include "../Logger.hpp"
 #include "../actions/ActionController.hpp"
 #include "../objects/Project.hpp"
@@ -17,8 +18,10 @@ namespace echomap
 {
 
 IndividualUploadModal::IndividualUploadModal(
+        EchoMap* const app,
         const Project* const project
 ) :
+    app(app),
     project(project)
 {
 }
@@ -56,42 +59,33 @@ void IndividualUploadModal::draw() noexcept
         // The remaining number of signals for which there is no given path in VFS, decremented as we enumerate.
         auto unmapped_count = project->unloaded_signals.size();
 
-        if (ImGui::BeginTable("##UploadTable", 5, table_flags)) {
+        if (ImGui::BeginTable("##UploadTable", 3, table_flags)) {
             ImGui::TableSetupColumn("##UploadButton", ImGuiTableColumnFlags_WidthFixed);
-            ImGui::TableSetupColumn("Signal Name", ImGuiTableColumnFlags_WidthStretch);
             ImGui::TableSetupColumn("Indicated Path", ImGuiTableColumnFlags_WidthStretch);
-            ImGui::TableSetupColumn("Indicated Channel", ImGuiTableColumnFlags_WidthStretch);
+            // ImGui::TableSetupColumn("Signal Name", ImGuiTableColumnFlags_WidthStretch); // TODO
+            // ImGui::TableSetupColumn("Channel Number", ImGuiTableColumnFlags_WidthStretch); // TODO
             ImGui::TableSetupColumn("Given Path", ImGuiTableColumnFlags_WidthStretch);
             ImGui::TableHeadersRow();
 
             std::size_t row_entry = 0;
 
-            for (const auto& factory : project->unloaded_signals | std::views::values) {
-                if (factory == nullptr || !factory->observe_signal().observe_source().has_value()) {
-                    LOG_F_WARN("Received an empty factory on row {}. Is the project corrupted?", row_entry);
-                    continue;
-                }
-
-                const auto& partial_signal = factory->observe_signal();
-
+            for (const auto& [external_path, mapping_info] : project->unloaded_signals) {
                 ImGui::PushID(static_cast<int>(row_entry++));
                 ImGui::TableNextRow();
                 ImGui::TableNextColumn();
 
                 if (ImGui::Button("Upload"))
-                    ActionController::complete_signal_load(project->get_id(), partial_signal.get_id());
+                    ActionController::register_vfs_mapping(project->get_id(), external_path);
 
                 ImGui::TableNextColumn();
-
-                ImGui::SetNextItemWidth(-std::numeric_limits<float>::min());
-                ImGui::TextUnformatted(partial_signal.get_imgui_name());
-                ImGui::TableNextColumn();
-                ImGui::TextUnformatted(partial_signal.observe_source()->path.c_str());
-                ImGui::TableNextColumn();
-                ImGui::Text("%ld", partial_signal.observe_source()->channel);
+                ImGui::TextUnformatted(external_path.c_str());
+                // ImGui::TableNextColumn();
+                // ImGui::TextUnformatted(partial_signal.observe_source()->path.c_str());
+                // ImGui::TableNextColumn();
+                // ImGui::Text("%ld", partial_signal.observe_source()->channel);
                 ImGui::TableNextColumn();
 
-                const auto& given_path = partial_signal.observe_source()->real_path;
+                const auto& given_path = mapping_info.first;
 
                 if (given_path.has_value()) {
                     ImGui::TextUnformatted(given_path->c_str());
@@ -117,8 +111,10 @@ void IndividualUploadModal::draw() noexcept
         ImGui::SameLine();
 
         if (unmapped_count == 0) {
-            if (ImGui::Button("Continue", ImVec2(button_width, 0.0f)))
+            if (ImGui::Button("Continue", ImVec2(button_width, 0.0f))) {
+                app->submit_lightweight_task(CompleteProjectLoadNotification(project->get_id()));
                 ImGui::CloseCurrentPopup();
+            }
         } else {
             ImGui::BeginDisabled();
             ImGui::Button("Continue", ImVec2(button_width, 0.0f));

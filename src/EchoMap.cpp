@@ -200,7 +200,7 @@ void EchoMap::setup_subscriptions()
 
                 if (!new_project->unloaded_signals.empty()) {
                     // Raise the modal to query for the sources.
-                    upload_modal = IndividualUploadModal(new_project.get());
+                    upload_modal = IndividualUploadModal(this, new_project.get());
                     unloaded_project = std::move(new_project);
                 } else
                     change_active_project(std::move(new_project));
@@ -209,15 +209,24 @@ void EchoMap::setup_subscriptions()
 
     connections.emplace_back(
             despatcher.load_signal_file_channel.nominate_consumer([this](LoadSignalFileResult&& result) {
-                if (project != nullptr && project->get_id() == result.get_project_id())
-                    for (auto&& signals = std::move(result).take_signals(); auto signal : signals)
-                        project->add_signal(std::move(signal));
-                else
+                Project* target = nullptr;
+                if (project != nullptr && result.get_project_id() == project->get_id())
+                    target = project.get();
+                else if (unloaded_project != nullptr && result.get_project_id() == unloaded_project->get_id())
+                    target = unloaded_project.get();
+
+                if (target == nullptr)
                     LOG_F_WARN(
-                            "Dropping LoadSignalFileResult which was intended for the non-active {} with ID {}.",
-                            Project::get_class_name(),
+                            "Dropping LoadSignalFileResult, which was intended for the unavailable Project with ID {}.",
                             result.get_project_id()
                     );
+                else {
+                    for (auto&& signals = std::move(result).take_signals(); auto signal : signals)
+                        target->add_signal(std::move(signal));
+
+                    if (target == unloaded_project.get())
+                        change_active_project(std::move(unloaded_project));
+                }
             })
     );
 
@@ -473,8 +482,8 @@ void EchoMap::process_lightweight_tasks()
                 [this](const ModifySensorColourTask& task) { handle_lwt(task); },
                 [this](const ModifySensorPositionTask& task) { handle_lwt(task); },
                 [this](const ProjectLoadRequest& task) { handle_lwt(task); },
-                [this](const WaveFileLoadRequest& task) { handle_lwt(task); },
-                [this](const WaveFilePreloadNotification& task) { handle_lwt(task); },
+                [this](const CompleteProjectLoadNotification& task) { handle_lwt(task); },
+                [this](const RegisterVFSMappingNotification& task) { handle_lwt(task); },
                 },
                 lwt_queue.back()
             );
@@ -544,99 +553,81 @@ void EchoMap::handle_lwt(
 }
 
 void EchoMap::handle_lwt(
-        const WaveFileLoadRequest& task
+        const CompleteProjectLoadNotification& task
 )
 {
-    // Validate that we have correct project loaded.
+    upload_modal.reset();
 
-    if (project == nullptr)
-        throw IgnoredWarning("Dropping WaveFileLoadRequest due to empty project.");
-
-    if (project->get_id() != task.project_id)
-        throw IgnoredWarning(
-                std::format(
-                        "Dropping WaveFileLoadRequest due to incorrect loaded project: requested {}, but have {}.",
-                        task.project_id,
-                        project->get_id()
-                )
-        );
-
-    // Grab the factories based on the channel map.
-
-    std::vector<std::unique_ptr<SignalFactory>> factories;
-    factories.resize(task.channel_map.size());
-
-    for (const auto [channel_num, signal_id] : task.channel_map) {
-        const auto signal_it = project->unloaded_signals.find(signal_id);
-
-        if (signal_it == project->unloaded_signals.end())
-            throw std::runtime_error(
-                    std::format(
-                            "Refusing WaveFileLoadRequest due to referencing factory for non-existent signal ID {}.",
-                            task.project_id
-                    )
-            );
-
-        // ReSharper disable once CppTooWideScopeInitStatement
-        const auto& source = signal_it->second->observe_signal().observe_source();
-        if (!source.has_value() || source->path != task.path || source->channel != channel_num)
-            throw std::runtime_error(
-                    std::format(
-                            "Refusing WaveFileLoadRequest due to referencing factory for signal ID {} with mismatched "
-                            "source metadata.",
-                            task.project_id
-                    )
-            );
-
-        factories[channel_num - 1] = std::move(signal_it->second);
-    }
-
-    // Create a worker task to load the wave file, providing the factories.
-
-    worker.submit(std::make_unique<LoadSignalFileTask>(project->get_id(), task.path.string(), std::move(factories)));
-}
-
-void EchoMap::handle_lwt(
-        const WaveFilePreloadNotification& task
-) const
-{
     // Validate that we have correct project loaded.
 
     if (unloaded_project == nullptr)
-        throw IgnoredWarning("Dropping WaveFileLoadRequest due to empty unloaded project.");
+        throw IgnoredWarning("Dropping CompleteProjectLoadNotification due to empty unloaded project.");
 
     if (unloaded_project->get_id() != task.project_id)
         throw IgnoredWarning(
                 std::format(
-                        "Dropping WaveFileLoadRequest due to incorrect unloaded project: requested {}, but have {}.",
+                        "Dropping CompleteProjectLoadNotification due to incorrect unloaded project: requested {}, but "
+                        "have {}.",
                         task.project_id,
                         unloaded_project->get_id()
                 )
         );
 
-    const auto factory_it = unloaded_project->unloaded_signals.find(task.signal_id);
+    // For each group, create a worker task to load the corresponding file.
 
-    if (factory_it == unloaded_project->unloaded_signals.end() || factory_it->second == nullptr)
-        throw std::runtime_error(
+    for (auto&& [vfs_path, factories] :
+         unloaded_project->unloaded_signals | std::views::values | std::views::as_rvalue) {
+
+        if (!vfs_path.has_value())
+            throw std::runtime_error("Refusing CompleteProjectLoadNotification due to an incomplete VFS mapping.");
+
+        worker.submit(
+                std::make_unique<LoadSignalFileTask>(unloaded_project->get_id(), *vfs_path, std::move(factories))
+        );
+    }
+}
+
+void EchoMap::handle_lwt(
+        const RegisterVFSMappingNotification& task
+) const
+{
+    // Validate that we have correct project loaded.
+
+    if (unloaded_project == nullptr)
+        throw IgnoredWarning("Dropping RegisterVFSMappingNotification due to empty unloaded project.");
+
+    if (unloaded_project->get_id() != task.project_id)
+        throw IgnoredWarning(
                 std::format(
-                        "Refusing WaveFilePreloadNotification due to referencing factory for signal ID {} which is not "
-                        "held by the {}.",
-                        task.signal_id,
-                        unloaded_project->get_name()
+                        "Dropping RegisterVFSMappingNotification due to incorrect unloaded project: requested {}, but "
+                        "have {}.",
+                        task.project_id,
+                        unloaded_project->get_id()
                 )
         );
 
-    const auto source = factory_it->second->observe_signal().observe_source();
-    assert(source.has_value()); // It is an invariant that any signal in the unloaded map is externally sourced.
+    // Add it.
 
-    // Update the project's real path.
-    factory_it->second->update_source(task.path);
+    const auto map_it = unloaded_project->unloaded_signals.find(task.external);
+
+    if (map_it == unloaded_project->unloaded_signals.end())
+        throw IgnoredWarning(
+                std::format(
+                        "Dropping RegisterVFSMappingNotification since we don't need a mapping for {}.",
+                        task.external.c_str()
+                )
+        );
+
+    map_it->second.first = task.internal;
 }
 
 void EchoMap::change_active_project(
         std::unique_ptr<Project> new_project
 ) noexcept
 {
+    if (new_project != nullptr)
+        LOG_F_DEBUG("Changing active project to {}.", new_project->get_name());
+
     project = std::move(new_project);
 }
 

@@ -16,15 +16,15 @@ namespace echomap
 
 LoadSignalFileTask::LoadSignalFileTask(
         const Project::id_type project_id,
-        const std::string_view file_path,
+        const std::filesystem::path& path,
         std::vector<std::unique_ptr<SignalFactory>>&& factories
 ) :
     ITask(std::format(
             "LoadSignalFileTask: {} ",
-            file_path
+            path.c_str()
     )),
     project_id(project_id),
-    path(file_path),
+    path(path),
     factories(std::move(factories))
 {
 }
