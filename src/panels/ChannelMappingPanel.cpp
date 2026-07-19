@@ -39,8 +39,8 @@ void ChannelMappingPanel::draw() noexcept
 
             // If a new mapping has been fully described, add it and prompt for another.
             if (new_entry_cache.signal != nullptr && new_entry_cache.sensor != nullptr) {
-                app->submit_lightweight_task(
-                        AddChannelMappingTask(new_entry_cache.signal->get_id(), new_entry_cache.sensor->get_id())
+                app->notify(
+                        AddChannelMappingNotification(new_entry_cache.signal->get_id(), new_entry_cache.sensor->get_id())
                 );
 
                 new_entry_cache.signal = nullptr;

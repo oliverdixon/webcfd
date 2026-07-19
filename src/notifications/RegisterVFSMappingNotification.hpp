@@ -10,7 +10,7 @@
 #ifndef ECHOMAP_REGISTERVFSMAPPINGNOTIFICATION_HPP
 #define ECHOMAP_REGISTERVFSMAPPINGNOTIFICATION_HPP
 
-#include "../../objects/Project.hpp"
+#include "../objects/Project.hpp"
 
 namespace echomap
 {

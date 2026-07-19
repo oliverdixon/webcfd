@@ -13,16 +13,16 @@
 #include <sigc++/scoped_connection.h>
 #include <webgpu/webgpu_cpp.h>
 
+#include "notifications/AddChannelMappingNotification.hpp"
+#include "notifications/CompleteProjectLoadNotification.hpp"
+#include "notifications/ModifySensorColourNotification.hpp"
+#include "notifications/ModifySensorPositionNotification.hpp"
+#include "notifications/ProjectSelectedNotification.hpp"
+#include "notifications/RegisterVFSMappingNotification.hpp"
 #include "panels/ErrorModal.hpp"
 #include "panels/IndividualUploadModal.hpp"
 #include "signals/Worker.hpp"
 #include "signals/WorkerResultDespatcher.hpp"
-#include "signals/lightweight/AddChannelMappingTask.hpp"
-#include "signals/lightweight/CompleteProjectLoadNotification.hpp"
-#include "signals/lightweight/ModifySensorColourTask.hpp"
-#include "signals/lightweight/ModifySensorPositionTask.hpp"
-#include "signals/lightweight/ProjectLoadRequest.hpp"
-#include "signals/lightweight/RegisterVFSMappingNotification.hpp"
 
 /**
  * The main EchoMap outermost namespace for all non-exported symbols.
@@ -41,14 +41,13 @@ class EchoMap
 {
 public:
     /**
-     * A lightweight task is a trivial message sent exclusively to the EchoMap controller.
+     * A Notification is a trivial message sent exclusively to the EchoMap controller.
      */
-    using LightweightTask =
-            std::variant<
-            AddChannelMappingTask,
-            ModifySensorColourTask,
-            ModifySensorPositionTask,
-            ProjectLoadRequest,
+    using Notification = std::variant<
+            AddChannelMappingNotification,
+            ModifySensorColourNotification,
+            ModifySensorPositionNotification,
+            ProjectSelectedNotification,
             CompleteProjectLoadNotification,
             RegisterVFSMappingNotification>;
 
@@ -79,13 +78,13 @@ public:
     void change_active_project(std::unique_ptr<Project> new_project) noexcept;
 
     /**
-     * Submit a new lightweight task to the application queue.
+     * Submit a new Notification task to the application queue.
      *
-     * LWTs are processed at the beginning of render cycles in a first-come first-served ordering.
+     * Notifications are processed at the beginning of render cycles in a first-come first-served ordering.
      *
      * @param task The trivial task to schedule.
      */
-    void submit_lightweight_task(const LightweightTask& task);
+    void notify(const Notification& task);
 
     /**
      * Indicate to the renderer that the following frames should always be rendered, regardless of whether there are any
@@ -185,21 +184,21 @@ private:
     bool handle_window_resize() noexcept;
 
     /**
-     * Handle any unconsumed events from the lightweight task queue.
+     * Handle any unconsumed Notification objects from the task queue.
      */
-    void process_lightweight_tasks();
+    void process_notifications();
 
     /**
      * Handle any unconsumed events from the Worker.
      */
     void process_worker_results();
 
-    void handle_lwt(const AddChannelMappingTask& task) const;
-    void handle_lwt(const ModifySensorColourTask& task) const;
-    void handle_lwt(const ModifySensorPositionTask& task) const;
-    void handle_lwt(const ProjectLoadRequest& task);
-    void handle_lwt(const CompleteProjectLoadNotification& task);
-    void handle_lwt(const RegisterVFSMappingNotification& task) const;
+    void handle_notification(const AddChannelMappingNotification& task) const;
+    void handle_notification(const ModifySensorColourNotification& task) const;
+    void handle_notification(const ModifySensorPositionNotification& task) const;
+    void handle_notification(const ProjectSelectedNotification& task);
+    void handle_notification(const CompleteProjectLoadNotification& task);
+    void handle_notification(const RegisterVFSMappingNotification& task) const;
 
 #ifdef __EMSCRIPTEN__
 
@@ -235,7 +234,7 @@ private:
     std::vector<std::unique_ptr<IPanel>> panels;      /**< Individual display components. */
     ErrorModal error_modal;                           /**< Persistent panel to indicate errors over all other panels. */
     std::optional<IndividualUploadModal> upload_modal;
-    std::vector<LightweightTask> lwt_queue;    /**< Queue for simple tasks that needn't go through the despatcher. */
+    std::vector<Notification> notify_queue;    /**< Queue for simple tasks that needn't go through the despatcher. */
     std::unique_ptr<Project> project;          /**< Owning container for the active Project. */
     std::unique_ptr<Project> unloaded_project; /**< Owning container for the unloaded Project. */
 

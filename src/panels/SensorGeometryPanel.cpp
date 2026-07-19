@@ -100,7 +100,7 @@ void SensorGeometryPanel::draw_geometry_summary() noexcept
             const ImVec4 colour = ImGui::ColorConvertU32ToFloat4(sensor_colours[row_idx]);
             std::array<float, 4> new_colour = {colour.x, colour.y, colour.z, colour.w};
             if (ImGui::ColorEdit4("##colour", new_colour.data(), ImGuiColorEditFlags_NoInputs)) {
-                app->submit_lightweight_task(ModifySensorColourTask(
+                app->notify(ModifySensorColourNotification(
                         sensor.get_id(),
                         {
                                 .r = new_colour[0],
@@ -141,7 +141,7 @@ void SensorGeometryPanel::draw_geometry_summary() noexcept
             ++row_idx;
 
             if (position_changed)
-                app->submit_lightweight_task(ModifySensorPositionTask(sensor.get_id(), new_position));
+                app->notify(ModifySensorPositionNotification(sensor.get_id(), new_position));
         }
 
         ImGui::EndTable();

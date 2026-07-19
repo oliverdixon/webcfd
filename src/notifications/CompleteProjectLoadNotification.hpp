@@ -10,7 +10,7 @@
 #ifndef ECHOMAP_COMPLETEPROJECTLOADNOTIFICATION_HPP
 #define ECHOMAP_COMPLETEPROJECTLOADNOTIFICATION_HPP
 
-#include "../../objects/Project.hpp"
+#include "../objects/Project.hpp"
 
 namespace echomap
 {

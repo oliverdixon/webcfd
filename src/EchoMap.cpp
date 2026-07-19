@@ -309,7 +309,7 @@ wgpu::Future EchoMap::request_device() noexcept
 void EchoMap::render() noexcept
 {
     // Process any events that have arrived since the last cycle.
-    process_lightweight_tasks();
+    process_notifications();
     process_worker_results();
 
     // Handle system/graphics changes.
@@ -466,33 +466,36 @@ bool EchoMap::handle_window_resize() noexcept
     return true;
 }
 
-void EchoMap::process_lightweight_tasks()
+void EchoMap::process_notifications()
 {
-    while (!lwt_queue.empty()) {
-        auto* const task_hint = static_cast<void*>(&lwt_queue.back());
-        const auto task_position = lwt_queue.size() - 1;
+    while (!notify_queue.empty()) {
+        auto* const task_hint = static_cast<void*>(&notify_queue.back());
+        const auto task_position = notify_queue.size() - 1;
 
+        // TODO variant_helpers
         LOG_F_DEBUG("Consuming LWT with hint {} (#{}).", task_hint, task_position);
 
         try {
 
             // clang-format off
             std::visit(variant_helpers::Overloaded{
-                [this](const AddChannelMappingTask& task) { handle_lwt(task); },
-                [this](const ModifySensorColourTask& task) { handle_lwt(task); },
-                [this](const ModifySensorPositionTask& task) { handle_lwt(task); },
-                [this](const ProjectLoadRequest& task) { handle_lwt(task); },
-                [this](const CompleteProjectLoadNotification& task) { handle_lwt(task); },
-                [this](const RegisterVFSMappingNotification& task) { handle_lwt(task); },
+                [this](const AddChannelMappingNotification& task) { handle_notification(task); },
+                [this](const ModifySensorColourNotification& task) { handle_notification(task); },
+                [this](const ModifySensorPositionNotification& task) { handle_notification(task); },
+                [this](const ProjectSelectedNotification& task) { handle_notification(task); },
+                [this](const CompleteProjectLoadNotification& task) { handle_notification(task); },
+                [this](const RegisterVFSMappingNotification& task) { handle_notification(task); },
                 },
-                lwt_queue.back()
+                notify_queue.back()
             );
             // clang-format on
 
         } catch (const IgnoredWarning& warning) {
+            // TODO variant_helpers
             LOG_F_WARN("LWT with hint {} (#{}) was dropped: {}", task_hint, task_position, warning.what());
         } catch (const std::exception& exception) {
             error_modal.raise_error(exception.what());
+            // TODO variant_helpers
             LOG_F_ERROR(
                     "LWT with hint {} (#{}) was responsible for error: {}",
                     task_hint,
@@ -501,7 +504,7 @@ void EchoMap::process_lightweight_tasks()
             );
         }
 
-        lwt_queue.pop_back();
+        notify_queue.pop_back();
     }
 }
 
@@ -515,8 +518,8 @@ void EchoMap::process_worker_results()
         }
 }
 
-void EchoMap::handle_lwt(
-        const AddChannelMappingTask& task
+void EchoMap::handle_notification(
+        const AddChannelMappingNotification& task
 ) const
 {
     if (project == nullptr)
@@ -525,8 +528,8 @@ void EchoMap::handle_lwt(
     project->add_association(task.signal_id, task.sensor_id);
 }
 
-void EchoMap::handle_lwt(
-        const ModifySensorColourTask& task
+void EchoMap::handle_notification(
+        const ModifySensorColourNotification& task
 ) const
 {
     if (project == nullptr)
@@ -535,8 +538,8 @@ void EchoMap::handle_lwt(
     project->get_mutable_sensor(task.sensor_id).set_colour(task.colour);
 }
 
-void EchoMap::handle_lwt(
-        const ModifySensorPositionTask& task
+void EchoMap::handle_notification(
+        const ModifySensorPositionNotification& task
 ) const
 {
     if (project == nullptr)
@@ -545,14 +548,14 @@ void EchoMap::handle_lwt(
     project->get_mutable_sensor(task.sensor_id).set_position(task.position);
 }
 
-void EchoMap::handle_lwt(
-        const ProjectLoadRequest& task
+void EchoMap::handle_notification(
+        const ProjectSelectedNotification& task
 )
 {
     worker.submit(std::make_unique<LoadProjectTask>(task.path, &worker));
 }
 
-void EchoMap::handle_lwt(
+void EchoMap::handle_notification(
         const CompleteProjectLoadNotification& task
 )
 {
@@ -587,7 +590,7 @@ void EchoMap::handle_lwt(
     }
 }
 
-void EchoMap::handle_lwt(
+void EchoMap::handle_notification(
         const RegisterVFSMappingNotification& task
 ) const
 {
@@ -631,20 +634,21 @@ void EchoMap::change_active_project(
     project = std::move(new_project);
 }
 
-void EchoMap::submit_lightweight_task(
-        const LightweightTask& task
+void EchoMap::notify(
+        const Notification& task
 )
 {
-    lwt_queue.emplace_back(task);
+    notify_queue.emplace_back(task);
 
     /*
      * The address is just a "hint" (as opposed to an ID) because the queue might be re-allocated. It's a best-guess
-     * effort to quickly discriminate on lightweight tasks without adding bloat to their structures.
+     * effort to quickly discriminate o notification without adding bloat to their structures.
      */
+    // TODO use variant_helpers to statically determine names.
     LOG_F_DEBUG(
-            "Scheduling LWT with hint {} at position {}.",
-            static_cast<void*>(&lwt_queue.back()),
-            lwt_queue.size() - 1
+            "Scheduling notification with hint {} at position {}.",
+            static_cast<void*>(&notify_queue.back()),
+            notify_queue.size() - 1
     );
 }
 

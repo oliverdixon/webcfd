@@ -13,7 +13,7 @@
 
 #include "EchoMap.hpp"
 #include "actions/ActionController.hpp"
-#include "signals/lightweight/RegisterVFSMappingNotification.hpp"
+#include "notifications/RegisterVFSMappingNotification.hpp"
 
 namespace echomap
 {
@@ -23,12 +23,12 @@ StaticInstanceController::StaticInstanceController(
 )
 {
     ActionController::bind([&app](const std::filesystem::path& path) {
-        app.submit_lightweight_task(ProjectLoadRequest(path));
+        app.notify(ProjectSelectedNotification(path));
     },
             [&app](const std::size_t project_id,
                    const std::filesystem::path& external,
                    const std::filesystem::path& internal) {
-                app.submit_lightweight_task(RegisterVFSMappingNotification(project_id, external, internal));
+                app.notify(RegisterVFSMappingNotification(project_id, external, internal));
             }
     );
 }

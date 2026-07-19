@@ -125,7 +125,7 @@ void IndividualUploadModal::draw_buttons(
 
     if (are_all_mapped) {
         if (ImGui::Button("Continue", button_size)) {
-            app->submit_lightweight_task(CompleteProjectLoadNotification(project->get_id()));
+            app->notify(CompleteProjectLoadNotification(project->get_id()));
             ImGui::CloseCurrentPopup();
         }
     } else {

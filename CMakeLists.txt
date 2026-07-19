@@ -74,9 +74,9 @@ add_library(DummyTarget INTERFACE EXCLUDE_FROM_ALL
         src/signals/tasks/DFTTask.hpp
         src/signals/results/DFTResult.cpp
         src/signals/results/DFTResult.hpp
-        src/signals/lightweight/AddChannelMappingTask.hpp
-        src/signals/lightweight/ModifySensorPositionTask.hpp
-        src/signals/lightweight/ModifySensorColourTask.hpp
+        src/notifications/AddChannelMappingNotification.hpp
+        src/notifications/ModifySensorPositionNotification.hpp
+        src/notifications/ModifySensorColourNotification.hpp
         src/objects/factories/FFTWBuffers.cpp
         src/objects/factories/FFTWBuffers.hpp
         src/signals/tasks/ITask.cpp
@@ -99,9 +99,9 @@ add_library(DummyTarget INTERFACE EXCLUDE_FROM_ALL
         src/StaticInstanceController.hpp
         src/errors/IgnoredWarning.cpp
         src/errors/IgnoredWarning.hpp
-        src/signals/lightweight/ProjectLoadRequest.hpp
-        src/signals/lightweight/CompleteProjectLoadNotification.hpp
-        src/signals/lightweight/RegisterVFSMappingNotification.hpp
+        src/notifications/ProjectSelectedNotification.hpp
+        src/notifications/CompleteProjectLoadNotification.hpp
+        src/notifications/RegisterVFSMappingNotification.hpp
 )
 
 if (EMSCRIPTEN OR ECHOMAP_BUILD_DOCUMENTATION)
