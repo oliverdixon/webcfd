@@ -43,9 +43,12 @@ public:
 
     [[nodiscard]] const char* get_imgui_name() const noexcept override;
 
+    void reshow() noexcept;
+
 private:
-    constexpr static ImVec2 button_size{80.0f, 0.0f};
+    constexpr static ImVec2 button_size{80.0f, 20.0f};
     constexpr static ImVec2 upload_button_frame_padding{0.0f, 0.0f};
+    constexpr static ImVec2 default_modal_size{500.0f, 300.0f};
 
     void draw_preamble() const noexcept;
 
@@ -55,11 +58,12 @@ private:
             SignalFactoryRange auto&& factories
     ) const noexcept;
 
-    void draw_buttons(bool are_all_mapped) const;
+    void draw_buttons(bool are_all_mapped);
 
     std::string panel_name;
     EchoMap* app;
     const Project* project;
+    bool should_open = true;
 };
 
 } // namespace echomap
