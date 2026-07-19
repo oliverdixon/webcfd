@@ -10,7 +10,6 @@
 #include "IndividualUploadModal.hpp"
 
 #include "../EchoMap.hpp"
-#include "../Logger.hpp"
 #include "../actions/ActionController.hpp"
 #include "../objects/Project.hpp"
 
@@ -28,7 +27,8 @@ IndividualUploadModal::IndividualUploadModal(
 
 void IndividualUploadModal::draw() noexcept
 {
-    // TODO refactor monster.
+    if (project->unloaded_signals.empty())
+        return;
 
     ImGui::OpenPopup("Upload External Files##UploadExternalModal");
     if (ImGui::BeginPopupModal(
@@ -38,89 +38,34 @@ void IndividualUploadModal::draw() noexcept
         )) {
         ImGui::PushID("UploadExternalModal");
 
-        ImGui::TextWrapped(
-                "%s contains references to externally sources signals. Browser security requires that each externally "
-                "sourced file is uploaded separately.",
-                project->get_imgui_name()
-        );
-
-        ImGui::Spacing();
-        ImGui::Separator();
-
-        ImGui::TextWrapped(
-                "Upload all missing files to complete the mapping, and press Continue.\n\nCancelling the operation "
-                "will abort the load and revert back to the previously loaded project, if applicable."
-        );
-
-        ImGui::Spacing();
-        ImGui::Separator();
-        ImGui::Spacing();
+        draw_preamble();
 
         // The remaining number of signals for which there is no given path in VFS, decremented as we enumerate.
         auto unmapped_count = project->unloaded_signals.size();
 
-        if (ImGui::BeginTable("##UploadTable", 3, table_flags)) {
+        if (ImGui::BeginTable("##UploadTable", 5, table_flags)) {
             ImGui::TableSetupColumn("##UploadButton", ImGuiTableColumnFlags_WidthFixed);
             ImGui::TableSetupColumn("Indicated Path", ImGuiTableColumnFlags_WidthStretch);
-            // ImGui::TableSetupColumn("Signal Name", ImGuiTableColumnFlags_WidthStretch); // TODO
-            // ImGui::TableSetupColumn("Channel Number", ImGuiTableColumnFlags_WidthStretch); // TODO
+            ImGui::TableSetupColumn("Signal Name", ImGuiTableColumnFlags_WidthStretch);
+            ImGui::TableSetupColumn("Channel Number", ImGuiTableColumnFlags_WidthStretch);
             ImGui::TableSetupColumn("Given Path", ImGuiTableColumnFlags_WidthStretch);
             ImGui::TableHeadersRow();
 
-            std::size_t row_entry = 0;
+            for (const auto& [external_path, mapping_info] : project->unloaded_signals)
+                if (draw_table_entry(
+                            external_path,
+                            mapping_info.first,
+                            std::views::transform(mapping_info.second, [](const std::unique_ptr<SignalFactory>& ptr) {
+                                return ptr.get();
+                            })
+                    ))
 
-            for (const auto& [external_path, mapping_info] : project->unloaded_signals) {
-                ImGui::PushID(static_cast<int>(row_entry++));
-                ImGui::TableNextRow();
-                ImGui::TableNextColumn();
-
-                if (ImGui::Button("Upload"))
-                    ActionController::register_vfs_mapping(project->get_id(), external_path);
-
-                ImGui::TableNextColumn();
-                ImGui::TextUnformatted(external_path.c_str());
-                // ImGui::TableNextColumn();
-                // ImGui::TextUnformatted(partial_signal.observe_source()->path.c_str());
-                // ImGui::TableNextColumn();
-                // ImGui::Text("%ld", partial_signal.observe_source()->channel);
-                ImGui::TableNextColumn();
-
-                const auto& given_path = mapping_info.first;
-
-                if (given_path.has_value()) {
-                    ImGui::TextUnformatted(given_path->c_str());
                     --unmapped_count;
-                } else
-                    ImGui::TextUnformatted("Not provided");
-
-                ImGui::PopID();
-            }
 
             ImGui::EndTable();
         }
 
-        ImGui::Spacing();
-        ImGui::Separator();
-        ImGui::Spacing();
-
-        constexpr float button_width = 80.0f;
-
-        if (ImGui::Button("Cancel", ImVec2(button_width, 0.0f)))
-            ImGui::CloseCurrentPopup();
-
-        ImGui::SameLine();
-
-        if (unmapped_count == 0) {
-            if (ImGui::Button("Continue", ImVec2(button_width, 0.0f))) {
-                app->submit_lightweight_task(CompleteProjectLoadNotification(project->get_id()));
-                ImGui::CloseCurrentPopup();
-            }
-        } else {
-            ImGui::BeginDisabled();
-            ImGui::Button("Continue", ImVec2(button_width, 0.0f));
-            ImGui::SetItemTooltip("To continue, provide mappings for all unloaded externally sourced signals.");
-            ImGui::EndDisabled();
-        }
+        draw_buttons(unmapped_count == 0);
 
         ImGui::PopID();
         ImGui::EndPopup();
@@ -130,6 +75,106 @@ void IndividualUploadModal::draw() noexcept
 const char* IndividualUploadModal::get_imgui_name() const noexcept
 {
     return panel_name.c_str();
+}
+
+void IndividualUploadModal::draw_preamble() const noexcept
+{
+    ImGui::TextWrapped(
+                "%s contains references to externally sources signals. Browser security requires that each externally "
+                "sourced file is uploaded separately.",
+                project->get_imgui_name()
+        );
+
+    ImGui::Spacing();
+    ImGui::Separator();
+
+    ImGui::TextWrapped(
+            "Upload all missing files to complete the mapping, and press Continue.\n\nCancelling the operation "
+            "will abort the load and revert back to the previously loaded project, if applicable."
+    );
+
+    ImGui::Spacing();
+    ImGui::Separator();
+    ImGui::Spacing();
+}
+
+void IndividualUploadModal::draw_buttons(
+        const bool are_all_mapped
+) const
+{
+    ImGui::Spacing();
+    ImGui::Separator();
+    ImGui::Spacing();
+
+    if (ImGui::Button("Cancel", button_size))
+        ImGui::CloseCurrentPopup();
+
+    ImGui::SameLine();
+
+    if (are_all_mapped) {
+        if (ImGui::Button("Continue", button_size)) {
+            app->submit_lightweight_task(CompleteProjectLoadNotification(project->get_id()));
+            ImGui::CloseCurrentPopup();
+        }
+    } else {
+        ImGui::BeginDisabled();
+        ImGui::Button("Continue", button_size);
+        ImGui::SetItemTooltip("To continue, provide mappings for all unloaded externally sourced signals.");
+        ImGui::EndDisabled();
+    }
+}
+
+bool IndividualUploadModal::draw_table_entry(
+        const std::filesystem::path& external_path,
+        const std::optional<std::filesystem::path>& vfs_path,
+        SignalFactoryRange auto&& factories
+) const noexcept
+{
+    ImGui::PushID(ImGui::TableGetRowIndex());
+    ImGui::TableNextRow();
+    ImGui::TableNextColumn();
+
+    ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, upload_button_frame_padding);
+    if (ImGui::Button("Upload", button_size))
+        ActionController::register_vfs_mapping(project->get_id(), external_path);
+    ImGui::PopStyleVar();
+
+    ImGui::TableNextColumn();
+    ImGui::TextUnformatted(external_path.c_str());
+
+    bool is_first = true;
+    bool is_mapped = false;
+
+    for (const auto signal_factory : factories) {
+        if (!is_first)
+            ImGui::TableNextRow();
+
+        ImGui::PushID(ImGui::TableGetRowIndex());
+        ImGui::TableSetColumnIndex(2);
+
+        const auto& signal = signal_factory->observe_signal();
+        ImGui::TextUnformatted(signal.get_imgui_name());
+        ImGui::TableNextColumn();
+        const auto formatted_channel_num = std::to_string(signal.observe_source()->channel);
+        ImGui::TextUnformatted(formatted_channel_num.c_str());
+        ImGui::TableNextColumn();
+
+        if (is_first) {
+            const auto& given_path = vfs_path;
+            if (given_path.has_value()) {
+                ImGui::TextUnformatted(given_path->c_str());
+                is_mapped = true;
+            } else
+                ImGui::TextUnformatted("Not provided");
+
+            is_first = false;
+        }
+
+        ImGui::PopID();
+    }
+
+    ImGui::PopID();
+    return is_mapped;
 }
 
 } // namespace echomap
