@@ -31,6 +31,7 @@
 #include "panels/SensorGeometryPanel.hpp"
 #include "panels/SignalDFTPanel.hpp"
 #include "panels/SignalWaveformPanel.hpp"
+#include "signals/tasks/LoadSignalFileTask.hpp"
 
 #if defined(__EMSCRIPTEN__) and !defined(__EMSCRIPTEN_PTHREADS__)
 #warning "The Emscripten application will be single-threaded."
@@ -197,7 +198,7 @@ void EchoMap::setup_subscriptions()
 
                 auto&& new_project = std::move(result).take_project();
 
-                if (!std::ranges::all_of(new_project->observe_signals(), &Signal::is_fully_loaded)) {
+                if (!new_project->unloaded_signals.empty()) {
                     // Raise the modal to query for the sources.
                     upload_modal = IndividualUploadModal(new_project.get());
                     unloaded_project = std::move(new_project);
@@ -472,6 +473,7 @@ void EchoMap::process_lightweight_tasks()
                 [this](const ModifySensorColourTask& task) { handle_lwt(task); },
                 [this](const ModifySensorPositionTask& task) { handle_lwt(task); },
                 [this](const ProjectLoadRequest& task) { handle_lwt(task); },
+                [this](const WaveFileLoadRequest& task) { handle_lwt(task); },
                 },
                 lwt_queue.back()
             );
@@ -538,6 +540,59 @@ void EchoMap::handle_lwt(
 )
 {
     worker.submit(std::make_unique<LoadProjectTask>(task.path, &worker));
+}
+
+void EchoMap::handle_lwt(
+        const WaveFileLoadRequest& task
+)
+{
+    // Validate that we have correct project loaded.
+
+    if (project == nullptr)
+        throw IgnoredWarning("Dropping WaveFileLoadRequest due to empty project.");
+
+    if (project->get_id() != task.project_id)
+        throw IgnoredWarning(
+                std::format(
+                        "Dropping WaveFileLoadRequest due to incorrect loaded project: requested {}, but have {}.",
+                        task.project_id,
+                        project->get_id()
+                )
+        );
+
+    // Grab the factories based on the channel map.
+
+    std::vector<std::unique_ptr<SignalFactory>> factories;
+    factories.resize(task.channel_map.size());
+
+    for (const auto [channel_num, signal_id] : task.channel_map) {
+        const auto signal_it = project->unloaded_signals.find(signal_id);
+
+        if (signal_it == project->unloaded_signals.end())
+            throw std::runtime_error(
+                    std::format(
+                            "Refusing WaveFileLoadRequest due to referencing factory for non-existent signal ID {}.",
+                            task.project_id
+                    )
+            );
+
+        // ReSharper disable once CppTooWideScopeInitStatement
+        const auto& source = signal_it->second->observe_signal().observe_source();
+        if (!source.has_value() || source->path != task.path || source->channel != channel_num)
+            throw std::runtime_error(
+                    std::format(
+                            "Refusing WaveFileLoadRequest due to referencing factory for signal ID {} with mismatched "
+                            "source metadata.",
+                            task.project_id
+                    )
+            );
+
+        factories[channel_num - 1] = std::move(signal_it->second);
+    }
+
+    // Create a worker task to load the wave file, providing the factories.
+
+    worker.submit(std::make_unique<LoadSignalFileTask>(project->get_id(), task.path.string(), std::move(factories)));
 }
 
 void EchoMap::change_active_project(
