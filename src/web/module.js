@@ -231,22 +231,22 @@ const EchoMap = (() => {
 })();
 
 /**
- * Opens a WAV file picker for replacing or loading an existing Signal.
+ * Opens a WAV file picker for mapping an external source into the WebAssembly VFS.
  *
  * Called from C++ via Emscripten. The selected file is copied into the virtual filesystem and then passed to
- * echomap_on_signal_load_complete.
+ * echomap_on_register_vfs_mapping.
  *
  * @param {number} projectID Project identifier supplied by C++.
- * @param {number} signalID Signal identifier supplied by C++.
+ * @param {string} externalPath The external path on the external file system.
  *
  * @returns {void}
  */
-Module.echomapOpenWAVFileChooserForExistingSignal = EchoMap.makeFileImportHandler({
+Module.echomapOpenVFSFileMapper = EchoMap.makeFileImportHandler({
     accept: ".wav,audio/wav,audio/x-wav",
     description: "WAV file",
-    cFunctionName: "echomap_on_signal_load_complete",
-    argTypes: ["number", "number", "string"],
-    makeArgs: (path, projectID, signalID) => [projectID, signalID, path]
+    cFunctionName: "echomap_on_register_vfs_mapping",
+    argTypes: ["number", "string", "string"],
+    makeArgs: (path, projectID, externalPath) => [projectID, externalPath, path]
 });
 
 /**

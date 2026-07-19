@@ -18,9 +18,9 @@ void NativeActionController::select_project_file_impl()
     throw std::runtime_error("Not implemented");
 }
 
-void NativeActionController::complete_signal_load_impl(
-        [[maybe_unused]] const std::size_t project_id,
-        [[maybe_unused]] const std::size_t signal_id
+void NativeActionController::register_vfs_mapping_impl(
+        std::size_t project_id,
+        const std::filesystem::path& external
 )
 {
     // TODO
@@ -34,13 +34,13 @@ void NativeActionController::notify_project_file_impl(
     notify_project_file(path);
 }
 
-void NativeActionController::complete_signal_load_impl(
+void NativeActionController::notify_vfs_mapping_impl(
         const std::size_t project_id,
-        const std::size_t signal_id,
-        const std::filesystem::path& path
+        const std::filesystem::path& external,
+        const std::filesystem::path& internal
 )
 {
-    notify_complete_signal_load(project_id, signal_id, path);
+    notify_vfs_mapping(project_id, external, internal);
 }
 
 } // namespace echomap

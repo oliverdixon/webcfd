@@ -22,7 +22,6 @@ namespace echomap
  */
 class NativeActionController : public ActionControllerBase<NativeActionController>
 {
-public:
     friend ActionControllerBase;
 
     /**
@@ -33,17 +32,17 @@ public:
     static void select_project_file_impl();
 
     /**
-     * Invokes the native function for @ref CompletePartialSignalLoad.
+     * Invokes the native function for @ref RegisterVFSMapping.
      *
      * @param project_id The ID of the Project that owns the destination Signal.
-     * @param signal_id The ID of the destination Signal.
+     * @param external The path of the external file being mapped into the VFS.
      *
-     * @ingroup CompletePartialSignalLoad
-     * @implements ActionControllerBase::complete_signal_load
+     * @ingroup RegisterVFSMapping
+     * @implements ActionControllerBase::register_vfs_mapping
      */
-    static void complete_signal_load_impl(
+    static void register_vfs_mapping_impl(
             std::size_t project_id,
-            std::size_t signal_id
+            const std::filesystem::path& external
     );
 
     /**
@@ -56,19 +55,19 @@ public:
     static void notify_project_file_impl(const std::filesystem::path& path);
 
     /**
-     * Services the callback for the @ref CompletePartialSignalLoad.
+     * Services the callback for the @ref RegisterVFSMapping.
      *
      * @param project_id The ID of the Project that owns the destination Signal.
-     * @param signal_id The ID of the destination Signal.
-     * @param path The path derived from the prompt.
+     * @param external The path of the external file being mapped into the VFS.
+     * @param internal The path of the VFS file.
      *
-     * @ingroup CompletePartialSignalLoad
-     * @implements ActionControllerBase::notify_complete_signal_load
+     * @ingroup RegisterVFSMapping
+     * @implements ActionControllerBase::notify_vfs_mapping
      */
-    static void complete_signal_load_impl(
+    static void notify_vfs_mapping_impl(
             std::size_t project_id,
-            std::size_t signal_id,
-            const std::filesystem::path& path
+            const std::filesystem::path& external,
+            const std::filesystem::path& internal
     );
 };
 

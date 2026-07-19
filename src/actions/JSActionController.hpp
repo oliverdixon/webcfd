@@ -13,10 +13,10 @@
 #include "ActionControllerBase.hpp"
 
 extern "C" int echomap_on_project_file_picked(const char* path) noexcept;
-extern "C" int echomap_on_signal_load_complete(
+extern "C" int echomap_on_register_vfs_mapping(
         std::size_t,
-        std::size_t,
-        const char* path
+        const char*,
+        const char*
 ) noexcept;
 
 namespace echomap
@@ -31,10 +31,10 @@ class JSActionController : public ActionControllerBase<JSActionController>
 {
     friend ActionControllerBase;
     friend int ::echomap_on_project_file_picked(const char* path) noexcept;
-    friend int ::echomap_on_signal_load_complete(
+    friend int ::echomap_on_register_vfs_mapping(
             std::size_t,
-            std::size_t,
-            const char* path
+            const char*,
+            const char*
     ) noexcept;
 
     /**
@@ -45,17 +45,17 @@ class JSActionController : public ActionControllerBase<JSActionController>
     static void select_project_file_impl();
 
     /**
-     * Invokes the JS function for @ref CompletePartialSignalLoad.
+     * Invokes the JS function for @ref RegisterVFSMapping.
      *
      * @param project_id The ID of the Project that owns the destination Signal.
-     * @param signal_id The ID of the destination Signal.
+     * @param external The path of the external file being mapped into the VFS.
      *
-     * @ingroup CompletePartialSignalLoad
-     * @implements ActionControllerBase::complete_signal_load
+     * @ingroup RegisterVFSMapping
+     * @implements ActionControllerBase::register_vfs_mapping
      */
-    static void complete_signal_load_impl(
+    static void register_vfs_mapping_impl(
             std::size_t project_id,
-            std::size_t signal_id
+            const std::filesystem::path& external
     );
 
     /**
@@ -68,19 +68,19 @@ class JSActionController : public ActionControllerBase<JSActionController>
     static void notify_project_file_impl(const std::filesystem::path& path);
 
     /**
-     * Services the callback for the @ref CompletePartialSignalLoad.
+     * Services the callback for the @ref RegisterVFSMapping.
      *
      * @param project_id The ID of the Project that owns the destination Signal.
-     * @param signal_id The ID of the destination Signal.
-     * @param path The path derived from the prompt.
+     * @param external The path of the external file being mapped into the VFS.
+     * @param internal The path of the VFS file.
      *
-     * @ingroup CompletePartialSignalLoad
-     * @implements ActionControllerBase::notify_complete_signal_load
+     * @ingroup RegisterVFSMapping
+     * @implements ActionControllerBase::notify_vfs_mapping
      */
-    static void notify_complete_signal_load_impl(
+    static void notify_vfs_mapping_impl(
             std::size_t project_id,
-            std::size_t signal_id,
-            const std::filesystem::path& path
+            const std::filesystem::path& external,
+            const std::filesystem::path& internal
     );
 };
 

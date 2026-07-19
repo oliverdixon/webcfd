@@ -60,17 +60,17 @@ template <typename Derived> class ActionControllerBase
         /** @} */
 
         /**
-         * @defgroup CompletePartialSignalLoad Complete Partial Signal Load Action
-         * Queries the user for the location of an externally sourced sample data file to provide to a SignalFactory.
+         * @defgroup RegisterVFSMapping Add a VFS file-system mapping to an unloaded Project.
+         * Queries the user for the location of an externally sourced file.
          * @ingroup Actions
          * @{
          */
 
-        /** Call signature type the @ref CompletePartialSignalLoad. @todo Use id_type on the C++ side. */
-        using CompleteSignal =
-                sigc::slot<void(std::size_t project_id, std::size_t signal_id, const std::filesystem::path&)>;
-        /** Stored callback for the @ref CompletePartialSignalLoad .*/
-        CompleteSignal complete_signal_slot;
+        /** Call signature type the @ref RegisterVFSMapping. @todo Use id_type on the C++ side. */
+        using RegisterVFS =
+                sigc::slot<void(std::size_t project_id, const std::filesystem::path&, const std::filesystem::path&)>;
+        /** Stored callback for the @ref RegisterVFSMapping .*/
+        RegisterVFS register_vfs_slot;
 
         /** @} */
     };
@@ -84,17 +84,17 @@ public:
      * If a callback is empty, callbacks on the corresponding action will be dropped and a warning logged.
      *
      * @param project_file_slot_v Callback for @ref ProjectFileAction.
-     * @param complete_signal_slot_v Callback for @ref CompletePartialSignalLoad.
+     * @param register_vfs_slot_v Callback for @ref RegisterVFSMapping.
      *
      * @ingroup Actions
      */
     static void bind(
             Callbacks::ProjectFile&& project_file_slot_v,
-            Callbacks::CompleteSignal&& complete_signal_slot_v
+            Callbacks::RegisterVFS&& register_vfs_slot_v
     )
     {
         callbacks.project_file_slot = std::move(project_file_slot_v);
-        callbacks.complete_signal_slot = std::move(complete_signal_slot_v);
+        callbacks.register_vfs_slot = std::move(register_vfs_slot_v);
     }
 
     /**
@@ -117,19 +117,19 @@ public:
     }
 
     /**
-     * Invokes the @ref CompletePartialSignalLoad.
+     * Invokes the @ref RegisterVFSMapping.
      *
      * @param project_id The ID of the Project that owns the destination Signal.
-     * @param signal_id The ID of the destination Signal.
+     * @param external The path of the external file being mapped into the VFS.
      *
-     * @ingroup CompletePartialSignalLoad
+     * @ingroup RegisterVFSMapping
      */
-    static void complete_signal_load(
+    static void register_vfs_mapping(
             const std::size_t project_id,
-            const std::size_t signal_id
+            const std::filesystem::path& external
     )
     {
-        Derived::complete_signal_load_impl(project_id, signal_id);
+        Derived::register_vfs_mapping_impl(project_id, external);
     }
 
 protected:
@@ -150,24 +150,28 @@ protected:
     }
 
     /**
-     * Executes the callback for the @ref CompletePartialSignalLoad.
+     * Executes the callback for the @ref RegisterVFSMapping.
      *
      * @param project_id The ID of the Project that owns the destination Signal.
-     * @param signal_id The ID of the destination Signal.
-     * @param path The path derived from the prompt.
-     * .
-     * @ingroup CompletePartialSignalLoad
+     * @param external The path of the external file being mapped into the VFS.
+     * @param internal The path of the VFS file.
+     *
+     * @ingroup RegisterVFSMapping
      */
-    static void notify_complete_signal_load(
+    static void notify_vfs_mapping(
             const std::size_t project_id,
-            const std::size_t signal_id,
-            const std::filesystem::path& path
+            const std::filesystem::path& external,
+            const std::filesystem::path& internal
     )
     {
-        if (callbacks.complete_signal_slot.empty())
-            LOG_F_WARN("Dropping signal load completion for {} since no application instance is bound.", path.c_str());
+        if (callbacks.register_vfs_slot.empty())
+            LOG_F_WARN(
+                    "Dropping VFS mapping for {} / {} since no application instance is bound.",
+                    external.c_str(),
+                    internal.c_str()
+            );
         else
-            callbacks.complete_signal_slot(project_id, signal_id, path);
+            callbacks.register_vfs_slot(project_id, external, internal);
     }
 };
 

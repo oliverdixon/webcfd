@@ -46,14 +46,15 @@ EM_JS(void,
       });
 
 EM_JS(void,
-      complete_signal_load,
+      register_vfs_mapping,
       (std::size_t project_id,
-       std::size_t signal_id),
+       const char * external),
       {
-          if (Module.echomapOpenWAVFileChooserForExistingSignal) {
-              Module.echomapOpenWAVFileChooserForExistingSignal(project_id, signal_id);
+          if (Module.echomapOpenVFSFileMapper) {
+              const externalPath = UTF8ToString(external);
+              Module.echomapOpenVFSFileMapper(project_id, externalPath);
           } else {
-              console.error("Module.echomapOpenWAVFileChooserForExistingSignal is not installed.");
+              console.error("Module.echomapOpenVFSFileMapper is not installed.");
           }
       });
 
@@ -68,12 +69,12 @@ void JSActionController::select_project_file_impl()
     js::select_project_file();
 }
 
-void JSActionController::complete_signal_load_impl(
+void JSActionController::register_vfs_mapping_impl(
         const std::size_t project_id,
-        const std::size_t signal_id
+        const std::filesystem::path& external
 )
 {
-    js::complete_signal_load(project_id, signal_id);
+    js::register_vfs_mapping(project_id, external.c_str());
 }
 
 void JSActionController::notify_project_file_impl(
@@ -83,13 +84,13 @@ void JSActionController::notify_project_file_impl(
     notify_project_file(path);
 }
 
-void JSActionController::notify_complete_signal_load_impl(
+void JSActionController::notify_vfs_mapping_impl(
         const std::size_t project_id,
-        const std::size_t signal_id,
-        const std::filesystem::path& path
+        const std::filesystem::path& external,
+        const std::filesystem::path& internal
 )
 {
-    notify_complete_signal_load(project_id, signal_id, path);
+    notify_vfs_mapping(project_id, external, internal);
 }
 
 } // namespace echomap
@@ -127,38 +128,38 @@ extern "C" EMSCRIPTEN_KEEPALIVE int echomap_on_project_file_picked(
 }
 
 /**
- * Services the @ref CompletePartialSignalLoad callback for Emscripten.
+ * Services the @ref RegisterVFSMapping callback for Emscripten.
  *
  * @param project_id The ID of the Project that owns the destination Signal.
- * @param signal_id The ID of the destination Signal.
- * @param path The path derived from the prompt.
+ * @param external The path of the external file being mapped into the VFS.
+ * @param internal The path of the VFS file.
  *
  * @return Zero status to indicate success; non-zero to indicate failure.
  *
- * @ingroup CompletePartialSignalLoad
+ * @ingroup RegisterVFSMapping
  */
-extern "C" EMSCRIPTEN_KEEPALIVE int echomap_on_signal_load_complete(
+extern "C" EMSCRIPTEN_KEEPALIVE int echomap_on_register_vfs_mapping(
         const std::size_t project_id,
-        const std::size_t signal_id,
-        const char* const path
+        const char* const external,
+        const char* const internal
 ) noexcept
 {
     using namespace echomap;
 
-    if (path == nullptr)
+    if (external == nullptr || internal == nullptr)
         return 2;
 
     try {
-        JSActionController::notify_complete_signal_load(project_id, signal_id, path);
+        JSActionController::notify_vfs_mapping_impl(project_id, external, internal);
         return 0;
     } catch (const ConfigurationError& error) {
-        LOG_F_ERROR("Could not load path {} due to error: {}", path, error.what());
+        LOG_F_ERROR("Could not load path {} due to error: {}", internal, error.what());
         return 3;
     } catch (const std::exception& error) {
-        LOG_F_ERROR("Could not load path {} due to unexpected error: {}", path, error.what());
+        LOG_F_ERROR("Could not load path {} due to unexpected error: {}", internal, error.what());
         return 4;
     } catch (...) {
-        LOG_F_ERROR("Could not load path {} due to unknown error.", path);
+        LOG_F_ERROR("Could not load path {} due to unknown error.", internal);
         return 5;
     }
 }
