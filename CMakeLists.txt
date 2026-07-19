@@ -100,8 +100,8 @@ add_library(DummyTarget INTERFACE EXCLUDE_FROM_ALL
         src/errors/IgnoredWarning.cpp
         src/errors/IgnoredWarning.hpp
         src/signals/lightweight/ProjectLoadRequest.hpp
-        src/signals/lightweight/WaveFileLoadRequest.hpp
-        src/signals/lightweight/WaveFilePreloadNotification.hpp
+        src/signals/lightweight/CompleteProjectLoadNotification.hpp
+        src/signals/lightweight/RegisterVFSMappingNotification.hpp
 )
 
 if (EMSCRIPTEN OR ECHOMAP_BUILD_DOCUMENTATION)

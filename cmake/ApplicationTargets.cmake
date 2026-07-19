@@ -73,7 +73,7 @@ if (ECHOMAP_BUILD_APPLICATION)
         set(exported_functions
                 _main
                 _echomap_on_project_file_picked
-                _echomap_on_signal_load_complete
+                _echomap_on_register_vfs_mapping
         )
 
         list(JOIN exported_functions "," exported_functions_js_argument)
