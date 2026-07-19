@@ -234,7 +234,7 @@ const EchoMap = (() => {
  * Opens a WAV file picker for replacing or loading an existing Signal.
  *
  * Called from C++ via Emscripten. The selected file is copied into the virtual filesystem and then passed to
- * echomap_on_wav_file_picked_for_existing_signal.
+ * echomap_on_signal_load_complete.
  *
  * @param {number} projectID Project identifier supplied by C++.
  * @param {number} signalID Signal identifier supplied by C++.
@@ -244,7 +244,7 @@ const EchoMap = (() => {
 Module.echomapOpenWAVFileChooserForExistingSignal = EchoMap.makeFileImportHandler({
     accept: ".wav,audio/wav,audio/x-wav",
     description: "WAV file",
-    cFunctionName: "echomap_on_wav_file_picked_for_existing_signal",
+    cFunctionName: "echomap_on_signal_load_complete",
     argTypes: ["number", "number", "string"],
     makeArgs: (path, projectID, signalID) => [projectID, signalID, path]
 });

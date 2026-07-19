@@ -59,7 +59,20 @@ template <typename Derived> class ActionControllerBase
 
         /** @} */
 
-        // TODO: more callbacks...
+        /**
+         * @defgroup CompletePartialSignalLoad Complete Partial Signal Load Action
+         * Queries the user for the location of an externally sourced sample data file to provide to a SignalFactory.
+         * @ingroup Actions
+         * @{
+         */
+
+        /** Call signature type the @ref CompletePartialSignalLoad. @todo Use id_type on the C++ side. */
+        using CompleteSignal =
+                sigc::slot<void(std::size_t project_id, std::size_t signal_id, const std::filesystem::path&)>;
+        /** Stored callback for the @ref CompletePartialSignalLoad .*/
+        CompleteSignal complete_signal_slot;
+
+        /** @} */
     };
 
     static Callbacks callbacks;
@@ -70,15 +83,18 @@ public:
      *
      * If a callback is empty, callbacks on the corresponding action will be dropped and a warning logged.
      *
-     * @param select_project_file_callback_v Callback for 'Select Project File' action.
+     * @param project_file_slot_v Callback for @ref ProjectFileAction.
+     * @param complete_signal_slot_v Callback for @ref CompletePartialSignalLoad.
      *
      * @ingroup Actions
      */
     static void bind(
-            Callbacks::ProjectFile&& select_project_file_callback_v
+            Callbacks::ProjectFile&& project_file_slot_v,
+            Callbacks::CompleteSignal&& complete_signal_slot_v
     )
     {
-        callbacks.project_file_slot = std::move(select_project_file_callback_v);
+        callbacks.project_file_slot = std::move(project_file_slot_v);
+        callbacks.complete_signal_slot = std::move(complete_signal_slot_v);
     }
 
     /**
@@ -100,9 +116,25 @@ public:
         Derived::select_project_file_impl();
     }
 
+    /**
+     * Invokes the @ref CompletePartialSignalLoad.
+     *
+     * @param project_id The ID of the Project that owns the destination Signal.
+     * @param signal_id The ID of the destination Signal.
+     *
+     * @ingroup CompletePartialSignalLoad
+     */
+    static void complete_signal_load(
+            const std::size_t project_id,
+            const std::size_t signal_id
+    )
+    {
+        Derived::complete_signal_load_impl(project_id, signal_id);
+    }
+
 protected:
     /**
-     * Executes the callback for the 'Select Project File' action.
+     * Executes the callback for the @ref ProjectFileAction.
      *
      * @param path The path derived from the prompt.
      * @ingroup ProjectFileAction
@@ -115,6 +147,27 @@ protected:
             LOG_F_WARN("Dropping project file selection for {} since no application instance is bound.", path.c_str());
         else
             callbacks.project_file_slot(path);
+    }
+
+    /**
+     * Executes the callback for the @ref CompletePartialSignalLoad.
+     *
+     * @param project_id The ID of the Project that owns the destination Signal.
+     * @param signal_id The ID of the destination Signal.
+     * @param path The path derived from the prompt.
+     * .
+     * @ingroup CompletePartialSignalLoad
+     */
+    static void notify_complete_signal_load(
+            const std::size_t project_id,
+            const std::size_t signal_id,
+            const std::filesystem::path& path
+    )
+    {
+        if (callbacks.complete_signal_slot.empty())
+            LOG_F_WARN("Dropping signal load completion for {} since no application instance is bound.", path.c_str());
+        else
+            callbacks.complete_signal_slot(project_id, signal_id, path);
     }
 };
 
