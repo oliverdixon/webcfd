@@ -33,7 +33,7 @@ struct RegisterVFSMappingNotification
      * @param internal The path on the internal (accessible) VFS corresponding to the external path.
      */
     RegisterVFSMappingNotification(
-            Project::id_type project_id,
+            id_type project_id,
             std::filesystem::path external,
             std::filesystem::path internal
     );
@@ -46,7 +46,7 @@ struct RegisterVFSMappingNotification
      */
     void verify_project(const Project* context) const;
 
-    Project::id_type project_id;    /**< The ID of the Project to which the mapping relates. */
+    id_type project_id;             /**< The ID of the Project to which the mapping relates. */
     std::filesystem::path external; /**< The path on the external file system. */
     std::filesystem::path internal; /**< The path on the internal file system. */
 };

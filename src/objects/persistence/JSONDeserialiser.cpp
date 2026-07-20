@@ -70,7 +70,7 @@ auto get_signals(
         echomap::Project& project, // NOLINT(*-const-correctness)
         std::unordered_map<
                 std::string_view,
-                echomap::Signal::id_type>& loaded
+                echomap::id_type>& loaded
 )
 {
     // Step 1.  Create our factories which detain only the signal metadata (sample rate, etc.) and source information.
@@ -187,7 +187,7 @@ auto get_sensors(
         echomap::Project& project,
         std::unordered_map<
                 std::string_view,
-                echomap::Sensor::id_type>& loaded
+                echomap::id_type>& loaded
 )
 {
     std::vector<std::unique_ptr<echomap::Sensor>> sensors;
@@ -208,10 +208,10 @@ auto get_mappings(
         echomap::Project& project,
         const std::unordered_map<
                 std::string_view,
-                echomap::Signal::id_type>& signals,
+                echomap::id_type>& signals,
         const std::unordered_map<
                 std::string_view,
-                echomap::Sensor::id_type>& sensors
+                echomap::id_type>& sensors
 )
 {
     simdjson::ondemand::array mappings;
@@ -378,12 +378,12 @@ auto tag_invoke(
         return error;
 
     // Signals
-    std::unordered_map<std::string_view, echomap::Signal::id_type> signal_ids;
+    std::unordered_map<std::string_view, echomap::id_type> signal_ids;
     if ((error = get_signals(root, project, signal_ids)))
         return error;
 
     // Sensors
-    std::unordered_map<std::string_view, echomap::Sensor::id_type> sensor_ids;
+    std::unordered_map<std::string_view, echomap::id_type> sensor_ids;
     if ((error = get_sensors(root, project, sensor_ids)))
         return error;
 

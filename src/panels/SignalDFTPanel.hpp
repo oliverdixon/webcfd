@@ -109,7 +109,7 @@ private:
      */
     struct CacheKey
     {
-        Signal::id_type source_id;
+        id_type source_id;
         WindowFunctions::AllFunctions window_function;
         std::size_t transform_size;
 

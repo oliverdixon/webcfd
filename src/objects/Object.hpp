@@ -37,7 +37,13 @@ namespace echomap
 template <typename Derived> class Object
 {
 public:
-    using id_type = IDAllocator<Derived>::id_type;
+    /**
+     * Non-virtual base destructor.
+     *
+     * We don't want vtables for Object instances. Object uses CRTP, so deleting an Object through @c Object* is not a
+     * concern.
+     */
+    ~Object() = default;
 
     [[nodiscard]] id_type get_id() const noexcept
     {
@@ -193,7 +199,9 @@ private:
      */
     static constexpr std::string_view class_name = "Object";
 
+    // NOLINTNEXTLINE(*-avoid-const-or-ref-data-members) - Immutability of IDs is core to the semantics.
     const id_type id;           /**< Primary numerical ID */
+
     std::size_t copy_count = 0; /**< Number of times the object has been copied */
     std::string name;           /**< Display name for the object */
 };

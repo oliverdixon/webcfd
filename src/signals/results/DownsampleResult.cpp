@@ -13,7 +13,7 @@ namespace echomap
 {
 
 DownsampleResult::DownsampleResult(
-        const Signal::id_type source_id,
+        const id_type source_id,
         std::unique_ptr<Signal> downsampled
 ) :
     source_id(source_id),
@@ -32,7 +32,7 @@ const Signal* DownsampleResult::observe_downsampled() const noexcept
     return downsampled.get();
 }
 
-Signal::id_type DownsampleResult::get_source_id() const noexcept
+id_type DownsampleResult::get_source_id() const noexcept
 {
     return source_id;
 }

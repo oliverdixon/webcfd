@@ -14,8 +14,6 @@
 namespace echomap
 {
 
-template <> constexpr std::string_view Object<FrequencySpectrum>::class_name = "FreqSpec";
-
 decltype(FrequencySpectrum::bins)::const_iterator FrequencySpectrum::begin() const
 {
     return bins.begin();

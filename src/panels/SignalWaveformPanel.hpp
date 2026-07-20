@@ -91,7 +91,7 @@ private:
      *  need to be visualised. Therefore, the SignalWaveformPanel seems to be the natural owner.
      * </p>
      */
-    std::unordered_map<Signal::id_type, std::unique_ptr<Signal>> downsample_cache;
+    std::unordered_map<id_type, std::unique_ptr<Signal>> downsample_cache;
 
     /**
      * The maximum bounding box of an LTTB-downsampled wave form plot.

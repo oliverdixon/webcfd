@@ -39,6 +39,7 @@ public:
     /**
      * Destruct the ITask base.
      */
+    // ReSharper disable once CppHidingFunction
     virtual ~ITask() noexcept = default;
 
     /**

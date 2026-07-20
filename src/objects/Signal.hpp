@@ -281,6 +281,8 @@ private:
     std::optional<std::vector<Sample::TimeT>> time_offsets;
 };
 
+template <> constexpr std::string_view Object<Signal>::class_name = "Signal";
+
 } // namespace echomap
 
 #endif // ECHOMAP_SIGNAL_HPP

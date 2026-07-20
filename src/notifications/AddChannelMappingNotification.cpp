@@ -15,9 +15,9 @@ namespace echomap
 {
 
 AddChannelMappingNotification::AddChannelMappingNotification(
-        const Project::id_type project_id,
-        const Signal::id_type signal_id,
-        const Sensor::id_type sensor_id
+        const id_type project_id,
+        const id_type signal_id,
+        const id_type sensor_id
 ) :
     project_id(project_id),
     signal_id(signal_id),

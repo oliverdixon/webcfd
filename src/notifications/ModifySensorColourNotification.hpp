@@ -33,8 +33,8 @@ struct ModifySensorColourNotification
      * @param colour The new Colour of the referenced Sensor.
      */
     explicit ModifySensorColourNotification(
-            Project::id_type project_id,
-            Sensor::id_type sensor_id,
+            id_type project_id,
+            id_type sensor_id,
             const Sensor::Colour& colour
     );
 
@@ -46,8 +46,8 @@ struct ModifySensorColourNotification
      */
     void verify_project(const Project* context) const;
 
-    Project::id_type project_id; /**< The ID of the Project which owns the updated Sensor. */
-    Sensor::id_type sensor_id;   /**< The ID of the moved Sensor. */
+    id_type project_id;    /**< The ID of the Project which owns the updated Sensor. */
+    id_type sensor_id;     /**< The ID of the moved Sensor. */
     Sensor::Colour colour;       /**< The new Colour of the referenced Sensor. */
 };
 

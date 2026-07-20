@@ -24,7 +24,7 @@ class LoadSignalFileTask : public ITask
 {
 public:
     explicit LoadSignalFileTask(
-            Project::id_type project_id,
+            id_type project_id,
             const std::filesystem::path& path,
             std::vector<std::unique_ptr<SignalFactory>>&& factories
     );
@@ -32,7 +32,7 @@ public:
 private:
     WorkerResult execute_work() override;
 
-    Project::id_type project_id;
+    id_type project_id;
     std::filesystem::path path;
     std::vector<std::unique_ptr<SignalFactory>> factories;
 };

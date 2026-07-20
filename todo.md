@@ -2,20 +2,16 @@
 
 ## Short Term
 
-1. Remove Object<T>::id_type specialisations and just use a common type, to reduce excessive includes.
-
-2. Document notification and worker sources and sinks.
-
-3. Use the ImGui DockBuilder API to configure a sane default panel configuration:
+1. Use the ImGui DockBuilder API to configure a sane default panel configuration:
    https://github.com/ocornut/imgui/wiki/Docking#programmatically-setting-up-docking-layout-dockbuider-api
 
-4. Harden! Doxygen where necessary, remove incorrect exception specifications, and verify dereferencing behaviour.
+2. Harden! Doxygen where necessary, remove incorrect exception specifications, and verify dereferencing behaviour.
 
-5. Add project loader dialog as a native action.
+3. Add project loader dialog as a native action.
 
-6. Add a wave file loader as a native action.
+4. Add a wave file loader as a native action.
 
-7. Resolve TODOs in code. 
+5. Resolve TODOs in code.
 
 ## Medium/Long Term
 

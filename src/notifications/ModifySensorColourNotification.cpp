@@ -15,8 +15,8 @@ namespace echomap
 {
 
 ModifySensorColourNotification::ModifySensorColourNotification(
-        const Project::id_type project_id,
-        const Sensor::id_type sensor_id,
+        const id_type project_id,
+        const id_type sensor_id,
         const Sensor::Colour& colour
 ) :
     project_id(project_id),

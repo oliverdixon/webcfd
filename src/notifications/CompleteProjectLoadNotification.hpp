@@ -31,7 +31,7 @@ public:
      *
      * @param project_id The ID of the Project to be loaded.
      */
-    explicit CompleteProjectLoadNotification(Project::id_type project_id);
+    explicit CompleteProjectLoadNotification(id_type project_id);
 
     /**
      * Verify that the given Project matches the intended target.
@@ -41,7 +41,7 @@ public:
      */
     void verify_project(const Project* context) const;
 
-    Project::id_type project_id; /**< The ID of the Project to be loaded. */
+    id_type project_id; /**< The ID of the Project to be loaded. */
 };
 
 } // namespace echomap

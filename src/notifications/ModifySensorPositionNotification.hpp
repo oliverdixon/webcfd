@@ -33,8 +33,8 @@ struct ModifySensorPositionNotification
      * @param position The new Position of the referenced Sensor.
      */
     explicit ModifySensorPositionNotification(
-            Project::id_type project_id,
-            Sensor::id_type sensor_id,
+            id_type project_id,
+            id_type sensor_id,
             const Sensor::Position& position
     );
 
@@ -46,8 +46,8 @@ struct ModifySensorPositionNotification
      */
     void verify_project(const Project* context) const;
 
-    Project::id_type project_id; /**< The ID of the Project which owns the updated Sensor. */
-    Sensor::id_type sensor_id;   /**< The ID of the moved Sensor. */
+    id_type project_id;        /**< The ID of the Project which owns the updated Sensor. */
+    id_type sensor_id;         /**< The ID of the moved Sensor. */
     Sensor::Position position;   /**< The new Position of the referenced Sensor. */
 };
 

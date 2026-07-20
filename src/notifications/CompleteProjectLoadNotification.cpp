@@ -15,7 +15,7 @@ namespace echomap
 {
 
 CompleteProjectLoadNotification::CompleteProjectLoadNotification(
-        const Project::id_type project_id
+        const id_type project_id
 ) :
     project_id(project_id)
 {

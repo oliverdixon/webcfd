@@ -15,7 +15,7 @@ namespace echomap
 {
 
 LoadSignalFileTask::LoadSignalFileTask(
-        const Project::id_type project_id,
+        const id_type project_id,
         const std::filesystem::path& path,
         std::vector<std::unique_ptr<SignalFactory>>&& factories
 ) :

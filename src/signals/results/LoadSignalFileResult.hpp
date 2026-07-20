@@ -23,7 +23,7 @@ class LoadSignalFileResult
 {
 public:
     explicit LoadSignalFileResult(
-            Project::id_type project_id,
+            id_type project_id,
             std::vector<std::unique_ptr<Signal>> loaded_signal
     );
 
@@ -39,10 +39,10 @@ public:
                });
     }
 
-    [[nodiscard]] Project::id_type get_project_id() const noexcept;
+    [[nodiscard]] id_type get_project_id() const noexcept;
 
 private:
-    Project::id_type project_id; // TODO put these in all tasks.
+    id_type project_id; // TODO put these in all tasks.
     std::vector<std::unique_ptr<Signal>> loaded_signals;
 };
 

@@ -13,7 +13,7 @@ namespace echomap
 {
 
 LoadSignalFileResult::LoadSignalFileResult(
-        const Project::id_type project_id,
+        const id_type project_id,
         std::vector<std::unique_ptr<Signal>> loaded_signal
 ) :
     project_id(project_id),
@@ -21,7 +21,7 @@ LoadSignalFileResult::LoadSignalFileResult(
 {
 }
 
-Project::id_type LoadSignalFileResult::get_project_id() const noexcept
+id_type LoadSignalFileResult::get_project_id() const noexcept
 {
     return project_id;
 }

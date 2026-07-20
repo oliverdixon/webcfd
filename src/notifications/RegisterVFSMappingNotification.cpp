@@ -15,7 +15,7 @@ namespace echomap
 {
 
 RegisterVFSMappingNotification::RegisterVFSMappingNotification(
-        const Project::id_type project_id,
+        const id_type project_id,
         std::filesystem::path external,
         std::filesystem::path internal
 ) :

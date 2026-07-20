@@ -40,6 +40,8 @@ public:
     void set_position(Position new_position) noexcept;
 };
 
+template <> constexpr std::string_view Object<Sensor>::class_name = "Sensor";
+
 } // namespace echomap
 
 #endif // ECHOMAP_SENSOR_HPP

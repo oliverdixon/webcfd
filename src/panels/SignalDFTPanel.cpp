@@ -469,7 +469,7 @@ std::size_t SignalDFTPanel::CacheKeyHash::operator()(
         const CacheKey& key
 ) const noexcept
 {
-    std::size_t seed = std::hash<Signal::id_type>{}(key.source_id);
+    std::size_t seed = std::hash<id_type>{}(key.source_id);
     seed = combine(seed, std::hash<std::size_t>{}(key.window_function.index()));
     return combine(seed, std::hash<std::size_t>{}(key.transform_size));
 }

@@ -17,6 +17,8 @@
 namespace echomap
 {
 
+using id_type = std::uint64_t;
+
 /**
  * Provides a simple static runtime ID generator for Object managers.
  */
@@ -24,8 +26,6 @@ template<typename>
 class IDAllocator
 {
 public:
-    using id_type = std::uint64_t;
-
     /**
      * Allocate the next ID.
      *
@@ -43,7 +43,7 @@ private:
 };
 
 template<typename Class>
-IDAllocator<Class>::id_type IDAllocator<Class>::next_id = 0;
+id_type IDAllocator<Class>::next_id = 0;
 
 } // namespace echomap
 

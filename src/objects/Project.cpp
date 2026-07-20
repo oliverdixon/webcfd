@@ -11,8 +11,6 @@
 namespace echomap
 {
 
-template <> constexpr std::string_view Object<Project>::class_name = "Project";
-
 Project::Project(
         const std::string_view project_name
 ) :
@@ -64,8 +62,8 @@ void Project::add_association(
 }
 
 void Project::add_association(
-        const Signal::id_type signal_id,
-        const Sensor::id_type sensor_id
+        const id_type signal_id,
+        const id_type sensor_id
 )
 {
     if (!requested_channel_mapping.emplace(signal_id, sensor_id).second)
@@ -109,8 +107,8 @@ std::optional<std::pair<
         const Signal&,
         const Sensor&>>
 Project::resolve_pair(
-        const Signal::id_type signal_id,
-        const Sensor::id_type sensor_id
+        const id_type signal_id,
+        const id_type sensor_id
 ) const
 {
     /*

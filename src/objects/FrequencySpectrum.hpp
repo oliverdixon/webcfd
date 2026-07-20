@@ -77,6 +77,8 @@ private:
     float maximum_magnitude = std::numeric_limits<float>::min();
 };
 
+template <> constexpr std::string_view Object<FrequencySpectrum>::class_name = "FreqSpec";
+
 } // namespace echomap
 
 #endif // ECHOMAP_FREQUENCYSPECTRUM_HPP

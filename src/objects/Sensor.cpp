@@ -7,8 +7,6 @@
 namespace echomap
 {
 
-template <> constexpr std::string_view Object<Sensor>::class_name = "Sensor";
-
 Sensor::Sensor(
         const std::string_view name
 ) :
