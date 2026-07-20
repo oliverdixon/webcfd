@@ -17,6 +17,8 @@ namespace echomap
 
 /**
  * A notification indicating that the position of a Sensor should be changed.
+ *
+ * @ingroup Notifications
  */
 struct ModifySensorPositionNotification
 {

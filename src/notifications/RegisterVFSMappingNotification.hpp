@@ -16,10 +16,19 @@ namespace echomap
 {
 
 /**
- * @todo Document
+ * A notification to indicate a new VFS mapping from an external source.
+ *
+ * @ingroup Notifications
  */
 struct RegisterVFSMappingNotification
 {
+    /**
+     * Creates a new RegisterVFSMappingNotification to express a mapping between the external and internal paths.
+     *
+     * @param project_id The ID of the Project to which the mapping relates.
+     * @param external The path on the external (inaccessible) file system as referenced in Project files.
+     * @param internal The path on the internal (accessible) VFS corresponding to the external path.
+     */
     RegisterVFSMappingNotification(
             const Project::id_type project_id,
             std::filesystem::path external,
@@ -31,10 +40,9 @@ struct RegisterVFSMappingNotification
     {
     }
 
-    Project::id_type project_id;
-
-    std::filesystem::path external;
-    std::filesystem::path internal;
+    Project::id_type project_id;    /**< The ID of the Project to which the mapping relates. */
+    std::filesystem::path external; /**< The path on the external file system. */
+    std::filesystem::path internal; /**< The path on the internal file system. */
 };
 
 } // namespace echomap

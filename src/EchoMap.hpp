@@ -41,7 +41,15 @@ class EchoMap
 {
 public:
     /**
+     * @defgroup Notifications Notifications
+     * A trivial message sent exclusively to the EchoMap controller.
+     * @todo Add relevant member functions
+     */
+
+    /**
      * A Notification is a trivial message sent exclusively to the EchoMap controller.
+     *
+     * @ingroup Notifications
      */
     using Notification = std::variant<
             AddChannelMappingNotification,

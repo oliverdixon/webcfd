@@ -1,7 +1,7 @@
 /**
  * @file
  *
- * ModifySensorColourTask specification
+ * ModifySensorColourNotification specification
  *
  * @author Oliver Dixon
  * @date 2026-07-14
@@ -17,6 +17,8 @@ namespace echomap
 
 /**
  * A notification indicating that the colour of a Sensor should be changed.
+ *
+ * @ingroup Notifications
  */
 struct ModifySensorColourNotification
 {

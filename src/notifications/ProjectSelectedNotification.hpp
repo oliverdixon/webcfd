@@ -17,6 +17,8 @@ namespace echomap
 
 /**
  * A notification indicating that a new Project file has been selected by the user to load into the application.
+ *
+ * @ingroup Notifications
  */
 struct ProjectSelectedNotification
 {

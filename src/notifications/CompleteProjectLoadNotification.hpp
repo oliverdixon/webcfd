@@ -16,11 +16,18 @@ namespace echomap
 {
 
 /**
- * @todo Document
+ * A notification indicating that a pending Project is ready to be loaded.
+ *
+ * @ingroup Notifications
  */
 class CompleteProjectLoadNotification
 {
 public:
+    /**
+     * Create a CompleteProjectLoadNotification to indicate that the referenced Project is ready to be loaded.
+     *
+     * @param project_id The ID of the Project to be loaded.
+     */
     explicit CompleteProjectLoadNotification(
             const Project::id_type project_id
     ) :
@@ -28,7 +35,7 @@ public:
     {
     }
 
-    Project::id_type project_id;
+    Project::id_type project_id; /**< The ID of the Project to be loaded. */
 };
 
 } // namespace echomap
