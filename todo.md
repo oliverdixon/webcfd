@@ -2,13 +2,14 @@
 
 ## Short Term
 
-1. Add project loader dialog as a native action.
+1. Harden the project/signal loading! Doxygen where necessary, remove incorrect exception specifications, and verify
+   dereferencing behaviour.
 
-2. Add a wave file loader as a native action.
+2. Resolve TODOs in code.
 
-3. Harden! Doxygen where necessary, remove incorrect exception specifications, and verify dereferencing behaviour.
+3. Add project loader dialog as a native action.
 
-4. Resolve TODOs in code.
+4. Add a wave file loader as a native action.
 
 ## Medium/Long Term
 
