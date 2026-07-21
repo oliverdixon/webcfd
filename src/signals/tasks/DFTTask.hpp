@@ -12,7 +12,7 @@
 
 #include <memory>
 
-#include "../../objects/FrequencySpectrum.hpp"
+#include "../../objects/factories/WindowFunctions.hpp"
 #include "ITask.hpp"
 
 namespace echomap
@@ -46,6 +46,11 @@ public:
             WindowFunctions::AllFunctions window_function,
             std::size_t transform_size
     );
+
+    ~DFTTask() noexcept override;
+
+    DFTTask(const DFTTask&) = delete;
+    DFTTask& operator=(const DFTTask&) = delete;
 
 private:
     WorkerResult execute_work() override;

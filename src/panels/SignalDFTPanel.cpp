@@ -12,13 +12,14 @@
 #include <bit>
 
 #include "../EchoMap.hpp"
-#include "../Logger.hpp"
-#include "../VariantHelpers.hpp"
 #include "../objects/FrequencySpectrum.hpp"
 #include "../objects/Project.hpp"
+#include "../objects/Signal.hpp"
 #include "../signals/Worker.hpp"
 #include "../signals/results/DFTResult.hpp"
 #include "../signals/tasks/DFTTask.hpp"
+#include "../utility/Logger.hpp"
+#include "../utility/VariantHelpers.hpp"
 
 namespace
 {
@@ -39,6 +40,7 @@ SignalDFTPanel::SignalDFTPanel(
         EchoMap* app,
         const Project* const initial_project
 ) :
+    panel_name(std::string("Signal DFT Panel") + get_imgui_stable_name()),
     parent_worker(parent_worker),
     active_project(initial_project),
     app(app)
@@ -57,6 +59,10 @@ SignalDFTPanel::SignalDFTPanel(
 
     reset_available_transform_sizes();
 }
+
+SignalDFTPanel::~SignalDFTPanel() noexcept = default;
+
+SignalDFTPanel::SignalDFTPanel(SignalDFTPanel&&) noexcept = default;
 
 void SignalDFTPanel::draw() noexcept
 {
@@ -87,6 +93,11 @@ void SignalDFTPanel::draw() noexcept
 const char* SignalDFTPanel::get_imgui_name() const noexcept
 {
     return panel_name.c_str();
+}
+
+const char* SignalDFTPanel::get_imgui_stable_name() noexcept
+{
+    return "###SignalDFTPanel";
 }
 
 void SignalDFTPanel::handle_completed_dft(
@@ -469,7 +480,7 @@ std::size_t SignalDFTPanel::CacheKeyHash::operator()(
         const CacheKey& key
 ) const noexcept
 {
-    std::size_t seed = std::hash<Signal::id_type>{}(key.source_id);
+    std::size_t seed = std::hash<id_type>{}(key.source_id);
     seed = combine(seed, std::hash<std::size_t>{}(key.window_function.index()));
     return combine(seed, std::hash<std::size_t>{}(key.transform_size));
 }

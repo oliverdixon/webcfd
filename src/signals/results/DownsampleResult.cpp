@@ -9,11 +9,13 @@
 
 #include "DownsampleResult.hpp"
 
+#include "../../objects/Signal.hpp"
+
 namespace echomap
 {
 
 DownsampleResult::DownsampleResult(
-        const Signal::id_type source_id,
+        const id_type source_id,
         std::unique_ptr<Signal> downsampled
 ) :
     source_id(source_id),
@@ -21,6 +23,12 @@ DownsampleResult::DownsampleResult(
 {
     assert(this->downsampled != nullptr);
 }
+
+DownsampleResult::~DownsampleResult() noexcept = default;
+
+DownsampleResult::DownsampleResult(DownsampleResult&&) noexcept = default;
+
+DownsampleResult& DownsampleResult::operator=(DownsampleResult&&) noexcept = default;
 
 std::unique_ptr<Signal> DownsampleResult::take_downsampled() && noexcept
 {
@@ -32,7 +40,7 @@ const Signal* DownsampleResult::observe_downsampled() const noexcept
     return downsampled.get();
 }
 
-Signal::id_type DownsampleResult::get_source_id() const noexcept
+id_type DownsampleResult::get_source_id() const noexcept
 {
     return source_id;
 }

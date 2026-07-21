@@ -41,6 +41,9 @@ private:
     std::vector<Bin> bins;
 
 public:
+    /**
+     * @todo Private
+     */
     WindowFunctions::AllFunctions preprocessor;
 
     [[nodiscard]] decltype(bins)::const_iterator begin() const;
@@ -76,6 +79,8 @@ private:
     float minimum_magnitude = std::numeric_limits<float>::max();
     float maximum_magnitude = std::numeric_limits<float>::min();
 };
+
+template <> constexpr std::string_view Object<FrequencySpectrum>::class_name = "FreqSpec";
 
 } // namespace echomap
 

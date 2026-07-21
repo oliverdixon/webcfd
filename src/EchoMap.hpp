@@ -183,6 +183,8 @@ private:
      */
     void setup_imgui();
 
+    void setup_dockspace();
+
     /**
      * Check if the window has been resized compared with the stored dimensions, updating member variables and
      * reconfiguring the WebGPU surface if necessary.

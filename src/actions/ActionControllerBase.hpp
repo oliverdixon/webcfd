@@ -14,7 +14,7 @@
 
 #include <filesystem>
 
-#include "../Logger.hpp"
+#include "../utility/Logger.hpp"
 
 namespace echomap
 {
@@ -60,7 +60,7 @@ template <typename Derived> class ActionControllerBase
         /** @} */
 
         /**
-         * @defgroup RegisterVFSMapping Add a VFS file-system mapping to an unloaded Project.
+         * @defgroup RegisterVFSMapping Register VFS Mapping
          * Queries the user for the location of an externally sourced file.
          * @ingroup Actions
          * @{

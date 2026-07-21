@@ -9,19 +9,12 @@
 #define ECHOMAP_ITASK_HPP
 
 #include <stop_token>
-#include <variant>
 
 #include "../../objects/Object.hpp"
-#include "../results/DFTResult.hpp"
-#include "../results/DownsampleResult.hpp"
-#include "../results/ErrorResult.hpp"
-#include "../results/LoadProjectResult.hpp"
-#include "../results/LoadSignalFileResult.hpp"
+#include "../results/WorkerResult.hpp"
 
 namespace echomap
 {
-
-using WorkerResult = std::variant<ErrorResult, DFTResult, DownsampleResult, LoadProjectResult, LoadSignalFileResult>;
 
 /**
  * An ITask represents an invocable piece of work that produces a WorkerResult.
@@ -39,6 +32,7 @@ public:
     /**
      * Destruct the ITask base.
      */
+    // ReSharper disable once CppHidingFunction
     virtual ~ITask() noexcept = default;
 
     /**

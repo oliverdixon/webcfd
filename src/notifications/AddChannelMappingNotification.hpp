@@ -10,12 +10,12 @@
 #ifndef ECHOMAP_ADDCHANNELMAPPINGNOTIFICATION_HPP
 #define ECHOMAP_ADDCHANNELMAPPINGNOTIFICATION_HPP
 
-#include "../objects/Sensor.hpp"
-#include "../objects/Signal.hpp"
-#include "../objects/Project.hpp"
+#include "../objects/IDAllocator.hpp"
 
 namespace echomap
 {
+
+class Project;
 
 /**
  * A notification indicating that a new channel mapping should be established.
@@ -33,19 +33,22 @@ struct AddChannelMappingNotification
      * @param sensor_id The ID of the participating Sensor.
      */
     AddChannelMappingNotification(
-            const Project::id_type project_id,
-            const Signal::id_type signal_id,
-            const Sensor::id_type sensor_id
-    ) :
-        project_id(project_id),
-        signal_id(signal_id),
-        sensor_id(sensor_id)
-    {
-    }
+            id_type project_id,
+            id_type signal_id,
+            id_type sensor_id
+    );
 
-    Project::id_type project_id; /** The ID of the Project detaining the Signal and Sensor. */
-    Signal::id_type signal_id; /**< The ID of the participating Signal. */
-    Sensor::id_type sensor_id; /**< The ID of the participating Sensor. */
+    /**
+     * Verify that the given Project matches the intended target.
+     *
+     * @param context The context to which the notification will apply.
+     * @throws IgnoredWarning The notification does not apply to the given context and should be ignored.
+     */
+    void verify_project(const Project* context) const;
+
+    id_type project_id; /**< The ID of the Project detaining the Signal and Sensor. */
+    id_type signal_id;  /**< The ID of the participating Signal. */
+    id_type sensor_id;  /**< The ID of the participating Sensor. */
 };
 
 } // namespace echomap

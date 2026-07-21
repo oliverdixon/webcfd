@@ -7,6 +7,7 @@
 
 #include <implot3d.h>
 
+#include <filesystem>
 #include <flat_map>
 #include <map>
 #include <memory>
@@ -14,17 +15,19 @@
 #include <string_view>
 
 #include "BidirectionalUnorderedMapping.hpp"
-#include "Sensor.hpp"
-#include "Signal.hpp"
-#include "factories/SignalFactory.hpp"
+#include "Object.hpp"
 
 namespace echomap
 {
 
+class Signal;
+class Sensor;
+class SignalFactory;
+
 class Project : public Object<Project>
 {
-    std::flat_map<Signal::id_type, std::shared_ptr<Signal>> signals;
-    std::flat_map<Sensor::id_type, std::unique_ptr<Sensor>> sensors;
+    std::flat_map<id_type, std::shared_ptr<Signal>> signals;
+    std::flat_map<id_type, std::unique_ptr<Sensor>> sensors;
 
 public:
     /**
@@ -46,6 +49,8 @@ public:
      * @param project_name Optional Project display name.
      */
     explicit Project(std::string_view project_name = {});
+
+    ~Project();
 
     /**
      * Transfers ownership of a Signal into the Project.
@@ -94,8 +99,8 @@ public:
      * @throws std::runtime_error A component (the Signal or the Sensor) is already mapped.
      */
     void add_association(
-            Signal::id_type signal_id,
-            Sensor::id_type sensor_id
+            id_type signal_id,
+            id_type sensor_id
     );
 
     /**
@@ -205,15 +210,15 @@ private:
             const Signal&,
             const Sensor&>>
     resolve_pair(
-            Signal::id_type signal_id,
-            Sensor::id_type sensor_id
+            id_type signal_id,
+            id_type sensor_id
     ) const;
 
     /**
      * Mapping between Signal objects and Sensor objects (identified by their numerical IDs).
      *
      * The structure stores all "requested" mappings, a non-strict subset of which are "confirmed". A mapping request is
-     * caused by an external caller, such as a factory, invoking @ref add_association(Signal::id_type, Sensor::id_type),
+     * caused by an external caller, such as a factory, invoking @ref add_association(id_type, id_type),
      * which does not require that the corresponding Signal or Sensor is owned by the Project at the time of the
      * request.
      *
@@ -221,8 +226,10 @@ private:
      *
      * Only confirmed mappings may be observed on the public API.
      */
-    BidirectionalUnorderedMapping<Signal::id_type, Sensor::id_type> requested_channel_mapping;
+    BidirectionalUnorderedMapping<id_type, id_type> requested_channel_mapping;
 };
+
+template <> constexpr std::string_view Object<Project>::class_name = "Project";
 
 } // namespace echomap
 

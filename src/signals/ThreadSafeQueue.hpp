@@ -38,7 +38,7 @@ public:
             ValueT value
     )
     {
-        std::lock_guard lock(mutex);
+        std::scoped_lock lock(mutex);
         queue.push_back(std::move(value));
         cv.notify_one();
     }
@@ -52,7 +52,7 @@ public:
      */
     std::optional<ValueT> try_consume()
     {
-        std::lock_guard lock(mutex);
+        std::scoped_lock lock(mutex);
 
         if (!queue.empty()) {
             auto value = std::move(queue.front());
@@ -96,7 +96,7 @@ public:
      */
     [[nodiscard]] bool empty() const
     {
-        std::lock_guard lock(mutex);
+        std::scoped_lock lock(mutex);
         return queue.empty();
     }
 
@@ -105,7 +105,7 @@ public:
      */
     void clear()
     {
-        std::lock_guard lock(mutex);
+        std::scoped_lock lock(mutex);
         queue.clear();
     }
 

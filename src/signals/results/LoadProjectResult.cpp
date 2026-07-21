@@ -19,6 +19,12 @@ LoadProjectResult::LoadProjectResult(
 {
 }
 
+LoadProjectResult::~LoadProjectResult() noexcept = default;
+
+LoadProjectResult::LoadProjectResult(LoadProjectResult&&) noexcept = default;
+
+LoadProjectResult& LoadProjectResult::operator=(LoadProjectResult&&) noexcept = default;
+
 std::unique_ptr<Project> LoadProjectResult::take_project() && noexcept
 {
     return std::move(loaded_project);

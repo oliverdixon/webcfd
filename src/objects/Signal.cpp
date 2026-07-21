@@ -10,13 +10,11 @@
 #include <cassert>
 #include <cmath>
 
-#include "../Logger.hpp"
+#include "../utility/Logger.hpp"
 #include "factories/SignalFactory.hpp"
 
 namespace echomap
 {
-
-template <> constexpr std::string_view Object<Signal>::class_name = "Signal";
 
 Signal::Signal(
     const std::string_view name,

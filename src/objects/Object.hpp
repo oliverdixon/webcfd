@@ -13,6 +13,7 @@
 #include <format>
 #include <string>
 #include <string_view>
+#include <utility>
 
 #include "IDAllocator.hpp"
 
@@ -22,78 +23,65 @@ namespace echomap
 /**
  * A participant in a runtime object model with a numerically unique identifier and display name.
  *
- * <p>
- *  A design invariant, which is not realistically possible to enforce, requires that no two objects of the same class
- *  co-exist for any non-trivial duration with matching IDs. In this context, a "non-trivial lifetime" would be any
- *  state that outlives a function as a member or global variable.
- * </p>
- * <p>
- *  In general, users should refer to objects by their stable numerical ID as opposed to iterators, pointers, or
- *  references. Transparent hashing on ordered and unordered STL containers allows fast and convenient lookup in the ID.
- * </p>
+ * A design invariant, which is not realistically possible to enforce, requires that no two objects of the same class
+ * co-exist for any non-trivial duration with matching IDs. In this context, a "non-trivial lifetime" would be any
+ * state that outlives a function as a member or global variable.
+ *
+ * In general, users should refer to objects by their stable numerical ID as opposed to iterators, pointers, or
+ * references. Transparent hashing on ordered and unordered STL containers allows fast and convenient lookup in the ID.
  *
  * @tparam Derived The concrete derived type, used for CRTP static polymorphism.
  */
 template <typename Derived> class Object
 {
 public:
-    using id_type = IDAllocator<Derived>::id_type;
+    /**
+     * Non-virtual base destructor.
+     *
+     * We don't want vtables for Object instances. Object uses CRTP, so deleting an Object through @c Object* is not a
+     * concern.
+     */
+    ~Object() = default;
 
     [[nodiscard]] id_type get_id() const noexcept
     {
+        assert(is_valid());
         return id;
+    }
+
+    [[nodiscard]] bool is_valid() const noexcept
+    {
+        return id != IDAllocator<Derived>::invalid_id;
     }
 
     void set_name(
             const std::string_view new_name
     )
     {
+        assert(is_valid());
         this->name = std::string(new_name);
     }
 
     [[nodiscard]] std::string_view get_name() const noexcept
     {
+        assert(is_valid());
         return name;
     }
 
     [[nodiscard]] const char* get_imgui_name() const noexcept
     {
+        assert(is_valid());
         return name.c_str();
     }
 
-    // ReSharper disable once CppDFAConstantFunctionResult
     [[nodiscard]] static std::string_view get_class_name() noexcept
     {
         return class_name;
     }
 
-    /**
-     * Deleted copy constructor.
-     *
-     * Derived classes should provide their own copy constructors to enable copy behaviour.
-     */
     Object(const Object&) = delete;
-
-    /**
-     * Deleted copy-assignment operator.
-     *
-     * @see Object(const Object&).
-     */
     Object& operator=(const Object&) = delete;
-
-    /**
-     * Defaulted move constructor.
-     *
-     * Move operations do not allocate a new internal ID.
-     */
-    Object(Object&&) = default;
-
-    /**
-     * Defaulted move-assignment operator.
-     *
-     * @return Mutable reference to the moved Object.
-     */
-    Object& operator=(Object&&) = default;
+    Object& operator=(Object&&) = delete;
 
     /**
      * Determine shallow equality between two Object instances.
@@ -139,15 +127,33 @@ protected:
     {
     }
 
+    Object(
+            Object&& other
+    ) noexcept :
+        id(std::exchange(
+                other.id,
+                IDAllocator<Derived>::invalid_id
+        )),
+        copy_count(
+                std::exchange(
+                        other.copy_count,
+                        0
+                )
+        ),
+        name(std::move(other.name))
+    {
+    }
+
     /**
      * Copy an existing Object.
      *
      * The new Object receives a newly allocated ID and a sensible default display name.
      *
+     * @param tag CopyTag despatch tag.
      * @param old The existing Object to copy.
      */
     Object(
-            CopyTag,
+            [[maybe_unused]] CopyTag tag,
             const Object& old
     ) :
         id(IDAllocator<Derived>::allocate()),
@@ -158,6 +164,7 @@ protected:
                 copy_count
         ))
     {
+        ++old.copy_count;
     }
 
     /**
@@ -165,11 +172,12 @@ protected:
      *
      * The new Object receives a newly allocated ID.
      *
+     * @param tag CopyTag despatch tag.
      * @param old The existing Object to copy.
      * @param new_name The display name of the new Object.
      */
     Object(
-            CopyTag,
+            [[maybe_unused]] CopyTag tag,
             const Object& old,
             const std::string_view new_name
     ) :
@@ -179,23 +187,56 @@ protected:
     {
     }
 
+    /**
+     * Helper for derived classes to provide move-assignment operations.
+     *
+     * For example,
+     * @code
+     * Sensor& operator=(Sensor&& other) noexcept
+     * {
+     *     if (this == &other)
+     *         return *this;
+     *
+     *     Object::move_identity_from(std::move(other));
+     *
+     *     position = std::move(other.position);
+     *     colour = std::move(other.colour);
+     *
+     *     return *this;
+     * }
+     * @endcode
+     *
+     * @param other The Object being moved from, to have its state invalidated.
+     */
+    void move_identity_from(
+            Object&& other // NOLINT(*-rvalue-reference-param-not-moved)
+    ) noexcept
+    {
+        if (this == &other)
+            return;
+
+        assert(other.is_valid());
+
+        id = std::exchange(other.id, IDAllocator<Derived>::invalid_id);
+        copy_count = std::exchange(other.copy_count, 0);
+        name = std::move(other.name);
+    }
+
 private:
     /**
      * Display name for objects of the type determined by the templated class.
      *
-     * <p>
-     *  Inheriting classes should override the class name by doing something equivalent to:
-     *  <pre>
-     *      template <>
-     *      constexpr std::string_view Object<Sensor>::class_name = "Sensor";
-     *  </pre>
-     * </p>
+     * Inheriting classes should override the class name by doing something equivalent to:
+     * @code
+     * template <>
+     * constexpr std::string_view Object<Sensor>::class_name = "Sensor";
+     * @endcode
      */
     static constexpr std::string_view class_name = "Object";
 
-    const id_type id;           /**< Primary numerical ID */
-    std::size_t copy_count = 0; /**< Number of times the object has been copied */
-    std::string name;           /**< Display name for the object */
+    id_type id;                         /**< Primary numerical ID. */
+    mutable std::size_t copy_count = 0; /**< Number of times the object has been copied; used only for display names. */
+    std::string name;                   /**< Display name for the object. */
 };
 
 } // namespace echomap

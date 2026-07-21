@@ -9,11 +9,13 @@
 
 #include "DFTResult.hpp"
 
+#include "../../objects/FrequencySpectrum.hpp"
+
 namespace echomap
 {
 
 DFTResult::DFTResult(
-        const Signal::id_type source_id,
+        const id_type source_id,
         std::unique_ptr<FrequencySpectrum> spectrum,
         const std::size_t transform_size
 ) :
@@ -23,6 +25,12 @@ DFTResult::DFTResult(
 {
     assert(this->spectrum != nullptr);
 }
+
+DFTResult::~DFTResult() noexcept = default;
+
+DFTResult::DFTResult(DFTResult&&) noexcept = default;
+
+DFTResult& DFTResult::operator=(DFTResult&&) noexcept = default;
 
 std::unique_ptr<FrequencySpectrum> DFTResult::take_spectrum() && noexcept
 {
@@ -34,7 +42,7 @@ const FrequencySpectrum* DFTResult::observe_spectrum() const noexcept
     return spectrum.get();
 }
 
-Signal::id_type DFTResult::get_source_id() const noexcept
+id_type DFTResult::get_source_id() const noexcept
 {
     return source_id;
 }

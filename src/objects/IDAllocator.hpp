@@ -10,6 +10,7 @@
 #ifndef ECHOMAP_IDALLOCATOR_HPP
 #define ECHOMAP_IDALLOCATOR_HPP
 
+#include <atomic>
 #include <cassert>
 #include <cstdint>
 #include <limits>
@@ -17,14 +18,21 @@
 namespace echomap
 {
 
+using id_type = std::uint64_t;
+
 /**
- * Provides a simple static runtime ID generator for Object managers.
+ * Provides a simple thread-safe runtime ID generator for Object managers.
  */
 template<typename>
 class IDAllocator
 {
 public:
-    using id_type = std::uint64_t;
+    /**
+     * Sentinel ID used by invalidated (moved-from) objects.
+     *
+     * This value is reserved and must never be returned by @ref allocate.
+     */
+    static constexpr id_type invalid_id = std::numeric_limits<id_type>::max();
 
     /**
      * Allocate the next ID.
@@ -34,16 +42,14 @@ public:
      */
     [[nodiscard]] static id_type allocate() noexcept
     {
-        assert(next_id < std::numeric_limits<id_type>::max());
-        return next_id++;
+        const auto allocated = next_id.fetch_add(1, std::memory_order_relaxed);
+        assert(allocated != invalid_id);
+        return allocated;
     }
 
 private:
-    static id_type next_id;
+    inline static std::atomic<id_type> next_id = 0;
 };
-
-template<typename Class>
-IDAllocator<Class>::id_type IDAllocator<Class>::next_id = 0;
 
 } // namespace echomap
 

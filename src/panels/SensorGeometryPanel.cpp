@@ -8,8 +8,9 @@
 #include "SensorGeometryPanel.hpp"
 
 #include "../EchoMap.hpp"
-#include "../Logger.hpp"
 #include "../objects/Project.hpp"
+#include "../objects/Sensor.hpp"
+#include "../utility/Logger.hpp"
 
 namespace echomap
 {
@@ -19,6 +20,7 @@ SensorGeometryPanel::SensorGeometryPanel(
         EchoMap* app,
         const Project* const initial_project
 ) :
+    panel_name(std::string("Sensor Geometry") + get_imgui_stable_name()),
     active_project(initial_project),
     app(app)
 {
@@ -48,6 +50,11 @@ void SensorGeometryPanel::draw() noexcept
     }
 
     ImGui::End();
+}
+
+const char* SensorGeometryPanel::get_imgui_stable_name() noexcept
+{
+    return "###SensorGeometryPanel";
 }
 
 void SensorGeometryPanel::recache_sensor_colours() noexcept
@@ -101,6 +108,7 @@ void SensorGeometryPanel::draw_geometry_summary() noexcept
             std::array<float, 4> new_colour = {colour.x, colour.y, colour.z, colour.w};
             if (ImGui::ColorEdit4("##colour", new_colour.data(), ImGuiColorEditFlags_NoInputs)) {
                 app->notify(ModifySensorColourNotification(
+                        active_project->get_id(),
                         sensor.get_id(),
                         {
                                 .r = new_colour[0],
@@ -122,7 +130,7 @@ void SensorGeometryPanel::draw_geometry_summary() noexcept
             ImGui::SetNextItemWidth(-std::numeric_limits<float>::min());
             ImGui::TextUnformatted(sensor.get_imgui_name());
 
-            Sensor::Position new_position = sensor.position;
+            Position new_position = sensor.position;
             bool position_changed = false;
 
             ImGui::TableNextColumn();
@@ -141,7 +149,7 @@ void SensorGeometryPanel::draw_geometry_summary() noexcept
             ++row_idx;
 
             if (position_changed)
-                app->notify(ModifySensorPositionNotification(sensor.get_id(), new_position));
+                app->notify(ModifySensorPositionNotification(active_project->get_id(), sensor.get_id(), new_position));
         }
 
         ImGui::EndTable();

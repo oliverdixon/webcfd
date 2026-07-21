@@ -6,6 +6,8 @@
 
 #include "../EchoMap.hpp"
 #include "../objects/Project.hpp"
+#include "../objects/Sensor.hpp"
+#include "../objects/Signal.hpp"
 
 namespace echomap
 {
@@ -15,6 +17,7 @@ ChannelMappingPanel::ChannelMappingPanel(
         EchoMap* app,
         const Project* const initial_project
 ) :
+    panel_name(std::string("Channel Mapping") + get_imgui_stable_name()),
     app(app),
     active_project(initial_project)
 {
@@ -57,8 +60,15 @@ void ChannelMappingPanel::draw() noexcept
     ImGui::End();
 }
 
+const char* ChannelMappingPanel::get_imgui_stable_name() noexcept
+{
+    return "###ChannelMappingPanel";
+}
+
 void ChannelMappingPanel::draw_new_channel_mapping() noexcept
 {
+    // TODO refactor monster.
+
     if (ImGui::BeginTable("##NewChannelMapping", 2, table_flags)) {
         ImGui::TableSetupColumn("Signal", ImGuiTableColumnFlags_WidthStretch);
         ImGui::TableSetupColumn("Sensor", ImGuiTableColumnFlags_WidthStretch);

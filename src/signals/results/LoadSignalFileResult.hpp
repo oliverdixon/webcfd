@@ -10,27 +10,37 @@
 #ifndef ECHOMAP_LOADSIGNALFILERESULT_HPP
 #define ECHOMAP_LOADSIGNALFILERESULT_HPP
 
-#include "../../objects/Project.hpp"
-#include "../../objects/Signal.hpp"
+#include <memory>
+#include <ranges>
+#include <vector>
+
+#include "../../objects/IDAllocator.hpp"
 
 namespace echomap
 {
 
+class Signal;
+
 /**
- *
+ * @todo Document.
  */
 class LoadSignalFileResult
 {
 public:
     explicit LoadSignalFileResult(
-            Project::id_type project_id,
+            id_type project_id,
             std::vector<std::unique_ptr<Signal>> loaded_signal
     );
 
-    [[nodiscard]] auto take_signals() && noexcept
-    {
-        return std::move(loaded_signals) | std::views::as_rvalue;
-    }
+    ~LoadSignalFileResult() noexcept;
+
+    LoadSignalFileResult(const LoadSignalFileResult&) = delete;
+    LoadSignalFileResult& operator=(const LoadSignalFileResult&) = delete;
+
+    LoadSignalFileResult(LoadSignalFileResult&&) noexcept;
+    LoadSignalFileResult& operator=(LoadSignalFileResult&&) noexcept;
+
+    [[nodiscard]] std::vector<std::unique_ptr<Signal>> take_signals() && noexcept;
 
     [[nodiscard]] auto observe_signals() const noexcept
     {
@@ -39,10 +49,10 @@ public:
                });
     }
 
-    [[nodiscard]] Project::id_type get_project_id() const noexcept;
+    [[nodiscard]] id_type get_project_id() const noexcept;
 
 private:
-    Project::id_type project_id; // TODO put these in all tasks.
+    id_type project_id; // TODO put these in all tasks.
     std::vector<std::unique_ptr<Signal>> loaded_signals;
 };
 

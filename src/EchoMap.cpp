@@ -18,13 +18,13 @@
 #endif
 
 #include "EchoMap.hpp"
-#include "Logger.hpp"
 #include "RobotoMedium.hpp"
 #include "SurfaceFactory.hpp"
-#include "VariantHelpers.hpp"
 #include "errors/ConfigurationError.hpp"
 #include "errors/IgnoredWarning.hpp"
 #include "objects/Project.hpp"
+#include "objects/Sensor.hpp"
+#include "objects/Signal.hpp"
 #include "panels/ChannelMappingPanel.hpp"
 #include "panels/MenuPanel.hpp"
 #include "panels/ProjectPanel.hpp"
@@ -32,6 +32,8 @@
 #include "panels/SignalDFTPanel.hpp"
 #include "panels/SignalWaveformPanel.hpp"
 #include "signals/tasks/LoadSignalFileTask.hpp"
+#include "utility/Logger.hpp"
+#include "utility/VariantHelpers.hpp"
 
 #if defined(__EMSCRIPTEN__) and !defined(__EMSCRIPTEN_PTHREADS__)
 #warning "The Emscripten application will be single-threaded."
@@ -221,7 +223,8 @@ void EchoMap::setup_subscriptions()
                             result.get_project_id()
                     );
                 else {
-                    for (auto&& signals = std::move(result).take_signals(); auto signal : signals)
+                    for (auto&& signals = std::move(result).take_signals();
+                         auto signal : signals | std::views::as_rvalue)
                         target->add_signal(std::move(signal));
 
                     if (target == unloaded_project.get())
@@ -341,11 +344,7 @@ void EchoMap::render() noexcept
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 
-    const ImGuiViewport* viewport = ImGui::GetMainViewport();
-    if (!dockspace_configured)
-        dockspace_configured = true;
-
-    ImGui::DockSpaceOverViewport(dockspace_id, viewport, ImGuiDockNodeFlags_None);
+    setup_dockspace();
 
     // Draw the panels and express any applicable error state.
     for (const auto& panel : panels)
@@ -432,6 +431,62 @@ void EchoMap::setup_imgui()
      */
     ImGui_ImplGlfw_InstallEmscriptenCallbacks(window, "#canvas");
 #endif
+}
+
+void EchoMap::setup_dockspace()
+{
+    const auto* const viewport = ImGui::GetMainViewport();
+
+    if (!dockspace_configured) {
+        dockspace_configured = true;
+
+        if (ImGui::DockBuilderGetNode(dockspace_id) == nullptr) {
+            // Root dockspace node.
+            ImGui::DockBuilderAddNode(dockspace_id, ImGuiDockNodeFlags_DockSpace);
+            ImGui::DockBuilderSetNodeSize(dockspace_id, viewport->Size);
+
+            // Left (narrow project explorer pane) and main workspace.
+            ImGuiID dock_id_left = 0;
+            ImGuiID dock_id_main = 0;
+            ImGui::DockBuilderSplitNode(dockspace_id, ImGuiDir_Left, .15f, &dock_id_left, &dock_id_main);
+            ImGui::DockBuilderDockWindow(ProjectPanel::get_imgui_stable_name(), dock_id_left);
+
+            // Upper/lower
+            ImGuiID dock_id_main_upper = 0;
+            ImGuiID dock_id_main_lower = 0;
+            ImGui::DockBuilderSplitNode(dock_id_main, ImGuiDir_Up, .33f, &dock_id_main_upper, &dock_id_main_lower);
+
+            // Upper left/right
+            ImGuiID dock_id_main_upper_left = 0;
+            ImGuiID dock_id_main_upper_right = 0;
+            ImGui::DockBuilderSplitNode(
+                    dock_id_main_upper,
+                    ImGuiDir_Left,
+                    .5f,
+                    &dock_id_main_upper_left,
+                    &dock_id_main_upper_right
+            );
+            ImGui::DockBuilderDockWindow(ChannelMappingPanel::get_imgui_stable_name(), dock_id_main_upper_left);
+            ImGui::DockBuilderDockWindow(SensorGeometryPanel::get_imgui_stable_name(), dock_id_main_upper_right);
+
+            // Lower left/right
+            ImGuiID dock_id_main_lower_left = 0;
+            ImGuiID dock_id_main_lower_right = 0;
+            ImGui::DockBuilderSplitNode(
+                    dock_id_main_lower,
+                    ImGuiDir_Left,
+                    .5f,
+                    &dock_id_main_lower_left,
+                    &dock_id_main_lower_right
+            );
+            ImGui::DockBuilderDockWindow(SignalWaveformPanel::get_imgui_stable_name(), dock_id_main_lower_left);
+            ImGui::DockBuilderDockWindow(SignalDFTPanel::get_imgui_stable_name(), dock_id_main_lower_right);
+
+            ImGui::DockBuilderFinish(dockspace_id);
+        }
+    }
+
+    ImGui::DockSpaceOverViewport(dockspace_id, viewport, ImGuiDockNodeFlags_PassthruCentralNode);
 }
 
 // ReSharper disable once CppDFAUnreachableFunctionCall
@@ -522,9 +577,7 @@ void EchoMap::handle_notification(
         const AddChannelMappingNotification& task
 ) const
 {
-    if (project == nullptr)
-        throw IgnoredWarning("Dropping AddChannelMappingTask due to empty project.");
-
+    task.verify_project(project.get());
     project->add_association(task.signal_id, task.sensor_id);
 }
 
@@ -532,9 +585,7 @@ void EchoMap::handle_notification(
         const ModifySensorColourNotification& task
 ) const
 {
-    if (project == nullptr)
-        throw IgnoredWarning("Dropping ModifySensorColourTask due to empty project.");
-
+    task.verify_project(project.get());
     project->get_mutable_sensor(task.sensor_id).set_colour(task.colour);
 }
 
@@ -542,9 +593,7 @@ void EchoMap::handle_notification(
         const ModifySensorPositionNotification& task
 ) const
 {
-    if (project == nullptr)
-        throw IgnoredWarning("Dropping ModifySensorPositionTask due to empty project.");
-
+    task.verify_project(project.get());
     project->get_mutable_sensor(task.sensor_id).set_position(task.position);
 }
 
@@ -559,22 +608,7 @@ void EchoMap::handle_notification(
         const CompleteProjectLoadNotification& task
 )
 {
-    upload_modal.reset();
-
-    // Validate that we have correct project loaded.
-
-    if (unloaded_project == nullptr)
-        throw IgnoredWarning("Dropping CompleteProjectLoadNotification due to empty unloaded project.");
-
-    if (unloaded_project->get_id() != task.project_id)
-        throw IgnoredWarning(
-                std::format(
-                        "Dropping CompleteProjectLoadNotification due to incorrect unloaded project: requested {}, but "
-                        "have {}.",
-                        task.project_id,
-                        unloaded_project->get_id()
-                )
-        );
+    task.verify_project(unloaded_project.get());
 
     // For each group, create a worker task to load the corresponding file.
 
@@ -594,22 +628,7 @@ void EchoMap::handle_notification(
         const RegisterVFSMappingNotification& task
 ) const
 {
-    // Validate that we have correct project loaded.
-
-    if (unloaded_project == nullptr)
-        throw IgnoredWarning("Dropping RegisterVFSMappingNotification due to empty unloaded project.");
-
-    if (unloaded_project->get_id() != task.project_id)
-        throw IgnoredWarning(
-                std::format(
-                        "Dropping RegisterVFSMappingNotification due to incorrect unloaded project: requested {}, but "
-                        "have {}.",
-                        task.project_id,
-                        unloaded_project->get_id()
-                )
-        );
-
-    // Add it.
+    task.verify_project(unloaded_project.get());
 
     const auto map_it = unloaded_project->unloaded_signals.find(task.external);
 

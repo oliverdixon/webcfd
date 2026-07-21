@@ -15,7 +15,7 @@ namespace echomap
 {
 
 LoadSignalFileTask::LoadSignalFileTask(
-        const Project::id_type project_id,
+        const id_type project_id,
         const std::filesystem::path& path,
         std::vector<std::unique_ptr<SignalFactory>>&& factories
 ) :
@@ -28,6 +28,8 @@ LoadSignalFileTask::LoadSignalFileTask(
     factories(std::move(factories))
 {
 }
+
+LoadSignalFileTask::~LoadSignalFileTask() noexcept = default;
 
 WorkerResult LoadSignalFileTask::execute_work()
 {

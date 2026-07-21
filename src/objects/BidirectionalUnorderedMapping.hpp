@@ -92,7 +92,8 @@ public:
         forward_map.clear();
         reverse_map.clear();
 
-        assert(forward_map.empty() == reverse_map.empty() == true);
+        assert(forward_map.empty());
+        assert(reverse_map.empty());
     }
 
     /**
@@ -152,12 +153,12 @@ public:
             const Key& key
     )
     {
-        const auto it = forward_map.find(key);
-        if (it == forward_map.end())
+        const auto itr = forward_map.find(key);
+        if (itr == forward_map.end())
             return false;
 
-        reverse_map.erase(it->second);
-        forward_map.erase(it);
+        reverse_map.erase(itr->second);
+        forward_map.erase(itr);
 
         assert(forward_map.size() == reverse_map.size());
 
@@ -175,12 +176,12 @@ public:
             const Value& value
     )
     {
-        const auto it = reverse_map.find(value);
-        if (it == reverse_map.end())
+        const auto itr = reverse_map.find(value);
+        if (itr == reverse_map.end())
             return false;
 
-        forward_map.erase(it->second);
-        reverse_map.erase(it);
+        forward_map.erase(itr->second);
+        reverse_map.erase(itr);
 
         assert(forward_map.size() == reverse_map.size());
 

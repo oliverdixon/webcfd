@@ -6,9 +6,9 @@
  */
 
 #include "EchoMap.hpp"
-#include "Logger.hpp"
 #include "StaticInstanceController.hpp"
 #include "errors/ConfigurationError.hpp"
+#include "utility/Logger.hpp"
 
 /**
  * EchoMap common entry point.

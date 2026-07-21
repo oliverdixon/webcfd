@@ -87,6 +87,7 @@ if (ECHOMAP_BUILD_APPLICATION)
                 "-sEXPORTED_RUNTIME_METHODS=['FS','ccall']"
                 "-pthread"
                 "-sPTHREAD_POOL_SIZE=navigator.hardwareConcurrency"
+                "-sALLOW_MEMORY_GROWTH=1"
                 "--shell-file=${web_shell}"
                 $<$<CONFIG:Debug,RelWithDebInfo>:--profiling-funcs>
         )

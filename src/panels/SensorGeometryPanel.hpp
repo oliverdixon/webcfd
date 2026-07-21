@@ -47,12 +47,14 @@ public:
 
     void draw() noexcept override;
 
+    static const char* get_imgui_stable_name() noexcept;
+
 private:
     void recache_sensor_colours() noexcept;
     void draw_geometry_summary() noexcept;
     void draw_geometry_plot() const noexcept;
 
-    std::string panel_name = "Sensor Geometry";
+    std::string panel_name;
 
     std::vector<ImU32> sensor_colours;
     ImPlot3DSpec plotting_spec_3d;

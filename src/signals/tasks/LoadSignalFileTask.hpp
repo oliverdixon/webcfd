@@ -10,12 +10,14 @@
 #ifndef ECHOMAP_LOADSIGNALFILETASK_HPP
 #define ECHOMAP_LOADSIGNALFILETASK_HPP
 
-#include "ITask.hpp"
+#include <filesystem>
 
-#include "../../objects/factories/SignalFactory.hpp"
+#include "ITask.hpp"
 
 namespace echomap
 {
+
+class SignalFactory;
 
 /**
  *
@@ -24,15 +26,22 @@ class LoadSignalFileTask : public ITask
 {
 public:
     explicit LoadSignalFileTask(
-            Project::id_type project_id,
+            id_type project_id,
             const std::filesystem::path& path,
             std::vector<std::unique_ptr<SignalFactory>>&& factories
     );
 
+    ~LoadSignalFileTask() noexcept override;
+
+    LoadSignalFileTask(const LoadSignalFileTask&) = delete;
+    LoadSignalFileTask& operator=(const LoadSignalFileTask&) = delete;
+
+    // TODO needs move operators.
+
 private:
     WorkerResult execute_work() override;
 
-    Project::id_type project_id;
+    id_type project_id;
     std::filesystem::path path;
     std::vector<std::unique_ptr<SignalFactory>> factories;
 };

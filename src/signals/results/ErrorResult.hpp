@@ -51,6 +51,13 @@ public:
             std::unique_ptr<ITask> responsible_task
     );
 
+    ~ErrorResult() noexcept;
+
+    ErrorResult(const ErrorResult&) = delete;
+    ErrorResult& operator=(const ErrorResult&) = delete;
+
+    ErrorResult(ErrorResult&&) noexcept;
+
     /**
      * Observes the human-readable error message.
      *
@@ -72,14 +79,6 @@ public:
      *  to a particular ITask.
      */
     [[nodiscard]] const ITask* observe_responsible_task() const noexcept;
-
-    ~ErrorResult();
-
-    ErrorResult(ErrorResult&&) noexcept;
-    ErrorResult& operator=(ErrorResult&&) noexcept;
-
-    ErrorResult(const ErrorResult&) = delete;
-    ErrorResult& operator=(const ErrorResult&) = delete;
 
 private:
     std::string message;

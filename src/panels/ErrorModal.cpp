@@ -9,10 +9,16 @@
 
 #include <imgui.h>
 
-#include "../Logger.hpp"
+#include "../utility/Logger.hpp"
 
 namespace echomap
 {
+
+ErrorModal::ErrorModal() :
+    panel_name(std::string("Error!") + get_imgui_stable_name())
+{
+}
+
 void ErrorModal::raise_error(
         const std::string_view message
 ) noexcept
@@ -50,8 +56,8 @@ void ErrorModal::draw() noexcept
     if (!is_raised)
         return;
 
-    ImGui::OpenPopup("Error!");
-    if (ImGui::BeginPopupModal("Error!", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
+    ImGui::OpenPopup(get_imgui_name());
+    if (ImGui::BeginPopupModal(get_imgui_name(), nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
         ImGui::TextUnformatted(prefix.c_str());
         ImGui::Separator();
 
@@ -76,6 +82,11 @@ void ErrorModal::draw() noexcept
 const char* ErrorModal::get_imgui_name() const noexcept
 {
     return panel_name.c_str();
+}
+
+const char* ErrorModal::get_imgui_stable_name() noexcept
+{
+    return "###ErrorModal";
 }
 
 } // namespace echomap

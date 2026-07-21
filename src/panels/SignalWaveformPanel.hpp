@@ -11,7 +11,9 @@
 #include <implot.h>
 #include <sigc++/scoped_connection.h>
 
-#include "../objects/Signal.hpp"
+#include <string>
+
+#include "../objects/IDAllocator.hpp"
 #include "IPanel.hpp"
 
 namespace echomap
@@ -19,6 +21,7 @@ namespace echomap
 
 class WorkerResultDespatcher;
 class DownsampleResult;
+class Signal;
 class Worker;
 
 /**
@@ -44,9 +47,19 @@ public:
             const Project* initial_project = nullptr
     );
 
+    ~SignalWaveformPanel() noexcept override;
+
+    SignalWaveformPanel(const SignalWaveformPanel&) = delete;
+    SignalWaveformPanel& operator=(const SignalWaveformPanel&) = delete;
+
+    SignalWaveformPanel(SignalWaveformPanel&&) noexcept;
+    SignalWaveformPanel& operator=(SignalWaveformPanel&&) noexcept = delete;
+
     [[nodiscard]] const char* get_imgui_name() const noexcept override;
 
     void draw() noexcept override;
+
+    static const char* get_imgui_stable_name() noexcept;
 
 private:
     static constexpr float default_downsample_factor = 50.0f;
@@ -91,7 +104,7 @@ private:
      *  need to be visualised. Therefore, the SignalWaveformPanel seems to be the natural owner.
      * </p>
      */
-    std::unordered_map<Signal::id_type, std::unique_ptr<Signal>> downsample_cache;
+    std::unordered_map<id_type, std::unique_ptr<Signal>> downsample_cache;
 
     /**
      * The maximum bounding box of an LTTB-downsampled wave form plot.
@@ -99,14 +112,9 @@ private:
      * The Y axis (amplitude) is fixed, since our PCM-normalised values, given as a constraint from the Signal samples,
      * are within a fixed range. The X range is variable and should be updated as new Signal objects are received.
      */
-    ImPlotRect bounding_box{
-            std::numeric_limits<double>::max(),
-            std::numeric_limits<double>::lowest(),
-            Signal::normalised_range.first,
-            Signal::normalised_range.second
-    };
+    ImPlotRect bounding_box;
 
-    std::string panel_name = "Signal Waveform Preview";
+    std::string panel_name;
     ImPlotSpec plotting_spec_2d;
     Worker* parent_worker;
     const Project* active_project = nullptr;

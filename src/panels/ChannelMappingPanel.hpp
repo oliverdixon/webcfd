@@ -44,11 +44,13 @@ public:
 
     void draw() noexcept override;
 
+    static const char* get_imgui_stable_name() noexcept;
+
 private:
     void draw_new_channel_mapping() noexcept;
     void draw_existing_channel_mapping() const noexcept;
 
-    std::string panel_name = "Channel Mapping";
+    std::string panel_name;
 
     struct AddChannelMappingRowCache
     {

@@ -7,8 +7,9 @@
 
 #include "Worker.hpp"
 
-#include "../Logger.hpp"
 #include "../objects/Project.hpp"
+#include "../objects/Signal.hpp"
+#include "../utility/Logger.hpp"
 
 namespace echomap
 {

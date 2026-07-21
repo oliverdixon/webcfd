@@ -7,7 +7,8 @@
 
 #include <sigc++/scoped_connection.h>
 
-#include "../objects/Project.hpp"
+#include <string>
+
 #include "IPanel.hpp"
 
 namespace echomap
@@ -35,8 +36,10 @@ public:
 
     [[nodiscard]] const char* get_imgui_name() const noexcept override;
 
+    static const char* get_imgui_stable_name() noexcept;
+
 private:
-    std::string panel_name = "Project Explorer";
+    std::string panel_name;
 
     const Project* active_project = nullptr;
     std::vector<sigc::scoped_connection> connections;

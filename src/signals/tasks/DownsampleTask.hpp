@@ -46,6 +46,13 @@ public:
             float factor = downsampling_factor
     );
 
+    ~DownsampleTask() noexcept override;
+
+    DownsampleTask(const DownsampleTask&) = delete;
+    DownsampleTask& operator=(const DownsampleTask&) = delete;
+
+    // TODO needs move operators.
+
 private:
     WorkerResult execute_work() override;
 

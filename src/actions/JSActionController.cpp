@@ -11,8 +11,8 @@
 
 #include <emscripten/em_js.h>
 
-#include "../Logger.hpp"
 #include "../errors/ConfigurationError.hpp"
+#include "../utility/Logger.hpp"
 
 namespace echomap
 {

@@ -6,6 +6,9 @@
 
 #include <imgui.h>
 
+#include "../objects/Project.hpp"
+#include "../objects/Sensor.hpp"
+#include "../objects/Signal.hpp"
 #include "../signals/WorkerResultDespatcher.hpp"
 #include "../signals/results/LoadProjectResult.hpp"
 
@@ -16,6 +19,7 @@ ProjectPanel::ProjectPanel(
         WorkerResultDespatcher& despatcher,
         const Project* const initial_project
 ) :
+    panel_name(std::string("Project Explorer") + get_imgui_stable_name()),
     active_project(initial_project)
 {
     connections.emplace_back(despatcher.load_project_finished_channel.observe([this](const LoadProjectResult& result) {
@@ -52,6 +56,11 @@ void ProjectPanel::draw() noexcept
 const char* ProjectPanel::get_imgui_name() const noexcept
 {
     return panel_name.c_str();
+}
+
+const char* ProjectPanel::get_imgui_stable_name() noexcept
+{
+    return "###ProjectPanel";
 }
 
 } // namespace echomap

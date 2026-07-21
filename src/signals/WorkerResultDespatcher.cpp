@@ -9,6 +9,11 @@
 
 #include "WorkerResultDespatcher.hpp"
 
+#include "../objects/FrequencySpectrum.hpp"
+#include "../objects/Project.hpp"
+#include "../objects/Signal.hpp"
+#include "../objects/Sensor.hpp"
+
 namespace echomap
 {
 

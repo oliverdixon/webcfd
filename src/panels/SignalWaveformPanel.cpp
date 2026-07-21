@@ -9,12 +9,13 @@
 
 #include <algorithm>
 
-#include "../Logger.hpp"
 #include "../objects/Project.hpp"
+#include "../objects/Signal.hpp"
 #include "../signals/Worker.hpp"
 #include "../signals/WorkerResultDespatcher.hpp"
 #include "../signals/results/DownsampleResult.hpp"
 #include "../signals/tasks/DownsampleTask.hpp"
+#include "../utility/Logger.hpp"
 
 namespace echomap
 {
@@ -24,6 +25,13 @@ SignalWaveformPanel::SignalWaveformPanel(
         WorkerResultDespatcher& despatcher,
         const Project* const initial_project
 ) :
+    bounding_box{
+            std::numeric_limits<double>::max(),
+            std::numeric_limits<double>::lowest(),
+            Signal::normalised_range.first,
+            Signal::normalised_range.second
+    },
+    panel_name(std::string("Signal Waveform Preview") + get_imgui_stable_name()),
     parent_worker(parent_worker),
     active_project(initial_project)
 {
@@ -37,6 +45,10 @@ SignalWaveformPanel::SignalWaveformPanel(
             sigc::mem_fun(*this, &SignalWaveformPanel::handle_downsampled_result)
     ));
 }
+
+SignalWaveformPanel::~SignalWaveformPanel() noexcept = default;
+
+SignalWaveformPanel::SignalWaveformPanel(SignalWaveformPanel&&) noexcept = default;
 
 const char* SignalWaveformPanel::get_imgui_name() const noexcept
 {
@@ -85,6 +97,11 @@ void SignalWaveformPanel::draw() noexcept
     }
 
     ImGui::End();
+}
+
+const char* SignalWaveformPanel::get_imgui_stable_name() noexcept
+{
+    return "###SignalWaveformPanel";
 }
 
 void SignalWaveformPanel::handle_downsampled_result(

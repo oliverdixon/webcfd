@@ -32,6 +32,8 @@ DFTTask::DFTTask(
     assert(this->signal != nullptr);
 }
 
+DFTTask::~DFTTask() noexcept = default;
+
 WorkerResult DFTTask::execute_work()
 {
     return DFTResult(

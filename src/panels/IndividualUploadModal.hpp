@@ -31,7 +31,7 @@ concept SignalFactoryRange =
  * This is most useful in browser (WebAssembly VFS) contexts where the application cannot interrogate the file system
  * directly.
  */
-class IndividualUploadModal : public IPanel
+class IndividualUploadModal final : public IPanel
 {
 public:
     explicit IndividualUploadModal(
@@ -44,6 +44,8 @@ public:
     [[nodiscard]] const char* get_imgui_name() const noexcept override;
 
     void reshow() noexcept;
+
+    static const char* get_imgui_stable_name() noexcept;
 
 private:
     constexpr static ImVec2 button_size{80.0f, 20.0f};

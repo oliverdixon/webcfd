@@ -13,8 +13,8 @@ add_library(DummyTarget INTERFACE EXCLUDE_FROM_ALL
         src/App.cpp
         src/panels/IPanel.hpp
         src/RobotoMedium.hpp
-        src/Logger.cpp
-        src/Logger.hpp
+        src/utility/Logger.cpp
+        src/utility/Logger.hpp
         src/errors/ConfigurationError.cpp
         src/errors/ConfigurationError.hpp
         src/objects/factories/SignalFactory.cpp
@@ -85,7 +85,7 @@ add_library(DummyTarget INTERFACE EXCLUDE_FROM_ALL
         src/signals/ResultChannel.hpp
         src/objects/factories/WindowFunctions.hpp
         src/objects/factories/WindowFunctions.cpp
-        src/VariantHelpers.hpp
+        src/utility/VariantHelpers.hpp
         src/web/EmscriptenExtra.hpp
         src/signals/tasks/LoadSignalFileTask.cpp
         src/signals/tasks/LoadSignalFileTask.hpp
@@ -102,6 +102,14 @@ add_library(DummyTarget INTERFACE EXCLUDE_FROM_ALL
         src/notifications/ProjectSelectedNotification.hpp
         src/notifications/CompleteProjectLoadNotification.hpp
         src/notifications/RegisterVFSMappingNotification.hpp
+        src/notifications/RegisterVFSMappingNotification.cpp
+        src/notifications/CompleteProjectLoadNotification.cpp
+        src/notifications/AddChannelMappingNotification.cpp
+        src/notifications/ModifySensorPositionNotification.cpp
+        src/notifications/ModifySensorColourNotification.cpp
+        src/signals/results/WorkerResult.hpp
+        src/utility/Colour.hpp
+        src/utility/Position.hpp
 )
 
 if (EMSCRIPTEN OR ECHOMAP_BUILD_DOCUMENTATION)

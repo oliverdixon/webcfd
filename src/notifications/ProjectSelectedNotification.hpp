@@ -18,7 +18,10 @@ namespace echomap
 /**
  * A notification indicating that a new Project file has been selected by the user to load into the application.
  *
- * @ingroup Notifications
+ * Produced by the ActionController on ProjectFileAction callbacks to indicate a new Project file has been selected for
+ * loading into the instance.
+ *
+ * @ingroup Notifications ProjectFileAction
  */
 struct ProjectSelectedNotification
 {

@@ -12,13 +12,17 @@
 
 #include <sigc++/scoped_connection.h>
 
-#include "../objects/FrequencySpectrum.hpp"
-#include "../objects/Signal.hpp"
+#include <string>
+
 #include "IPanel.hpp"
+#include "../objects/IDAllocator.hpp"
+#include "../objects/factories/WindowFunctions.hpp"
 
 namespace echomap
 {
 
+class Signal;
+class FrequencySpectrum;
 class WorkerResultDespatcher;
 class DFTResult;
 class EchoMap;
@@ -27,7 +31,7 @@ class Worker;
 /**
  * Provides an IPanel to display and interact with previews of Signal frequency spectra (i.e., Signal DFTs).
  */
-class SignalDFTPanel : public IPanel
+class SignalDFTPanel final : public IPanel
 {
 public:
     /**
@@ -47,9 +51,19 @@ public:
             const Project* initial_project = nullptr
     );
 
+    ~SignalDFTPanel() noexcept override;
+
+    SignalDFTPanel(const SignalDFTPanel&) = delete;
+    SignalDFTPanel& operator=(const SignalDFTPanel&) = delete;
+
+    SignalDFTPanel(SignalDFTPanel&&) noexcept;
+    SignalDFTPanel& operator=(SignalDFTPanel&&) noexcept = delete;
+
     void draw() noexcept override;
 
     const char* get_imgui_name() const noexcept override;
+
+    static const char* get_imgui_stable_name() noexcept;
 
 private:
     struct CallbackData
@@ -98,7 +112,7 @@ private:
 
     ImPlotRect viewport_bounds; /**< The user-controlled bounding box of the DFT plots. */
 
-    std::string panel_name = "Signal DFT Preview";
+    std::string panel_name;
     ImPlotSpec plotting_spec_2d;
     Worker* parent_worker;
     const Project* active_project = nullptr;
@@ -109,7 +123,7 @@ private:
      */
     struct CacheKey
     {
-        Signal::id_type source_id;
+        id_type source_id;
         WindowFunctions::AllFunctions window_function;
         std::size_t transform_size;
 

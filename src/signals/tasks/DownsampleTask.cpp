@@ -9,6 +9,8 @@
 
 #include "DownsampleTask.hpp"
 
+#include "../../objects/FrequencySpectrum.hpp"
+#include "../../objects/Project.hpp"
 #include "../../objects/factories/SignalFactory.hpp"
 #include "../results/DownsampleResult.hpp"
 
@@ -25,6 +27,8 @@ DownsampleTask::DownsampleTask(
 {
     assert(this->signal != nullptr);
 }
+
+DownsampleTask::~DownsampleTask() noexcept = default;
 
 WorkerResult DownsampleTask::execute_work()
 {

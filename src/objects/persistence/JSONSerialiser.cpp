@@ -5,6 +5,8 @@
 #include "JSONSerialiser.hpp"
 
 #include "../Project.hpp"
+#include "../Sensor.hpp"
+#include "../Signal.hpp"
 
 namespace simdjson
 {
@@ -156,7 +158,7 @@ void tag_invoke(
         builder.append_key_value("kind", signal.is_uniformly_sampled() ? "embeddedUniform" : "embeddedVariable");
         builder.append_comma();
 
-        if (signal.is_uniformly_sampled() || signal.get_time_offset() != echomap::Signal::Sample::TimeT(0) ||
+        if (signal.is_uniformly_sampled() || signal.get_time_offset() != echomap::Signal::Sample::TimeT{0} ||
             signal.get_sample_count() != 0) {
             builder.append_key_value("time_offset", signal.get_time_offset());
             builder.append_comma();
