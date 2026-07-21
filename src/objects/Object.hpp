@@ -209,8 +209,8 @@ protected:
      * @param other The Object being moved from, to have its state invalidated.
      */
     void move_identity_from(
-            Object&& other
-    ) noexcept // NOLINT(*-rvalue-reference-param-not-moved)
+            Object&& other // NOLINT(*-rvalue-reference-param-not-moved)
+    ) noexcept
     {
         if (this == &other)
             return;

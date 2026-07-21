@@ -7,6 +7,8 @@
 
 #include <sigc++/scoped_connection.h>
 
+#include <string>
+
 #include "IPanel.hpp"
 
 namespace echomap

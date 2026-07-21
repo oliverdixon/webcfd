@@ -41,8 +41,6 @@ ErrorResult::~ErrorResult() noexcept = default;
 
 ErrorResult::ErrorResult(ErrorResult&&) noexcept = default;
 
-ErrorResult& ErrorResult::operator=(ErrorResult&&) noexcept = default;
-
 std::string_view ErrorResult::what() const noexcept
 {
     return message;

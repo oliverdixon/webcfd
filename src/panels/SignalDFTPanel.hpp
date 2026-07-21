@@ -12,6 +12,8 @@
 
 #include <sigc++/scoped_connection.h>
 
+#include <string>
+
 #include "IPanel.hpp"
 #include "../objects/IDAllocator.hpp"
 #include "../objects/factories/WindowFunctions.hpp"
@@ -55,7 +57,7 @@ public:
     SignalDFTPanel& operator=(const SignalDFTPanel&) = delete;
 
     SignalDFTPanel(SignalDFTPanel&&) noexcept;
-    SignalDFTPanel& operator=(SignalDFTPanel&&) noexcept;
+    SignalDFTPanel& operator=(SignalDFTPanel&&) noexcept = delete;
 
     void draw() noexcept override;
 

@@ -49,8 +49,6 @@ SignalWaveformPanel::~SignalWaveformPanel() noexcept = default;
 
 SignalWaveformPanel::SignalWaveformPanel(SignalWaveformPanel&&) noexcept = default;
 
-SignalWaveformPanel& SignalWaveformPanel::operator=(SignalWaveformPanel&&) noexcept = default;
-
 const char* SignalWaveformPanel::get_imgui_name() const noexcept
 {
     return panel_name.c_str();

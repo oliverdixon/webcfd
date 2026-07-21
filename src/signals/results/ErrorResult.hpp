@@ -57,7 +57,6 @@ public:
     ErrorResult& operator=(const ErrorResult&) = delete;
 
     ErrorResult(ErrorResult&&) noexcept;
-    ErrorResult& operator=(ErrorResult&&) noexcept;
 
     /**
      * Observes the human-readable error message.

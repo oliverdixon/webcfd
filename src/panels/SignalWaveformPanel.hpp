@@ -11,8 +11,10 @@
 #include <implot.h>
 #include <sigc++/scoped_connection.h>
 
-#include "IPanel.hpp"
+#include <string>
+
 #include "../objects/IDAllocator.hpp"
+#include "IPanel.hpp"
 
 namespace echomap
 {
@@ -51,7 +53,7 @@ public:
     SignalWaveformPanel& operator=(const SignalWaveformPanel&) = delete;
 
     SignalWaveformPanel(SignalWaveformPanel&&) noexcept;
-    SignalWaveformPanel& operator=(SignalWaveformPanel&&) noexcept;
+    SignalWaveformPanel& operator=(SignalWaveformPanel&&) noexcept = delete;
 
     [[nodiscard]] const char* get_imgui_name() const noexcept override;
 

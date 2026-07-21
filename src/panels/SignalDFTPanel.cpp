@@ -63,8 +63,6 @@ SignalDFTPanel::~SignalDFTPanel() noexcept = default;
 
 SignalDFTPanel::SignalDFTPanel(SignalDFTPanel&&) noexcept = default;
 
-SignalDFTPanel& SignalDFTPanel::operator=(SignalDFTPanel&&) noexcept = default;
-
 void SignalDFTPanel::draw() noexcept
 {
     if (ImGui::Begin(panel_name.c_str())) {

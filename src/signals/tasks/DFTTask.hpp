@@ -52,8 +52,6 @@ public:
     DFTTask(const DFTTask&) = delete;
     DFTTask& operator=(const DFTTask&) = delete;
 
-    // TODO needs move operators.
-
 private:
     WorkerResult execute_work() override;
 
