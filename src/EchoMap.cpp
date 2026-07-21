@@ -18,13 +18,12 @@
 #endif
 
 #include "EchoMap.hpp"
-#include "Logger.hpp"
 #include "RobotoMedium.hpp"
 #include "SurfaceFactory.hpp"
-#include "VariantHelpers.hpp"
 #include "errors/ConfigurationError.hpp"
 #include "errors/IgnoredWarning.hpp"
 #include "objects/Project.hpp"
+#include "objects/Sensor.hpp"
 #include "objects/Signal.hpp"
 #include "panels/ChannelMappingPanel.hpp"
 #include "panels/MenuPanel.hpp"
@@ -33,6 +32,8 @@
 #include "panels/SignalDFTPanel.hpp"
 #include "panels/SignalWaveformPanel.hpp"
 #include "signals/tasks/LoadSignalFileTask.hpp"
+#include "utility/Logger.hpp"
+#include "utility/VariantHelpers.hpp"
 
 #if defined(__EMSCRIPTEN__) and !defined(__EMSCRIPTEN_PTHREADS__)
 #warning "The Emscripten application will be single-threaded."

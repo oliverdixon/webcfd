@@ -18,7 +18,7 @@ namespace echomap
 ModifySensorPositionNotification::ModifySensorPositionNotification(
         const id_type project_id,
         const id_type sensor_id,
-        const Sensor::Position& position
+        const Position& position
 ) :
     project_id(project_id),
     sensor_id(sensor_id),

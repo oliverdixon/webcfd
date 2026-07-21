@@ -6,6 +6,7 @@
 
 #include "../EchoMap.hpp"
 #include "../objects/Project.hpp"
+#include "../objects/Sensor.hpp"
 #include "../objects/Signal.hpp"
 
 namespace echomap

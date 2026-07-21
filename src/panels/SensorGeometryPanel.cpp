@@ -8,8 +8,9 @@
 #include "SensorGeometryPanel.hpp"
 
 #include "../EchoMap.hpp"
-#include "../Logger.hpp"
 #include "../objects/Project.hpp"
+#include "../objects/Sensor.hpp"
+#include "../utility/Logger.hpp"
 
 namespace echomap
 {
@@ -123,7 +124,7 @@ void SensorGeometryPanel::draw_geometry_summary() noexcept
             ImGui::SetNextItemWidth(-std::numeric_limits<float>::min());
             ImGui::TextUnformatted(sensor.get_imgui_name());
 
-            Sensor::Position new_position = sensor.position;
+            Position new_position = sensor.position;
             bool position_changed = false;
 
             ImGui::TableNextColumn();

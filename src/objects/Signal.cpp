@@ -10,7 +10,7 @@
 #include <cassert>
 #include <cmath>
 
-#include "../Logger.hpp"
+#include "../utility/Logger.hpp"
 #include "factories/SignalFactory.hpp"
 
 namespace echomap

@@ -11,7 +11,7 @@
 #define ECHOMAP_MODIFYSENSORPOSITIONNOTIFICATION_HPP
 
 #include "../objects/IDAllocator.hpp"
-#include "../objects/Sensor.hpp" // TODO remove.
+#include "../utility/Position.hpp"
 
 namespace echomap
 {
@@ -37,7 +37,7 @@ struct ModifySensorPositionNotification
     explicit ModifySensorPositionNotification(
             id_type project_id,
             id_type sensor_id,
-            const Sensor::Position& position
+            const Position& position
     );
 
     /**
@@ -50,7 +50,7 @@ struct ModifySensorPositionNotification
 
     id_type project_id;        /**< The ID of the Project which owns the updated Sensor. */
     id_type sensor_id;         /**< The ID of the moved Sensor. */
-    Sensor::Position position;   /**< The new Position of the referenced Sensor. */
+    Position position;         /**< The new Position of the referenced Sensor. */
 };
 
 } // namespace echomap

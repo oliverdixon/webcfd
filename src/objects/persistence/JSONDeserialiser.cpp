@@ -4,6 +4,7 @@
 #include "JSONDeserialiser.hpp"
 
 #include "../../EchoMap.hpp"
+#include "../../objects/Sensor.hpp"
 #include "../../signals/Worker.hpp"
 #include "../../signals/tasks/LoadSignalFileTask.hpp"
 #include "../Project.hpp"

@@ -5,6 +5,8 @@
 #ifndef ECHOMAP_SENSOR_HPP
 #define ECHOMAP_SENSOR_HPP
 
+#include "../utility/Colour.hpp"
+#include "../utility/Position.hpp"
 #include "Object.hpp"
 
 namespace echomap
@@ -13,20 +15,8 @@ namespace echomap
 class Sensor : public Object<Sensor>
 {
 public:
-    struct Position
-    {
-        float x = 0.0f;
-        float y = 0.0f;
-        float z = 0.0f;
-    } position{};
-
-    struct Colour
-    {
-        float r = 1.0f;
-        float g = 0.0f;
-        float b = 0.0f;
-        float a = 1.0f;
-    } colour{};
+    Position position{};
+    Colour colour{};
 
     explicit Sensor(std::string_view name = {});
 
@@ -34,7 +24,6 @@ public:
 
     Sensor(const Sensor& old_sensor);
     Sensor(const Sensor& old_sensor, std::string_view new_name);
-
 
     void set_colour(Colour new_colour) noexcept;
     void set_position(Position new_position) noexcept;

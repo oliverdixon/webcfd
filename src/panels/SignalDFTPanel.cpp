@@ -12,14 +12,14 @@
 #include <bit>
 
 #include "../EchoMap.hpp"
-#include "../Logger.hpp"
-#include "../VariantHelpers.hpp"
 #include "../objects/FrequencySpectrum.hpp"
 #include "../objects/Project.hpp"
 #include "../objects/Signal.hpp"
 #include "../signals/Worker.hpp"
 #include "../signals/results/DFTResult.hpp"
 #include "../signals/tasks/DFTTask.hpp"
+#include "../utility/Logger.hpp"
+#include "../utility/VariantHelpers.hpp"
 
 namespace
 {
