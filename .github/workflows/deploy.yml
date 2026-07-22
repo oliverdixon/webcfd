@@ -1,0 +1,167 @@
+name: Deploy EchoMap on Request
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-echomap
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-deploy:
+    name: Build and deploy Wasm and Doxygen
+    runs-on: [ self-hosted, linux, x64, york ]
+    timeout-minutes: 180
+
+    env:
+      DEPLOY_ROOT: ${{ vars.ECHOMAP_DEPLOY_ROOT }}
+      CACHE_ROOT: ${{ vars.ECHOMAP_CACHE_ROOT }}
+      CI_ROOT: ${{ vars.ECHOMAP_CI_ROOT }}
+      TOOLCHAIN_ROOT: ${{ vars.ECHOMAP_TOOLCHAIN_ROOT }}
+
+      VCPKG_ROOT: ${{ vars.ECHOMAP_CI_ROOT }}/vcpkg
+      VCPKG_DEFAULT_BINARY_CACHE: ${{ vars.ECHOMAP_CACHE_ROOT }}/vcpkg
+      EMSDK: ${{ vars.ECHOMAP_CI_ROOT }}/emsdk
+      EM_CACHE_REPLACEMENT: ${{ vars.ECHOMAP_CACHE_ROOT }}/emscripten
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+          clean: true
+
+      - name: Setup CI path
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          
+          : "${TOOLCHAIN_ROOT:?Set repository variable ECHOMAP_TOOLCHAIN_ROOT}"
+
+          test -x "${TOOLCHAIN_ROOT}/cmake"
+          test -x "${TOOLCHAIN_ROOT}/doxygen"
+          test -x "${TOOLCHAIN_ROOT}/ninja"
+
+          echo "${TOOLCHAIN_ROOT}" >> "${GITHUB_PATH}"
+
+      - name: Validate runner environment
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+
+          : "${DEPLOY_ROOT:?Set repository variable ECHOMAP_DEPLOY_ROOT}"
+          : "${CI_ROOT:?Set repository variable ECHOMAP_CI_ROOT}"
+          : "${CACHE_ROOT:?Set repository variable ECHOMAP_CACHE_ROOT}"
+          
+          mkdir -p \
+            "${DEPLOY_ROOT}" \
+            "${CI_ROOT}" \
+            "${VCPKG_DEFAULT_BINARY_CACHE}" \
+            "${EM_CACHE_REPLACEMENT}"
+          
+          test -w "${DEPLOY_ROOT}"
+          test -w "${CI_ROOT}"
+          test -w "${VCPKG_DEFAULT_BINARY_CACHE}"
+          test -w "${EM_CACHE_REPLACEMENT}"
+
+          command -v git
+          command -v cmake
+          command -v ninja
+          command -v doxygen
+          command -v rsync
+
+          cmake --version
+          doxygen --version
+          ninja --version
+
+      - name: Bootstrap persistent SDKs
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+
+          source bootstrap.sh
+
+          echo "VCPKG_ROOT=${VCPKG_ROOT}"
+          echo "EMSDK=${EMSDK}"
+          echo "VCPKG_DEFAULT_BINARY_CACHE=${VCPKG_DEFAULT_BINARY_CACHE}"
+
+      - name: Configure wasm-release
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          source bootstrap.sh
+          export EM_CACHE="${EM_CACHE_REPLACEMENT}"
+          cmake --preset wasm-release
+
+      - name: Build wasm-release
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          source bootstrap.sh
+          export EM_CACHE="${EM_CACHE_REPLACEMENT}"
+          cmake --build cmake-build-wasm-release --target EchoMap
+
+      - name: Configure documentation
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          source bootstrap.sh
+          cmake --preset documentation
+
+      - name: Build Doxygen HTML
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          source bootstrap.sh
+          cmake --build docs/out --target EchoMapHTMLDocumentation
+
+      - name: Stage deployment
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          
+          mkdir -p _deploy/docs/html
+          
+          find cmake-build-wasm-release \
+            -maxdepth 1 \
+            -type f \
+            \( \
+              -name '*.html' -o \
+              -name '*.js' -o \
+              -name '*.wasm' -o \
+              -name '*.css' \
+            \) \
+            -print \
+            -exec cp -v -t _deploy/ {} +
+          
+          test -f _deploy/EchoMap.html
+          test -f _deploy/EchoMap.js
+          test -f _deploy/EchoMap.wasm
+          test -f _deploy/module.js
+          test -f _deploy/shell.css
+          
+          test -d docs/out/html
+          rsync -a --delete docs/out/html/ _deploy/docs/html/
+          
+          cat > _deploy/.htaccess <<'EOF'
+          <IfModule mod_headers.c>
+            AddType application/wasm .wasm
+            Header set Cross-Origin-Opener-Policy "same-origin"
+            Header set Cross-Origin-Embedder-Policy "require-corp"
+            Header edit X-Frame-Options "DENY" "SAMEORIGIN"
+          </IfModule>
+          EOF
+
+      - name: Deploy
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+
+          mkdir -p "${DEPLOY_ROOT}/docs/html"
+
+          rsync -a --exclude '/docs/' _deploy/ "${DEPLOY_ROOT}/"
+          rsync -a --delete _deploy/docs/html/ "${DEPLOY_ROOT}/docs/html/"
