@@ -191,48 +191,17 @@ void EchoMap::configure_surface(
 
 void EchoMap::setup_subscriptions()
 {
+    // NOLINTBEGIN(*-redundant-casting) - False positive; casts are required for libsigcpp to resolve overloads.
     connections.emplace_back(
-            despatcher.load_project_finished_channel.nominate_consumer([this](LoadProjectResult&& result) {
-                if (upload_modal.has_value()) {
-                    // How have we loaded a new project whilst we're still querying for sources from another one?
-                    LOG_WARN("Ignoring request to change active Project since there is an active modal.");
-                    return;
-                }
-
-                auto&& new_project = std::move(result).take_project();
-
-                if (!new_project->unloaded_signals.empty()) {
-                    // Raise the modal to query for the sources.
-                    upload_modal = IndividualUploadModal(this, new_project.get());
-                    unloaded_project = std::move(new_project);
-                } else
-                    change_active_project(std::move(new_project));
-            })
-    );
+            despatcher.load_project_finished_channel.nominate_consumer(
+            sigc::mem_fun(*this, static_cast<void (EchoMap::*)(LoadProjectResult&&)>(&EchoMap::handle_result))
+    ));
 
     connections.emplace_back(
-            despatcher.load_signal_file_channel.nominate_consumer([this](LoadSignalFileResult&& result) {
-                Project* target = nullptr;
-                if (project != nullptr && result.get_project_id() == project->get_id())
-                    target = project.get();
-                else if (unloaded_project != nullptr && result.get_project_id() == unloaded_project->get_id())
-                    target = unloaded_project.get();
-
-                if (target == nullptr)
-                    LOG_F_WARN(
-                            "Dropping LoadSignalFileResult, which was intended for the unavailable Project with ID {}.",
-                            result.get_project_id()
-                    );
-                else {
-                    for (auto&& signals = std::move(result).take_signals();
-                         auto signal : signals | std::views::as_rvalue)
-                        target->add_signal(std::move(signal));
-
-                    if (target == unloaded_project.get())
-                        change_active_project(std::move(unloaded_project));
-                }
-            })
-    );
+            despatcher.load_signal_file_channel.nominate_consumer(
+            sigc::mem_fun(*this, static_cast<void (EchoMap::*)(LoadSignalFileResult&&)>(&EchoMap::handle_result))
+    ));
+    // NOLINTEND(*-redundant-casting)
 
     connections.emplace_back(despatcher.error_channel.observe([this](const ErrorResult& error) {
         error_modal.raise_error(error.what());
@@ -656,6 +625,52 @@ void EchoMap::handle_notification(
 
     upload_modal.reset();
     unloaded_project.reset();
+}
+
+void EchoMap::handle_result(
+        LoadProjectResult&& result
+)
+{
+    if (upload_modal.has_value()) {
+        // How have we loaded a new project whilst we're still querying for sources from another one?
+        LOG_WARN("Ignoring request to change active Project since there is an active modal.");
+        return;
+    }
+
+    auto&& new_project = std::move(result).take_project();
+
+    if (!new_project->unloaded_signals.empty()) {
+        // Raise the modal to query for the sources.
+        upload_modal = IndividualUploadModal(this, new_project.get());
+        unloaded_project = std::move(new_project);
+    } else
+        change_active_project(std::move(new_project));
+}
+
+void EchoMap::handle_result(
+        LoadSignalFileResult&& result
+)
+{
+    Project* target = nullptr;
+    if (project != nullptr && result.get_project_id() == project->get_id())
+        target = project.get();
+    else if (unloaded_project != nullptr && result.get_project_id() == unloaded_project->get_id())
+        target = unloaded_project.get();
+
+    if (target == nullptr) {
+        LOG_F_WARN(
+                "Dropping LoadSignalFileResult, which was intended for the unavailable Project with ID {}.",
+                result.get_project_id()
+        );
+
+        return;
+    }
+
+    for (auto&& signals = std::move(result).take_signals(); auto signal : signals | std::views::as_rvalue)
+        target->add_signal(std::move(signal));
+
+    if (target == unloaded_project.get())
+        change_active_project(std::move(unloaded_project));
 }
 
 void EchoMap::change_active_project(

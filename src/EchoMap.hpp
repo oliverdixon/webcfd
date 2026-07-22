@@ -153,7 +153,7 @@ private:
      * Configure the core signals for the application instance.
      *
      * This should be invoked during construction prior to any IPanel invocations as it takes the exclusive consumer
-     * role for several critical messages.
+     * role for several critical message classes.
      */
     void setup_subscriptions();
 
@@ -213,6 +213,9 @@ private:
     void handle_notification(const CompleteProjectLoadNotification& task);
     void handle_notification(const RegisterVFSMappingNotification& task) const;
     void handle_notification(const CancelProjectLoadNotification& task);
+
+    void handle_result(LoadProjectResult&& result);
+    void handle_result(LoadSignalFileResult&& result);
 
 #ifdef __EMSCRIPTEN__
 
