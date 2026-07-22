@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="EchoMap" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="EchoMap" TARGET_NAME="EchoMap" CONFIG_NAME="native-debug" RUN_TARGET_PROJECT_NAME="EchoMap" RUN_TARGET_NAME="EchoMap">
+  <configuration default="false" name="EchoMap" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="EchoMap" TARGET_NAME="EchoMap" CONFIG_NAME="wasm-debug" RUN_TARGET_PROJECT_NAME="EchoMap" RUN_TARGET_NAME="EchoMap">
     <method v="2">
       <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
     </method>

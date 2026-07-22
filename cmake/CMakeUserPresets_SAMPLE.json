@@ -1,0 +1,28 @@
+{
+  "version": 6,
+  "configurePresets": [
+    {
+      "name": "local",
+      "hidden": true,
+      "cacheVariables": {
+        "CMAKE_C_COMPILER": "/clang",
+        "CMAKE_CXX_COMPILER": "/clang++",
+        "CMAKE_LINKER_TYPE": "LLD"
+      }
+    },
+    {
+      "name": "native-debug-local",
+      "inherits": [
+        "native-debug",
+        "local"
+      ]
+    },
+    {
+      "name": "native-release-local",
+      "inherits": [
+        "native-release",
+        "local"
+      ]
+    }
+  ]
+}

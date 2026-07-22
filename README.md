@@ -57,7 +57,7 @@ will work. Users without a Rust toolchain installed may look to Python's
 
 ### Detailed Procedure
 
-1. Source the `/bootstrap.sh` script into a Bash-compatible shell.
+1. Source the [/bootstrap.sh](bootstrap.sh) script into a Bash-compatible shell.
 
     * If the `VCPKG_ROOT` environment variable is unset, or does not indicate a valid [vcpkg](https://vcpkg.io/en/)
       installation, the bootstrap script will fetch and configure the upstream into `/third-party/vcpkg` and export
@@ -71,8 +71,11 @@ will work. Users without a Rust toolchain installed may look to Python's
       [configure your toolchain](https://www.jetbrains.com/help/clion/how-to-create-toolchain-in-clion.html#env-scripts)
       to source `/bootstrap.sh` as an environment file. The script is sourced into a non-interactive shell, so a wrapper
       should be used to export any local environment variables prior to running the bootstrapper.
+    * Advanced users with existing VCPKG or Emscripten SDK toolchains can provide a wrapper, named `/bootstrap-user.sh`,
+      which exports `VCPKG_ROOT` or `EMSDK` prior to sourcing the packaged bootstrap script.
 
-2. Run CMake on one of the presets defined in `/CMakePresets.json` depending on build type and target type:
+2. Run CMake on one of the presets defined in [/CMakePresets.json](CMakePresets.json) depending on build type and target
+   type:
 
     * `native-debug`
     * `native-release`
@@ -82,6 +85,10 @@ will work. Users without a Rust toolchain installed may look to Python's
    For example, `cmake --preset native-debug` produces (by default) a Ninja script in `cmake-build-native-debug`. Note
    that CMake generation also sources the vcpkg toolchain file, which may incur a long runtime if dependencies are not
    already extant in the binary cache.
+
+   Advanced users with a custom toolchain (e.g. upstream LLVM) can provide a `/CMakeUserPresets.json` to define a local
+   profile, which is used to generate local variants of the existing presets. An example is given
+   in [/cmake/CMakeUserPresets_SAMPLE.json](cmake/CMakeUserPresets_SAMPLE.json).
 
 3. Build EchoMap. For example, `cmake --build cmake-build-native-debug`.
 
@@ -99,8 +106,8 @@ will work. Users without a Rust toolchain installed may look to Python's
 
 ## Documentation
 
-Currently, "documentation" refers to generated HTML from Doxygen. The HTML is fully reproducible from the source, so
-anybody wishing the review the docs can do any of the following:
+"Documentation" refers to generated HTML from Doxygen. The HTML is fully reproducible from the source, so anybody
+wishing the review the docs can do any of the following:
 
 * view the `/** ... */` Doxygen comments in the source directly;
 * clone the repo and run `doxygen` in the root; or
