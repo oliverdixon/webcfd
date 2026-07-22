@@ -34,6 +34,11 @@ called JavaScript Promise Integration (JSPI), which is elaborated upon in the *D
 
 ![A screenshot of EchoMap running in Google Chrome](resources/wasm-screenshot.png)
 
+As the GitHub Action responsible for building and deploying EchoMap must be run manually by
+[@oliverdixon](https://github.com/oliverdixon) with
+[`workflow_dispatch`](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#workflow_dispatch),
+it is possible that the live deployment may lag a couple of revisions behind `master/HEAD`.
+
 ## Build Instructions
 
 All build environments must have git and CMake >=4.0 available on the `$PATH`. Additional third-party dependencies are
