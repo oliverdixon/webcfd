@@ -19,28 +19,17 @@ void NativeActionController::select_project_file_impl()
 }
 
 void NativeActionController::register_vfs_mapping_impl(
-        std::size_t project_id,
+        const std::size_t project_id,
         const std::filesystem::path& external
 )
 {
-    // TODO
-    throw std::runtime_error("Not implemented");
-}
+    std::ignore = project_id;
+    std::ignore = external;
 
-void NativeActionController::notify_project_file_impl(
-        const std::filesystem::path& path
-)
-{
-    notify_project_file(path);
-}
-
-void NativeActionController::notify_vfs_mapping_impl(
-        const std::size_t project_id,
-        const std::filesystem::path& external,
-        const std::filesystem::path& internal
-)
-{
-    notify_vfs_mapping(project_id, external, internal);
+    throw std::runtime_error(
+            "The NativeActionController received a request to query for VFS mappings, which are not applicable on the "
+            "native platform."
+    );
 }
 
 } // namespace echomap

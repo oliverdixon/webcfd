@@ -77,22 +77,6 @@ void JSActionController::register_vfs_mapping_impl(
     js::register_vfs_mapping(project_id, external.c_str());
 }
 
-void JSActionController::notify_project_file_impl(
-        const std::filesystem::path& path
-)
-{
-    notify_project_file(path);
-}
-
-void JSActionController::notify_vfs_mapping_impl(
-        const std::size_t project_id,
-        const std::filesystem::path& external,
-        const std::filesystem::path& internal
-)
-{
-    notify_vfs_mapping(project_id, external, internal);
-}
-
 } // namespace echomap
 
 /**
@@ -113,7 +97,7 @@ extern "C" EMSCRIPTEN_KEEPALIVE int echomap_on_project_file_picked(
         return 2;
 
     try {
-        JSActionController::notify_project_file_impl(path);
+        JSActionController::notify_project_file(path);
         return 0;
     } catch (const ConfigurationError& error) {
         LOG_F_ERROR("Could not load path {} due to error: {}", path, error.what());
@@ -150,7 +134,7 @@ extern "C" EMSCRIPTEN_KEEPALIVE int echomap_on_register_vfs_mapping(
         return 2;
 
     try {
-        JSActionController::notify_vfs_mapping_impl(project_id, external, internal);
+        JSActionController::notify_vfs_mapping(project_id, external, internal);
         return 0;
     } catch (const ConfigurationError& error) {
         LOG_F_ERROR("Could not load path {} due to error: {}", internal, error.what());
