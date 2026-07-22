@@ -22,6 +22,18 @@ The problem of SSL is not new, but this implementation strives to provide severa
 Existing FOSS implementations of SSL in desktop/web applications, such as [ODAS](https://github.com/introlab/odas), are
 widely available. Most will lack one of the above features, but will likely excel in many more unlisted capabilities!
 
+## Live Deployment
+
+Pre-packaged native builds aren't available yet, but users wanting a taste of EchoMap can use the WebAssembly deployment
+available at https://www-users.york.ac.uk/~od641/echomap. Sample project files (JSON metadata and wave files) are
+similarly available to download at https://www-users.york.ac.uk/~od641/echomap/sample-resources.
+
+For technical reasons (or, more precisely, because EchoMap intentionally uses modern features), the live deployment is
+only functional on Google Chrome or development builds of Firefox. This is due to the availability of a web technology
+called JavaScript Promise Integration (JSPI), which is elaborated upon in the *Detailed Procedure* subsection.
+
+![A screenshot of EchoMap running in Google Chrome](resources/wasm-screenshot.png)
+
 ## Build Instructions
 
 All build environments must have git and CMake >=4.0 available on the `$PATH`. Additional third-party dependencies are
@@ -110,6 +122,7 @@ will work. Users without a Rust toolchain installed may look to Python's
 wishing the review the docs can do any of the following:
 
 * view the `/** ... */` Doxygen comments in the source directly;
+* view the rendered documentation online at https://www-users.york.ac.uk/~od641/echomap/docs/html/;
 * clone the repo and run `doxygen` in the root; or
 * clone the repo and use the CMake preset:
   ```shell
