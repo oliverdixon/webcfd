@@ -22,9 +22,8 @@ class Project;
  *
  * Produced by the IndividualUploadModal if the user states a preference to cancel a VFS mapping.
  */
-class CancelProjectLoadNotification
+struct CancelProjectLoadNotification
 {
-public:
     /**
      * Create a new CancelProjectLoadNotification to indicate that the identified Project should be cancelled.
      *
@@ -40,7 +39,6 @@ public:
      */
     void verify_project(const Project* context) const;
 
-private:
     id_type project_id; /**< The ID of the partially loaded Project to cancel. */
 };
 

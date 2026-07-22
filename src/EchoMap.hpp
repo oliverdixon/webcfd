@@ -13,13 +13,6 @@
 #include <sigc++/scoped_connection.h>
 #include <webgpu/webgpu_cpp.h>
 
-#include "notifications/AddChannelMappingNotification.hpp"
-#include "notifications/CancelProjectLoadNotification.hpp"
-#include "notifications/CompleteProjectLoadNotification.hpp"
-#include "notifications/ModifySensorColourNotification.hpp"
-#include "notifications/ModifySensorPositionNotification.hpp"
-#include "notifications/ProjectSelectedNotification.hpp"
-#include "notifications/RegisterVFSMappingNotification.hpp"
 #include "panels/ErrorModal.hpp"
 #include "panels/IndividualUploadModal.hpp"
 #include "signals/Worker.hpp"
@@ -33,6 +26,14 @@ namespace echomap
 
 class IPanel;
 class Project;
+
+struct AddChannelMappingNotification;
+struct ModifySensorColourNotification;
+struct ModifySensorPositionNotification;
+struct ProjectSelectedNotification;
+struct CompleteProjectLoadNotification;
+struct RegisterVFSMappingNotification;
+struct CancelProjectLoadNotification;
 
 /**
  * The EchoMap maintains state for the application including WebGPU and Dear ImGui context, encapsulating
@@ -59,7 +60,7 @@ public:
             ProjectSelectedNotification,
             CompleteProjectLoadNotification,
             RegisterVFSMappingNotification,
-            CancelProjectLoadNotification>; // TODO fwd-decl this variant, wrapped inside a struct maybe.
+            CancelProjectLoadNotification>;
 
     /**
      * Initialise a EchoMap application instance.

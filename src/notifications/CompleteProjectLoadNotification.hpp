@@ -25,9 +25,8 @@ class Project;
  *
  * @ingroup Notifications
  */
-class CompleteProjectLoadNotification
+struct CompleteProjectLoadNotification
 {
-public:
     /**
      * Create a CompleteProjectLoadNotification to indicate that the referenced Project is ready to be loaded.
      *

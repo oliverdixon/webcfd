@@ -13,7 +13,7 @@
 
 #include "EchoMap.hpp"
 #include "actions/ActionController.hpp"
-#include "notifications/RegisterVFSMappingNotification.hpp"
+#include "notifications/AllNotifications.hpp"
 
 namespace echomap
 {

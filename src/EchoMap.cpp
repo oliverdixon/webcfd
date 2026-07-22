@@ -22,6 +22,7 @@
 #include "SurfaceFactory.hpp"
 #include "errors/ConfigurationError.hpp"
 #include "errors/IgnoredWarning.hpp"
+#include "notifications/AllNotifications.hpp"
 #include "objects/Project.hpp"
 #include "objects/Sensor.hpp"
 #include "objects/Signal.hpp"

@@ -112,6 +112,7 @@ add_library(DummyTarget INTERFACE EXCLUDE_FROM_ALL
         src/utility/Position.hpp
         src/notifications/CancelProjectLoadNotification.cpp
         src/notifications/CancelProjectLoadNotification.hpp
+        src/notifications/AllNotifications.hpp
 )
 
 if (EMSCRIPTEN OR ECHOMAP_BUILD_DOCUMENTATION)

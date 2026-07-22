@@ -11,6 +11,7 @@
 
 #include "../EchoMap.hpp"
 #include "../actions/ActionController.hpp"
+#include "../notifications/AllNotifications.hpp"
 #include "../objects/Project.hpp"
 #include "../objects/factories/SignalFactory.hpp"
 
