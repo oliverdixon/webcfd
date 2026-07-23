@@ -66,11 +66,7 @@ void ErrorModal::draw() noexcept
             ImGui::Separator();
         }
 
-        constexpr float button_width = 80.0f;
-        const float available_width = ImGui::GetContentRegionAvail().x;
-        ImGui::SetCursorPosX(ImGui::GetCursorPosX() + available_width - button_width);
-
-        if (ImGui::Button("Dismiss", ImVec2(button_width, 0.0f))) {
+        if (ImGui::Button("Dismiss", button_size)) {
             is_raised = false;
             ImGui::CloseCurrentPopup();
         }

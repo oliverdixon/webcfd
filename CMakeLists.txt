@@ -115,6 +115,8 @@ add_library(DummyTarget INTERFACE EXCLUDE_FROM_ALL
         src/notifications/AllNotifications.hpp
         src/panels/NativeFileChooser.cpp
         src/panels/NativeFileChooser.hpp
+        src/utility/FilesystemCombo.cpp
+        src/utility/FilesystemCombo.hpp
 )
 
 if (EMSCRIPTEN OR ECHOMAP_BUILD_DOCUMENTATION)

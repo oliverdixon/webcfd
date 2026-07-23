@@ -58,7 +58,6 @@ public:
     static const char* get_imgui_stable_name() noexcept;
 
 private:
-    constexpr static ImVec2 button_size{80.0f, 20.0f};
     constexpr static ImVec2 upload_button_frame_padding{0.0f, 0.0f};
     constexpr static ImVec2 default_modal_size{500.0f, 300.0f};
 
